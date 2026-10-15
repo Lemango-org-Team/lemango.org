@@ -6,8 +6,9 @@ plus the backend that powers two products:
 - **Lemango AI** — an AI chat assistant (`/ai.html`)
 - **Court & Notice Management** — a case/notice/document workspace (`/court.html`)
 
-It also includes a **newsletter signup** that automatically drafts a notification
-email to `lemangonewsletter@gmail.com`, and **ad slots** ready for Google AdSense.
+It also includes a **newsletter signup** (a pre-filled "email us" link to
+`lemangonewsletter@gmail.com` — no paid email service needed) and **ad slots**
+ready for Google AdSense.
 
 ## Stack
 
@@ -70,7 +71,12 @@ co-creator Kevin / Kmoon).
 
 ### Email
 
-Without SMTP, every composed email is written to `data/outbox/*.eml` — open the
+The landing page doesn't send mail itself — the "Get updates" button opens a
+pre-filled email to `lemangonewsletter@gmail.com` (Gmail compose, with a
+`mailto:` fallback), so no paid mail service or automation is required.
+
+The optional backend email helper still exists (`POST /api/newsletter`) and,
+without SMTP, writes every composed email to `data/outbox/*.eml` — open the
 draft to review, then configure SMTP to send for real.
 
 For Gmail, create an [App Password](https://support.google.com/accounts/answer/185833)

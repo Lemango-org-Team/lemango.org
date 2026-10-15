@@ -102,14 +102,18 @@
           <h2>Get Lemango updates by email.</h2>
           <p>Product launches, early-access invites, and updates. No spam — unsubscribe anytime.</p>
         </div>
-        <form id="newsletter-form" class="newsletter-form" novalidate>
-          <label class="sr-only" for="nl-name">Name</label>
-          <input id="nl-name" type="text" name="name" placeholder="Name (optional)" autocomplete="name">
-          <label class="sr-only" for="nl-email">Email</label>
-          <input id="nl-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
-          <button type="submit">Subscribe</button>
-          <p class="newsletter-status" role="status" aria-live="polite"></p>
-        </form>
+        <div class="newsletter-mail">
+          <a class="newsletter-compose-btn"
+             href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=lemangonewsletter%40gmail.com&amp;su=Subscribe%20me%20to%20Lemango%20updates&amp;body=Hi%20Lemango%20team%2C%0A%0APlease%20add%20me%20to%20the%20Lemango%20updates%20list.%0A%0AName%3A%0AEmail%3A%0A%0AThanks%21"
+             target="_blank" rel="noopener noreferrer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+            Email us to subscribe
+          </a>
+          <p class="newsletter-note">
+            Opens a pre-filled message in Gmail — just hit send. Using another email app?
+            <a href="mailto:lemangonewsletter@gmail.com?subject=Subscribe%20me%20to%20Lemango%20updates&amp;body=Hi%20Lemango%20team%2C%0A%0APlease%20add%20me%20to%20the%20Lemango%20updates%20list.%0A%0AName%3A%0AEmail%3A%0A%0AThanks%21">Use your mail app</a>.
+          </p>
+        </div>
       </div>
     </section>
 
