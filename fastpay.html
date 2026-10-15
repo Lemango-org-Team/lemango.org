@@ -305,6 +305,34 @@
 
     .field-error { color: var(--danger); font-size: 11.5px; font-weight: 600; min-height: 14px; }
 
+    /* ---- Sign in with Google ---- */
+    .signin-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px 14px; border: 1px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; }
+    .signin-row-note { color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .signin-row-note.ok { color: var(--ok); font-weight: 600; }
+    .signin-row-note.warn { color: var(--danger); font-weight: 600; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .topbar-account { display: flex; align-items: center; gap: 10px; }
+    .account-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: #dbeafe; }
+    .account-chip img { width: 26px; height: 26px; border-radius: 50%; }
+
+    /* ---- Demo payment area ---- */
+    .pay-box { margin-top: 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: #f8fafc; }
+    .pay-box-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .pay-box-head strong { font-size: 14px; color: #0b2b28; }
+    .pay-badge { font-size: 10px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; color: #92400e; background: #fef3c7; padding: 3px 9px; border-radius: 999px; }
+    .pay-note { margin: 6px 0 12px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .pay-fields { display: grid; grid-template-columns: 1fr 110px 90px; gap: 10px; margin-bottom: 12px; }
+    .pay-fields input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; font: inherit; font-size: 13px; background: #fff; }
+    .pay-fields input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 4px var(--ring); }
+    .pay-status-line { margin: 10px 0 0; font-size: 12.5px; font-weight: 600; min-height: 16px; color: var(--muted); }
+    .pay-status-line.ok { color: var(--ok); }
+    .pay-status-line.busy { color: var(--brand-dark); }
+    .pay-status-line.error { color: var(--danger); }
+
+    @media (max-width: 640px) {
+      .pay-fields { grid-template-columns: 1fr 1fr; }
+    }
+
     .foot {
       width: min(920px, 100%);
       margin-top: 18px;
@@ -329,7 +357,10 @@
       <img class="mark" src="assets/lemango-flag.webp" alt="">
       Lemango
     </a>
-    <span style="font-size:12px; opacity:.75;">FastPay Studio · early preview</span>
+    <div class="topbar-right">
+      <span style="font-size:12px; opacity:.75;">FastPay Studio · early preview</span>
+      <div class="topbar-account" id="accountArea"></div>
+    </div>
   </header>
 
   <main class="app" aria-label="FastPay Agreement and Receipt Studio">
@@ -350,6 +381,10 @@
       <section class="step active" data-step="1">
         <h2>Who's involved?</h2>
         <p class="hint">Enter the parties to this agreement. Emails are optional but recommended.</p>
+        <div class="signin-row">
+          <div class="signin-slot" id="googleSlot"></div>
+          <span class="signin-row-note" id="googleStatus">Optional: sign in with Google to autofill your details.</span>
+        </div>
         <div class="grid">
           <div class="field">
             <label for="sellerName">Seller name <span class="req">*</span></label>
@@ -442,6 +477,22 @@
         <h2>Review &amp; export</h2>
         <p class="hint">Check the details, then download your signed PDF.</p>
         <div class="preview" id="preview"></div>
+
+        <div class="pay-box" id="payBox">
+          <div class="pay-box-head">
+            <strong>Payment</strong>
+            <span class="pay-badge">Demo — no real charge</span>
+          </div>
+          <p class="pay-note">This is a simulated payment area. No card is charged, no data leaves your browser, and nothing is stored.</p>
+          <div class="pay-fields">
+            <input id="payCard" type="text" inputmode="numeric" placeholder="4242 4242 4242 4242" autocomplete="off" aria-label="Card number (demo)">
+            <input id="payExp" type="text" placeholder="MM / YY" autocomplete="off" aria-label="Expiry (demo)">
+            <input id="payCvc" type="text" placeholder="CVC" autocomplete="off" aria-label="CVC (demo)">
+          </div>
+          <button type="button" class="btn btn-primary" id="btnPayDemo">Simulate payment</button>
+          <p class="pay-status-line" id="payStatus"></p>
+        </div>
+
         <div class="legal-note">
           By signing, each party agrees to these terms. Electronic signatures carry the same legal
           weight as handwritten ones under the ESIGN Act and applicable law.
@@ -529,14 +580,181 @@
         return { paid: true, verified: false, provider: this.provider };
       },
 
+      // -------------------------------------------------------------------
+      // DEMO MODE (what powers the "Payment" area today)
+      // -------------------------------------------------------------------
+      // A fully local, fake gateway so the flow can be demoed end to end
+      // without a real processor. No network calls, no card data is read or
+      // stored, and nothing is charged.
+      // To go live: set demoMode = false and implement createCheckoutSession
+      // + verifyPayment against your backend (Stripe / Adyen / etc.).
+      demoMode: true,
+      demoPaid: false,
+
+      // Simulates a successful payment locally (used by the demo area).
+      simulatePayment: function (formData) {
+        var self = this;
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            self.demoPaid = true;
+            resolve({
+              paid: true,
+              verified: true,
+              simulated: true,
+              provider: "demo",
+              amount: formData ? formData.totalAmount : 0
+            });
+          }, 900);
+        });
+      },
+
       // Optional: mount a payment button/status area into a container element.
       mount: function (container) {
         if (!container) return;
         // When enabled, render a "Pay to unlock" button here that triggers
         // createCheckoutSession(), then re-runs handleExport() on success.
-        container.setAttribute("data-gateway", this.enabled ? "active" : "inactive");
+        container.setAttribute("data-gateway", this.demoMode ? "demo" : (this.enabled ? "active" : "inactive"));
       }
     };
+
+    /* ---------------------------------------------------------------------
+     * GoogleSignInModule
+     * ---------------------------------------------------------------------
+     * Client-side "Sign in with Google" via Google Identity Services (GIS).
+     *
+     * !! SECURITY !!  Only a PUBLIC OAuth *Client ID* belongs in this file.
+     * NEVER put a client secret (starts with "GOCSPX-") here or anywhere in
+     * this repo — this page is downloaded by every visitor, so a secret would
+     * be public. Client secrets must stay on a server.
+     *
+     * To enable:
+     *   1. Google Cloud Console -> APIs & Services -> Credentials
+     *   2. Create credentials -> OAuth client ID -> Web application
+     *   3. Authorized JavaScript origins: add https://lemango.org (and
+     *      http://localhost:3000 while testing)
+     *   4. Paste the Client ID below (looks like "1234-abc.apps.googleusercontent.com")
+     * ------------------------------------------------------------------- */
+    var GoogleSignInModule = {
+      clientId: "",           // <-- paste your PUBLIC OAuth Client ID here
+      onSignedIn: null,       // callback(user) -> autofill / UI
+      _scriptPromise: null,
+
+      load: function () {
+        if (window.google && window.google.accounts) return Promise.resolve();
+        if (this._scriptPromise) return this._scriptPromise;
+        this._scriptPromise = new Promise(function (resolve, reject) {
+          var s = document.createElement("script");
+          s.src = "https://accounts.google.com/gsi/client";
+          s.async = true;
+          s.defer = true;
+          s.onload = function () { resolve(); };
+          s.onerror = function () { reject(new Error("Could not load Google Identity Services.")); };
+          document.head.appendChild(s);
+        });
+        return this._scriptPromise;
+      },
+
+      // Decodes the JWT id_token returned by GIS (payload only; no verify needed client-side).
+      decodeCredential: function (token) {
+        try {
+          var part = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+          var json = decodeURIComponent(atob(part).split("").map(function (c) {
+            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(""));
+          return JSON.parse(json);
+        } catch (e) { return null; }
+      },
+
+      renderInto: function (slot, statusEl) {
+        var self = this;
+        if (!slot) return;
+
+        // Not configured yet: show a friendly button that explains what's needed.
+        if (!this.clientId) {
+          slot.innerHTML = "";
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "btn btn-secondary";
+          b.innerHTML =
+            '<svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true">' +
+            '<path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/>' +
+            '<path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 18.9 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>' +
+            '<path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.1-11.3-7.6l-6.5 5C9.6 39.6 16.2 44 24 44z"/>' +
+            '<path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C36.9 40 44 35 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>' +
+            "<span>Sign in with Google</span>";
+          b.addEventListener("click", function () {
+            if (statusEl) {
+              statusEl.className = "signin-row-note warn";
+              statusEl.textContent = "Google Sign-In isn't configured yet — add your OAuth Client ID in GoogleSignInModule.clientId (see the code comments).";
+            }
+          });
+          slot.appendChild(b);
+          return;
+        }
+
+        // Configured: load GIS and render the official button.
+        this.load().then(function () {
+          window.google.accounts.id.initialize({
+            client_id: self.clientId,
+            callback: function (resp) {
+              var u = self.decodeCredential(resp.credential) || {};
+              if (self.onSignedIn) self.onSignedIn(u);
+            }
+          });
+          window.google.accounts.id.renderButton(slot, {
+            theme: "outline", size: "large", text: "signin_with", shape: "pill"
+          });
+        }).catch(function (err) {
+          if (statusEl) { statusEl.className = "signin-row-note warn"; statusEl.textContent = err.message; }
+        });
+      },
+
+      signOut: function () {
+        try { if (window.google && window.google.accounts) window.google.accounts.id.disableAutoSelect(); } catch (e) {}
+      }
+    };
+
+    /* ---------------------------------------------------------------------
+     * FastPay logo — drawn as a very faint watermark in the exported PDF.
+     * ------------------------------------------------------------------- */
+    var fastpayLogo = null; // HTMLImageElement once loaded
+    function loadFastPayLogo() {
+      return new Promise(function (resolve) {
+        var img = new Image();
+        img.onload = function () { fastpayLogo = img; resolve(); };
+        img.onerror = function () { resolve(); };
+        img.src = "assets/FastPaylogo.png";
+      });
+    }
+
+    // Renders the signed-in account chip in the top bar.
+    function renderAccountChip(user) {
+      var area = $("#accountArea");
+      if (!area) return;
+      area.innerHTML = "";
+      var chip = document.createElement("div");
+      chip.className = "account-chip";
+      if (user.picture) {
+        var im = document.createElement("img");
+        im.src = user.picture;
+        im.alt = "";
+        chip.appendChild(im);
+      }
+      var span = document.createElement("span");
+      span.textContent = user.name || user.email || "Signed in";
+      chip.appendChild(span);
+      area.appendChild(chip);
+
+      var out = document.createElement("button");
+      out.type = "button";
+      out.className = "btn btn-ghost";
+      out.textContent = "Sign out";
+      out.addEventListener("click", function () {
+        GoogleSignInModule.signOut();
+        area.innerHTML = "";
+      });
+      area.appendChild(out);
+    }
 
     /* ---------------------------- DOM helpers ---------------------------- */
     function $(sel) { return document.querySelector(sel); }
@@ -646,6 +864,21 @@
         doc.setFont("helvetica", bold ? "bold" : "normal");
         doc.setFontSize(size || 10);
         return doc.splitTextToSize(str || "", width);
+      }
+
+      // ---- Faint brand watermark (bottom-right corner) ----
+      if (fastpayLogo && fastpayLogo.complete && fastpayLogo.naturalWidth) {
+        try {
+          var wmW = 150;
+          var wmH = wmW * (fastpayLogo.naturalHeight / fastpayLogo.naturalWidth);
+          if (wmH > 150) { wmH = 150; wmW = wmH * (fastpayLogo.naturalWidth / fastpayLogo.naturalHeight); }
+          var wmX = W - M - wmW + 16;
+          var wmY = H - 34 - wmH;
+          var canGState = (typeof doc.setGState === "function") && doc.GState;
+          if (canGState) doc.setGState(new doc.GState({ opacity: 0.06 }));
+          doc.addImage(fastpayLogo, "PNG", wmX, wmY, wmW, wmH);
+          if (canGState) doc.setGState(new doc.GState({ opacity: 1 }));
+        } catch (e) { /* watermark is optional — never block export */ }
       }
 
       // ---- Header band ----
@@ -897,7 +1130,7 @@
 
     function renderPreview() {
       var d = getFormData();
-      var paid = { paid: true }; // display-only; real gate happens on export
+      var paid = { paid: PaymentGatewayModule.demoPaid }; // display-only; real gate happens on export
       var preview = $("#preview");
 
       function row(k, v) {
@@ -918,8 +1151,8 @@
       html += row("Total amount", d.totalAmountFormatted);
       html += row("Due date", escapeHtml(formatLongDate(d.dueDate)));
       html += row("Late fee", d.lateFeeEnabled && d.lateFeeText ? escapeHtml(d.lateFeeText) : "None");
-      html += row("Status", '<span class="pay-status ' + (paid.paid ? "paid" : "unpaid") + '">' +
-                    (paid.paid ? "Paid" : "Pending") + '</span>');
+      html += row("Payment", '<span class="pay-status ' + (paid.paid ? "paid" : "unpaid") + '">' +
+                    (paid.paid ? "Paid (demo)" : "Demo — not charged") + '</span>');
       if (d.signatureDataUrl) {
         html += '<div style="padding:12px 0 0;"><div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px;">Signature</div>' +
                 '<img src="' + d.signatureDataUrl + '" alt="Signature"><div style="color:#334155; font-size:12px; margin-top:6px;">' +
@@ -979,6 +1212,42 @@
         clearTimeout(rt);
         rt = setTimeout(resizeCanvas, 150);
       });
+
+      // Load the FastPay logo used as the faint PDF watermark (non-blocking)
+      loadFastPayLogo();
+
+      // Google Sign-In (client-side; activates once an OAuth Client ID is set)
+      GoogleSignInModule.onSignedIn = function (user) {
+        if (!user) return;
+        if (user.name && !val("sellerName")) document.getElementById("sellerName").value = user.name;
+        if (user.email && !val("sellerEmail")) document.getElementById("sellerEmail").value = user.email;
+        var gs = $("#googleStatus");
+        if (gs) {
+          gs.className = "signin-row-note ok";
+          gs.textContent = "Signed in as " + (user.email || user.name) + ".";
+        }
+        renderAccountChip(user);
+      };
+      GoogleSignInModule.renderInto($("#googleSlot"), $("#googleStatus"));
+
+      // Demo payment area (fake gateway — no real charge)
+      var payBtn = $("#btnPayDemo");
+      if (payBtn) {
+        payBtn.addEventListener("click", function () {
+          var status = $("#payStatus");
+          payBtn.disabled = true;
+          if (status) { status.className = "pay-status-line busy"; status.textContent = "Processing demo payment…"; }
+          PaymentGatewayModule.simulatePayment(getFormData()).then(function () {
+            if (status) {
+              status.className = "pay-status-line ok";
+              status.textContent = "Demo payment approved — no real charge. Ref FP-DEMO-" + Math.floor(1000 + Math.random() * 9000) + ".";
+            }
+            if (currentStep === 4) renderPreview();
+          }).catch(function () {
+            if (status) { status.className = "pay-status-line error"; status.textContent = "Demo payment failed. Please try again."; }
+          }).finally(function () { payBtn.disabled = false; });
+        });
+      }
 
       showStep(1);
     }
