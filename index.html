@@ -7,8 +7,24 @@
   <meta name="description" content="Lemango builds practical tools for AI, productivity, and case management. Try Lemango AI and Court & Notice Management in early preview.">
   <title>Lemango — Practical tools for AI, productivity & case management</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=3">
-  <script src="app.js?v=3" defer></script>
+  <link rel="apple-touch-icon" href="assets/lemango-touch-icon.png">
+
+  <!-- Open Graph / Social sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://lemango.org/">
+  <meta property="og:title" content="Lemango — Practical tools for AI, productivity & case management">
+  <meta property="og:description" content="Lemango builds practical tools for AI, productivity, and case management. Try Lemango AI and FastPay Studio today.">
+  <meta property="og:image" content="https://lemango.org/assets/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://lemango.org/assets/og-image.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css?v=4">
+  <script src="app.js?v=4" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -17,15 +33,27 @@
         <img class="brand-mark" src="assets/lemango-flag.webp" alt="">
         <span class="brand-name">le<span>mango</span></span>
       </a>
-      <nav class="site-nav" aria-label="Primary">
+      <nav class="site-nav" aria-label="Primary" id="site-nav">
         <a href="index.html#products">Products</a>
         <a href="ai.html">Lemango AI</a>
         <a href="court.html">Case Manager</a>
         <a href="fastpay.html?v=2">FastPay Studio</a>
         <a class="nav-cta" href="index.html#newsletter">Get updates</a>
       </nav>
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Open navigation menu" aria-expanded="false" aria-controls="site-nav">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
+  <div class="nav-overlay" id="nav-overlay" aria-hidden="true">
+    <nav class="nav-drawer" aria-label="Mobile navigation">
+      <a href="index.html#products">Products</a>
+      <a href="ai.html">Lemango AI</a>
+      <a href="court.html">Case Manager</a>
+      <a href="fastpay.html?v=2">FastPay Studio</a>
+      <a class="nav-cta-drawer" href="index.html#newsletter">Get updates</a>
+    </nav>
+  </div>
 
   <main>
     <aside class="construction-banner section-wrap" id="availability" role="note" aria-label="Service availability">
@@ -40,7 +68,7 @@
     <section class="hero">
       <div class="hero-copy">
         <p class="eyebrow"><span class="eyebrow-dot"></span> A little more time. A lot more to come.</p>
-        <h1>Good ideas deserve <span>good tools.</span></h1>
+        <h1>Good ideas deserve <em>good tools.</em></h1>
         <p class="hero-intro">Lemango builds practical tools for AI, productivity, and case management. Both products are in early preview and improving every week.</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="ai.html">Try Lemango AI</a>
@@ -52,13 +80,31 @@
         </div>
       </div>
 
-      <div class="hero-art" aria-label="Lemango flag and launch status">
-        <p class="art-caption"><span class="caption-dot"></span> The Lemango flag</p>
-        <img class="flag-artwork" src="assets/lemango-flag.webp" alt="Lemango's red and green flag with its mango emblem">
+      <div class="hero-art" aria-label="Lemango AI product preview">
+        <div class="browser-chrome">
+          <span class="browser-dot"></span><span class="browser-dot"></span><span class="browser-dot"></span>
+          <span class="browser-url">lemango.org/ai</span>
+        </div>
+        <div class="mockup-chat">
+          <div class="mockup-msg mockup-msg--user">
+            <span>How do I write a compelling introduction for a business proposal?</span>
+          </div>
+          <div class="mockup-msg mockup-msg--ai">
+            <span class="mockup-ai-label">Lemango AI</span>
+            <p>Start with a hook that frames the problem your reader already feels. State the stakes clearly — why this matters now — then transition to your solution in one confident sentence.</p>
+            <p>Your opening paragraph should answer: <em>Why this? Why now? Why you?</em></p>
+          </div>
+          <div class="mockup-msg mockup-msg--user">
+            <span>Can you give me a short example?</span>
+          </div>
+          <div class="mockup-msg mockup-msg--ai mockup-msg--typing">
+            <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+          </div>
+        </div>
         <div class="art-footer">
           <span class="art-footer-mark">L</span>
-          <span><strong>Lemango</strong><small>Growing something useful.</small></span>
-          <span class="art-footer-status"><span></span> Early preview</span>
+          <span><strong>Lemango AI</strong><small>Early preview · Free to use</small></span>
+          <span class="art-footer-status"><span></span> Live</span>
         </div>
       </div>
     </section>
@@ -68,7 +114,29 @@
       <div class="ad-mount"></div>
     </aside>
 
-    <section class="products section-wrap" id="products">
+    <div class="traction-bar section-wrap reveal">
+      <div class="traction-item">
+        <strong>3</strong>
+        <span>Tools built</span>
+      </div>
+      <div class="traction-divider"></div>
+      <div class="traction-item">
+        <strong>100%</strong>
+        <span>Runs in your browser</span>
+      </div>
+      <div class="traction-divider"></div>
+      <div class="traction-item">
+        <strong>Free</strong>
+        <span>No account needed</span>
+      </div>
+      <div class="traction-divider"></div>
+      <div class="traction-item">
+        <strong>Weekly</strong>
+        <span>Updates shipping</span>
+      </div>
+    </div>
+
+    <section class="products section-wrap reveal" id="products">
       <div class="section-heading">
         <div>
           <p class="eyebrow">THE LEMANGO TOOLKIT</p>
@@ -78,14 +146,14 @@
       </div>
 
       <div class="product-grid">
-        <article class="product-card product-ai">
+        <article class="product-card product-ai reveal">
           <div class="product-topline"><img class="product-logo product-logo-ai" src="assets/lemango-ai-logo.png" alt="Lemango AI logo"><span class="product-tag">AI &amp; productivity</span></div>
           <h3>Lemango AI</h3>
           <p>An AI chat assistant for exploring ideas, getting help with writing, and working through questions.</p>
           <a class="product-link" href="ai.html">Open Lemango AI <span aria-hidden="true">→</span></a>
         </article>
 
-        <article class="product-card product-court">
+        <article class="product-card product-court reveal">
           <div class="product-topline"><img class="product-logo product-logo-nuca" src="assets/nuca-logo.png" alt="NUCA logo"><span class="product-tag">Case &amp; notice management</span></div>
           <h3>Court &amp; Notice Management</h3>
           <p>A workspace for organizing cases, documents, notices, schedules, and virtual proceedings.</p>
@@ -93,7 +161,7 @@
           <a class="product-link" href="court.html">Open Case Manager <span aria-hidden="true">→</span></a>
         </article>
 
-        <article class="product-card product-wide product-fastpay">
+        <article class="product-card product-wide product-fastpay reveal">
           <div class="product-topline"><img class="product-logo" src="assets/lemango-flag.webp" alt="FastPay Studio logo"><span class="product-tag">Agreements &amp; payments</span></div>
           <h3>FastPay Agreement &amp; Receipt Studio</h3>
           <p>Build a signed service agreement and receipt in seconds — fill in the parties, add an e-signature, and export a clean, professional PDF. Runs entirely in your browser.</p>
@@ -103,7 +171,7 @@
       <p class="product-footnote">Both products are in early preview. Feedback helps us improve.</p>
     </section>
 
-    <section class="newsletter section-wrap" id="newsletter">
+    <section class="newsletter section-wrap reveal" id="newsletter">
       <div class="newsletter-inner">
         <div class="newsletter-copy">
           <p class="eyebrow">STAY IN THE LOOP</p>
@@ -111,21 +179,38 @@
           <p>Product launches, early-access invites, and updates. No spam — unsubscribe anytime.</p>
         </div>
         <div class="newsletter-mail">
-          <a class="newsletter-compose-btn"
-             href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=lemangonewsletter%40gmail.com&amp;su=Subscribe%20me%20to%20Lemango%20updates&amp;body=Hi%20Lemango%20team%2C%0A%0APlease%20add%20me%20to%20the%20Lemango%20updates%20list.%0A%0AName%3A%0AEmail%3A%0A%0AThanks%21"
-             target="_blank" rel="noopener noreferrer">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
-            Email us to subscribe
-          </a>
-          <p class="newsletter-note">
-            Opens a pre-filled message in Gmail — just hit send. Using another email app?
-            <a href="mailto:lemangonewsletter@gmail.com?subject=Subscribe%20me%20to%20Lemango%20updates&amp;body=Hi%20Lemango%20team%2C%0A%0APlease%20add%20me%20to%20the%20Lemango%20updates%20list.%0A%0AName%3A%0AEmail%3A%0A%0AThanks%21">Use your mail app</a>.
-          </p>
+          <form class="newsletter-form" id="newsletter-form" novalidate>
+            <div class="newsletter-fields">
+              <input
+                type="text"
+                name="name"
+                id="nl-name"
+                placeholder="Your name (optional)"
+                autocomplete="name"
+                maxlength="80"
+              >
+              <input
+                type="email"
+                name="email"
+                id="nl-email"
+                placeholder="Your email address"
+                autocomplete="email"
+                required
+                aria-required="true"
+              >
+            </div>
+            <button type="submit" class="newsletter-submit" id="nl-submit">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+              <span id="nl-btn-label">Subscribe</span>
+            </button>
+          </form>
+          <p class="newsletter-note" id="nl-status" aria-live="polite"></p>
+          <p class="newsletter-note">No spam — unsubscribe anytime.</p>
         </div>
       </div>
     </section>
 
-    <section class="about section-wrap" id="about">
+    <section class="about section-wrap reveal" id="about">
       <img class="about-flag" src="assets/lemango-flag.webp" alt="Lemango flag">
       <div class="about-copy">
         <p class="eyebrow">A LITTLE ABOUT LEMANGO</p>
