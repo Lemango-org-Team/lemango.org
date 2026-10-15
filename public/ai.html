@@ -6,6 +6,7 @@
     <title>Lemango AI</title>
     <link rel="icon" type="image/png" href="assets/lemango-ai-logo.png">
     <link rel="stylesheet" href="ai.css">
+    <link rel="stylesheet" href="banner.css">
 </head>
 <body>
 <div class="shell">
@@ -38,6 +39,16 @@
     </aside>
 
     <div class="app">
+        <aside class="lm-banner-wrap" aria-label="Service availability">
+            <div class="lm-banner" role="note">
+                <img src="assets/lemango-flag.webp" alt="Lemango flag">
+                <div class="lm-banner-copy">
+                    <strong><span class="lm-banner-dot"></span> Early preview</strong>
+                    <p>Lemango AI and Court &amp; Notice Management are live in early preview. Expect frequent improvements as we build.</p>
+                </div>
+                <span class="lm-banner-status">Beta</span>
+            </div>
+        </aside>
         <header class="header">
             <div class="header-left">
                 <button class="sidebar-toggle" id="sidebarToggle" title="Chat history">
@@ -147,6 +158,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+        <script src="lemango-ai.js"></script>
         <script src="ai.js"></script>
 </body>
 </html>

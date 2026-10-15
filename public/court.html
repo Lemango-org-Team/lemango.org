@@ -6,6 +6,7 @@
     <title>Court &amp; Notice Management — Lemango</title>
     <link rel="icon" type="image/png" href="assets/nuca-logo.png">
     <link rel="stylesheet" href="nuca.css">
+    <link rel="stylesheet" href="banner.css">
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
@@ -123,6 +124,18 @@
         <div class="p-6 bg-gray-800 text-[10px] font-bold tracking-widest text-gray-400 uppercase">NUCA · Lemangoes Gov</div>
     </div>
 
+    <!-- Beta banner -->
+    <aside class="lm-banner-wrap no-print" aria-label="Service availability">
+        <div class="lm-banner lm-dark" role="note">
+            <img src="assets/lemango-flag.webp" alt="Lemango flag">
+            <div class="lm-banner-copy">
+                <strong><span class="lm-banner-dot"></span> Early preview</strong>
+                <p>Lemango AI and Court &amp; Notice Management are live in early preview. Expect frequent improvements as we build.</p>
+            </div>
+            <span class="lm-banner-status">Beta</span>
+        </div>
+    </aside>
+
     <main id="main-content" class="flex-grow view-transition" role="main" tabindex="-1"></main>
 
     <!-- Footer -->
@@ -181,6 +194,7 @@
         </div>
     </div>
 
+    <script defer src="lemango-ai.js"></script>
     <script defer src="court.js"></script>
 </body>
 </html>

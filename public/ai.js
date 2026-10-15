@@ -142,7 +142,7 @@ async function switchModel(name){
     try{const r=await fetch("/api/ai/switch_model",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:name})});showToast("Switched to "+name)}catch{showToast("Model set to "+name)}
 }
 
-async function fetchModels(){try{const r=await fetch("/api/ai/models");const d=await r.json();if(Array.isArray(d.models)&&d.models.length){models=d.models;if(!models.find(m=>m.name===currentModel)){currentModel=models[0].name;modelLabel.textContent=currentModel}renderModelDropdown()}}catch{}}
+async function fetchModels(){try{const list=await window.LemangoAI.models();if(Array.isArray(list)&&list.length){models=list;if(!models.find(m=>m.name===currentModel)){currentModel=models[0].name;modelLabel.textContent=currentModel}renderModelDropdown()}}catch{}}
 
 /* ============================================================
    Toast
@@ -242,7 +242,7 @@ async function sendMessage(text,displayUser=true){
     sending=true;updateSendState();updateRegenVisibility();
     if(displayUser)addMessage(text,"user");
     messageInput.value="";autoResizeInput();showTyping();
-    try{const payload={message:text,model:currentModel,history:history.map(m=>({role:m.r==="user"?"user":"assistant",content:m.t}))};const r=await fetch("/api/ai/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const d=await r.json();removeTyping();if(d.ok===false){addMessage(d.error||"Something went wrong. Please try again.","bot")}else{addMessage(d.response??d.reply??"","bot")}}
+    try{const historyPayload=history.map(m=>({role:m.r==="user"?"user":"assistant",content:m.t}));const reply=await window.LemangoAI.chat({message:text,model:currentModel,history:historyPayload});removeTyping();addMessage(reply,"bot")}
     catch{removeTyping();addMessage("Connection error. Please try again.","bot")}
     sending=false;updateSendState();updateRegenVisibility();messageInput.focus();
 }

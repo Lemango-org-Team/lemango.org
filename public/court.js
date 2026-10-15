@@ -1043,22 +1043,13 @@ const App = (() => {
     }
     
     try {
-      // Routed through the Lemango backend (multi-provider, branded as Lemango AI).
-      const response = await fetch('/api/ai/generate-document', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt })
-      });
-
-      if (!response.ok) {
-        throw new Error('AI service unavailable');
+      // Uses the shared Lemango AI client: backend first, then a free keyless
+      // public provider so generation also works on static hosting.
+      const generatedContent = (await window.LemangoAI.document({ prompt: prompt, model: 'Mango-Core' })) || '';
+      if (!generatedContent.trim()) {
+        throw new Error('Empty AI response');
       }
 
-      const result = await response.json();
-      const generatedContent = result.text || result.response || '';
-      
       createNewDocument();
       document.getElementById('document-title').value = 'AI Generated Document';
       

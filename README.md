@@ -58,6 +58,11 @@ Users pick branded models (`Mango-Light`, `Mango-Flash`, `Mango-Core`, `Mango-Pr
 and every reply identifies itself as **Lemango AI** — the underlying provider is
 never disclosed.
 
+The browser tries this backend first, then falls back to a free keyless public
+provider (`public/lemango-ai.js`). That means Lemango AI also works on static
+hosting (e.g. GitHub Pages) where the Node backend isn't running, and it upgrades
+automatically to the configured providers/keys once the backend is deployed.
+
 ### Email
 
 Without SMTP, every composed email is written to `data/outbox/*.eml` — open the
