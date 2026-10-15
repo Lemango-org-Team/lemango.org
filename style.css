@@ -1,5 +1,5 @@
 /* ============================================================
-   LEMANGO — style.css v4
+   LEMANGO — style.css
    Fonts: Plus Jakarta Sans (body/UI) · DM Serif Display (hero accent)
    ============================================================ */
 
@@ -604,27 +604,7 @@ h2 {
 .newsletter-copy > p:last-child { max-width: 460px; margin: 10px 0 0; color: #778074; font-size: 12px; line-height: 1.7; }
 .newsletter-mail { display: grid; gap: 10px; align-content: center; }
 
-/* Real form */
-.newsletter-form { display: grid; gap: 8px; }
-.newsletter-fields { display: grid; gap: 8px; }
-.newsletter-form input {
-  width: 100%;
-  padding: 11px 14px;
-  border: 1px solid #d4ccba;
-  border-radius: 6px;
-  background: rgba(255,255,255,.8);
-  color: var(--ink);
-  font: inherit;
-  font-size: 13px;
-  outline: none;
-  transition: border-color .18s, box-shadow .18s;
-}
-.newsletter-form input::placeholder { color: #a8a499; }
-.newsletter-form input:focus {
-  border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(0,122,51,.12);
-  background: #fff;
-}
+/* Compose button */
 .newsletter-submit {
   display: inline-flex;
   align-items: center;
@@ -642,11 +622,8 @@ h2 {
   transition: background .2s, transform .15s;
 }
 .newsletter-submit:hover { background: var(--green); transform: translateY(-1px); }
-.newsletter-submit:disabled { opacity: .65; cursor: not-allowed; transform: none; }
 .newsletter-note { margin: 0; color: #778074; font-size: 11px; line-height: 1.6; }
 .newsletter-note a { color: var(--green-dark); font-weight: 600; }
-.newsletter-note.success { color: var(--green-dark); font-weight: 600; }
-.newsletter-note.error   { color: var(--flag-red); }
 
 /* ── About ── */
 .about {
