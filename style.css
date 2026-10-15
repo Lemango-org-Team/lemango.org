@@ -134,6 +134,7 @@ h2 { margin-bottom: 0; color: #29382c; font-family: var(--display); font-size: c
 .product-card::before { position: absolute; top: 0; right: 0; left: 0; height: 4px; background: linear-gradient(90deg, var(--green) 0 50%, var(--flag-red) 50% 75%, var(--flag-orange) 75% 88%, var(--flag-yellow) 88%); content: ""; }
 .product-ai { background: #fffdf8; }
 .product-court { background: #f5f7ed; }
+.product-fastpay { grid-column: 1 / -1; background: #eef6f4; }
 .product-topline { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
 .product-logo { width: 43px; height: 35px; flex: 0 0 43px; border-radius: 3px; object-fit: contain; }
 .product-logo-ai { background: #f1f0ed; }
