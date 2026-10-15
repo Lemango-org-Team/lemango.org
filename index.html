@@ -179,33 +179,16 @@
           <p>Product launches, early-access invites, and updates. No spam — unsubscribe anytime.</p>
         </div>
         <div class="newsletter-mail">
-          <form class="newsletter-form" id="newsletter-form" novalidate>
-            <div class="newsletter-fields">
-              <input
-                type="text"
-                name="name"
-                id="nl-name"
-                placeholder="Your name (optional)"
-                autocomplete="name"
-                maxlength="80"
-              >
-              <input
-                type="email"
-                name="email"
-                id="nl-email"
-                placeholder="Your email address"
-                autocomplete="email"
-                required
-                aria-required="true"
-              >
-            </div>
-            <button type="submit" class="newsletter-submit" id="nl-submit">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
-              <span id="nl-btn-label">Subscribe</span>
-            </button>
-          </form>
-          <p class="newsletter-note" id="nl-status" aria-live="polite"></p>
-          <p class="newsletter-note">No spam — unsubscribe anytime.</p>
+          <a class="newsletter-submit"
+             href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=lemangonewsletter%40gmail.com&amp;su=Subscribe%20me%20to%20Lemango%20updates&amp;body=Hi%20Lemango%20team%2C%0A%0APlease%20add%20me%20to%20the%20Lemango%20updates%20list.%0A%0AName%3A%0AEmail%3A%0A%0AThanks%21"
+             target="_blank" rel="noopener noreferrer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+            <span>Email us to subscribe</span>
+          </a>
+          <p class="newsletter-note">
+            Opens a pre-filled message in Gmail — just hit send. Using another email app?
+            <a href="mailto:lemangonewsletter@gmail.com?subject=Subscribe%20me%20to%20Lemango%20updates&amp;body=Hi%20Lemango%20team%2C%0A%0APlease%20add%20me%20to%20the%20Lemango%20updates%20list.%0A%0AName%3A%0AEmail%3A%0A%0AThanks%21">Use your mail app</a>.
+          </p>
         </div>
       </div>
     </section>

@@ -13,9 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── Mobile nav ────────────────────────────────────────────
   setupMobileNav();
-
-  // ── Newsletter form ───────────────────────────────────────
-  setupNewsletter();
 });
 
 /* ── Config fetch ─────────────────────────────────────────── */
@@ -139,67 +136,4 @@ function setupMobileNav() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && btn.getAttribute("aria-expanded") === "true") closeNav();
   });
-}
-
-/* ── Newsletter form ──────────────────────────────────────── */
-function setupNewsletter() {
-  const form      = document.getElementById("newsletter-form");
-  const statusEl  = document.getElementById("nl-status");
-  const submitBtn = document.getElementById("nl-submit");
-  const btnLabel  = document.getElementById("nl-btn-label");
-  if (!form) return;
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = form.elements["email"]?.value?.trim() ?? "";
-    const name  = form.elements["name"]?.value?.trim()  ?? "";
-
-    // Basic client-side validation
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setStatus("Please enter a valid email address.", "error");
-      form.elements["email"].focus();
-      return;
-    }
-
-    // Loading state
-    submitBtn.disabled = true;
-    btnLabel.textContent = "Subscribing…";
-    setStatus("", "");
-
-    try {
-      const res = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, source: "landing" }),
-      });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok && data.ok) {
-        if (data.alreadySubscribed) {
-          setStatus("You're already on the list — thanks!", "success");
-        } else {
-          setStatus("You're in! Check your inbox for a welcome email.", "success");
-          form.reset();
-        }
-        submitBtn.disabled = true;
-        btnLabel.textContent = "Subscribed ✓";
-      } else {
-        const msg = data.error || "Something went wrong. Please try again.";
-        setStatus(msg, "error");
-        submitBtn.disabled = false;
-        btnLabel.textContent = "Subscribe";
-      }
-    } catch {
-      setStatus("Network error — please check your connection and try again.", "error");
-      submitBtn.disabled = false;
-      btnLabel.textContent = "Subscribe";
-    }
-  });
-
-  function setStatus(msg, type) {
-    if (!statusEl) return;
-    statusEl.textContent = msg;
-    statusEl.className = "newsletter-note" + (type ? ` ${type}` : "");
-  }
 }
