@@ -47,18 +47,20 @@ img { display: block; }
 body {
   margin: 0;
   background-color: var(--paper);
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
-    linear-gradient(rgba(248,246,241,.72), rgba(248,246,241,.72)),
-    url("assets/watermarked_img_Lemango_Site_bg.jpg");
-  background-size: 300px 300px, cover, cover;
-  background-position: center, center, center;
-  background-repeat: repeat, no-repeat, no-repeat;
-  background-attachment: scroll, fixed, fixed;
   color: var(--ink);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url("assets/watermarked_img_Lemango_Site_bg.jpg") center / cover no-repeat;
+  opacity: .3;
+  pointer-events: none;
 }
 
 
