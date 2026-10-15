@@ -11,18 +11,84 @@
 
     var BRAND = "Lemango AI";
 
+    var FOUNDERS =
+        "I was founded and primarily developed by Logan, known online as LoganNeedsFries, " +
+        "who created the Lemangoes project, provided funding, and configured my core " +
+        "infrastructure—including domain acquisition and Cloudflare security certification. " +
+        "Kevin, known online as Kmoon, also contributed as a co-creator to the project.";
+
     var SYSTEM =
         "You are " + BRAND + ", a helpful assistant created by Lemango. " +
         "Always identify yourself as " + BRAND + ". Never mention, name, or hint at any " +
         "underlying model, company, or provider. If asked what model or system you are, " +
-        "say that you are " + BRAND + ". Be accurate, friendly, and concise.";
+        "say that you are " + BRAND + ". If asked who made, created, founded, built, or owns " +
+        "you, reply exactly: \"" + FOUNDERS + "\". Be accurate, friendly, and concise.";
 
     var LEGAL_SYSTEM =
         "You are the " + BRAND + " document assistant for NUCA (National Universal Court) " +
         "case and notice management, provided by Lemango. Draft professional, formal legal " +
         "documents. Always refer to yourself as " + BRAND + " and never mention any underlying " +
-        "model or provider. Return plain text only: write section headings in UPPERCASE on " +
-        "their own line, body paragraphs below them, and finish with a signature block.";
+        "model or provider. If asked who made, created, founded, built, or owns you, reply " +
+        "exactly: \"" + FOUNDERS + "\". Return plain text only: write section headings in " +
+        "UPPERCASE on their own line, body paragraphs below them, and finish with a " +
+        "signature block.";
+
+    /* ---- Beta daily question limit (per browser, per day) ---- */
+    var DAILY_LIMIT = 4;
+    var USAGE_KEY = "lemango_ai_usage";
+
+    function todayKey() {
+        var d = new Date();
+        var m = String(d.getMonth() + 1);
+        var day = String(d.getDate());
+        if (m.length < 2) m = "0" + m;
+        if (day.length < 2) day = "0" + day;
+        return d.getFullYear() + "-" + m + "-" + day;
+    }
+
+    function readUsage() {
+        try {
+            var raw = localStorage.getItem(USAGE_KEY);
+            var data = raw ? JSON.parse(raw) : null;
+            if (!data || data.date !== todayKey() || typeof data.count !== "number") {
+                return { date: todayKey(), count: 0 };
+            }
+            return data;
+        } catch (e) {
+            return { date: todayKey(), count: 0 };
+        }
+    }
+
+    function writeUsage(usage) {
+        try { localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) { /* ignore */ }
+    }
+
+    function limitInfo() {
+        var usage = readUsage();
+        return {
+            date: usage.date,
+            count: usage.count,
+            limit: DAILY_LIMIT,
+            remaining: Math.max(0, DAILY_LIMIT - usage.count)
+        };
+    }
+
+    function recordUse() {
+        var usage = readUsage();
+        usage.count += 1;
+        writeUsage(usage);
+        return limitInfo();
+    }
+
+    function limitReached() {
+        var err = new Error(
+            "You've reached the Lemango AI beta limit of " + DAILY_LIMIT +
+            " questions per day. Please come back tomorrow!"
+        );
+        err.code = "daily-limit";
+        err.info = limitInfo();
+        return err;
+    }
 
     var MODELS = [
         { name: "Mango-Light", desc: "Fast, everyday answers", color: "#f59e0b" },
@@ -106,6 +172,11 @@
 
     async function chat(opts) {
         opts = opts || {};
+        var counts = opts.count !== false;
+        if (counts) {
+            if (limitInfo().remaining <= 0) throw limitReached();
+            recordUse();
+        }
         try {
             return await viaBackend(
                 "/api/ai/chat",
@@ -147,6 +218,8 @@
     window.LemangoAI = {
         BRAND: BRAND,
         MODELS: MODELS,
+        DAILY_LIMIT: DAILY_LIMIT,
+        limitInfo: limitInfo,
         chat: chat,
         document: document,
         models: models

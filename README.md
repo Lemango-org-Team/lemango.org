@@ -63,6 +63,11 @@ provider (`public/lemango-ai.js`). That means Lemango AI also works on static
 hosting (e.g. GitHub Pages) where the Node backend isn't running, and it upgrades
 automatically to the configured providers/keys once the backend is deployed.
 
+During the beta, chat is limited to **4 questions per day** per browser (tracked
+in `localStorage`). Regenerating an answer doesn't count. If asked who created it,
+Lemango AI credits the Lemangoes project's founders (Logan / LoganNeedsFries and
+co-creator Kevin / Kmoon).
+
 ### Email
 
 Without SMTP, every composed email is written to `data/outbox/*.eml` — open the

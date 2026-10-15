@@ -242,8 +242,8 @@ async function sendMessage(text,displayUser=true){
     sending=true;updateSendState();updateRegenVisibility();
     if(displayUser)addMessage(text,"user");
     messageInput.value="";autoResizeInput();showTyping();
-    try{const historyPayload=history.map(m=>({role:m.r==="user"?"user":"assistant",content:m.t}));const reply=await window.LemangoAI.chat({message:text,model:currentModel,history:historyPayload});removeTyping();addMessage(reply,"bot")}
-    catch{removeTyping();addMessage("Connection error. Please try again.","bot")}
+    try{const historyPayload=history.map(m=>({role:m.r==="user"?"user":"assistant",content:m.t}));const reply=await window.LemangoAI.chat({message:text,model:currentModel,history:historyPayload,count:displayUser});removeTyping();addMessage(reply,"bot")}
+    catch(err){removeTyping();if(err&&err.code==="daily-limit"){addMessage(err.message||"You've reached the Lemango AI beta limit of 4 questions per day. Please come back tomorrow!","bot")}else{addMessage("Connection error. Please try again.","bot")}}
     sending=false;updateSendState();updateRegenVisibility();messageInput.focus();
 }
 
