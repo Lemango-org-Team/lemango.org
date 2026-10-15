@@ -26,6 +26,15 @@ body {
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
 }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url("assets/watermarked_img_Lemango_Site_bg.jpg") center / cover no-repeat;
+  opacity: .09;
+  pointer-events: none;
+}
 a { color: inherit; }
 button { font: inherit; }
 .site-header { height: 82px; border-bottom: 1px solid rgba(37, 62, 43, .08); background: transparent; }
