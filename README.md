@@ -12,7 +12,7 @@ email to `lemangonewsletter@gmail.com`, and **ad slots** ready for Google AdSens
 ## Stack
 
 - Node.js + Express (no build step)
-- Plain HTML/CSS/JS frontend served from `public/`. The Lemango AI chat UI and
+- Plain HTML/CSS/JS frontend served from the project root. The Lemango AI chat UI and
   the NUCA court workspace are self-contained pages (`ai.html`, `court.html`)
   wired to the backend API.
 - File-based JSON storage in `data/` (swap for a real database as you grow)
@@ -59,7 +59,7 @@ and every reply identifies itself as **Lemango AI** — the underlying provider 
 never disclosed.
 
 The browser tries this backend first, then falls back to a free keyless public
-provider (`public/lemango-ai.js`). That means Lemango AI also works on static
+provider (`lemango-ai.js`). That means Lemango AI also works on static
 hosting (e.g. GitHub Pages) where the Node backend isn't running, and it upgrades
 automatically to the configured providers/keys once the backend is deployed.
 
@@ -80,8 +80,8 @@ and set `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_SECURE=true`.
 
 1. Get approved by Google AdSense and copy your publisher ID.
 2. Set `ADSENSE_CLIENT=ca-pub-…`.
-3. Add a real ad unit ID to `data-ad-unit` on each `.ad-slot` in `public/index.html`.
-4. Fill in `public/ads.txt`.
+3. Add a real ad unit ID to `data-ad-unit` on each `.ad-slot` in `index.html`.
+4. Fill in `ads.txt`.
 
 ## API
 

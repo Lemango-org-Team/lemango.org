@@ -8,7 +8,9 @@ import { courtRouter } from "./routes/court.js";
 import { isSmtpConfigured } from "./mailer.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PUBLIC_DIR = path.resolve(__dirname, "..", "public");
+// The frontend lives at the repo root so static hosts (GitHub Pages, Cloudflare)
+// serve it directly, while this Node server serves the same files.
+const ROOT_DIR = path.resolve(__dirname, "..");
 const PORT = Number(process.env.PORT || 3000);
 const NEWSLETTER_INBOX = process.env.NEWSLETTER_INBOX || "lemangonewsletter@gmail.com";
 
@@ -62,14 +64,24 @@ app.use("/api/newsletter", rateLimit({ windowMs: 60_000, max: 10 }), newsletterR
 app.use("/api/ai", rateLimit({ windowMs: 60_000, max: 60 }), aiRouter);
 app.use("/api/court", courtRouter);
 
-// --- Static frontend ---
-app.use(express.static(PUBLIC_DIR, { extensions: ["html"], index: "index.html" }));
+// --- Static frontend (served from the repo root) ---
+// Keep backend source and data private even though the frontend is at the root.
+const BLOCKED_DIR = /^\/(?:server|tests|data|node_modules|\.git)(?:\/|$)/i;
+const BLOCKED_FILES = /^\/(?:package(?:-lock)?\.json|readme\.md|cname|dockerfile|license|\.env(?:\.example)?|\.gitignore|\.nojekyll)$/i;
+app.use((req, res, next) => {
+  if (BLOCKED_DIR.test(req.path) || BLOCKED_FILES.test(req.path)) {
+    return res.status(404).type("text/plain").send("Not found.");
+  }
+  next();
+});
+
+app.use(express.static(ROOT_DIR, { extensions: ["html"], index: "index.html", dotfiles: "deny" }));
 
 app.use("/api", (_req, res) => res.status(404).json({ ok: false, error: "Not found." }));
 
 // Fallback to the landing page for unknown non-API routes.
 app.get("*", (_req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, "index.html"));
+  res.sendFile(path.join(ROOT_DIR, "index.html"));
 });
 
 // eslint-disable-next-line no-unused-vars
