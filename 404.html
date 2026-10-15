@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fffaf0">
+  <title>Page not found — Lemango</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --paper: #f8f6f1; --ink: #1e2b22; --muted: #6b6659;
+      --green: #007a33; --green-dark: #005c2d; --line: #e3ddd1;
+      --sans: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+      --serif: "DM Serif Display", Georgia, serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center;
+      background: radial-gradient(700px 500px at 85% 0%, #e6f0e8 0%, transparent 60%),
+                  radial-gradient(600px 500px at 5% 100%, #fdf5e0 0%, transparent 55%), var(--paper);
+      color: var(--ink); font-family: var(--sans); padding: 32px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .card { max-width: 640px; text-align: center; }
+    .brand { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 26px; text-decoration: none; color: inherit; }
+    .brand img { width: 44px; height: 25px; object-fit: contain; }
+    .brand b { font-size: 24px; font-weight: 800; letter-spacing: -.5px; }
+    .brand b i { color: var(--green); font-style: normal; }
+    .code { font-family: var(--serif); font-size: 92px; line-height: 1; color: var(--green); margin: 0; }
+    h1 { font-family: var(--serif); font-size: 34px; margin: 8px 0 12px; color: var(--ink); }
+    p { color: var(--muted); font-size: 15px; line-height: 1.7; margin: 0 0 28px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 22px; border-radius: 999px; font-weight: 700; font-size: 14px; text-decoration: none;
+      transition: transform .15s, background .2s;
+    }
+    .btn-primary { background: var(--green-dark); color: #fff; }
+    .btn-primary:hover { background: var(--green); transform: translateY(-1px); }
+    .btn-ghost { background: #fff; color: var(--green-dark); border: 1px solid var(--line); }
+    .btn-ghost:hover { transform: translateY(-1px); }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="actions" style="justify-content:flex-start;margin-bottom:22px;">
+      <a class="btn btn-ghost" href="/">← Back to Lemango</a>
+    </div>
+    <p class="eyebrow" style="color:var(--green-dark);font-weight:800;letter-spacing:.14em;font-size:12px;text-transform:uppercase;margin:0 0 8px;">Error 404</p>
+    <h1>This page took a wrong turn.</h1>
+    <p>The page you're looking for doesn't exist or may have moved. Try one of the tools below.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="/ai.html">Try Lemango AI</a>
+      <a class="btn btn-primary" href="/court.html">Open Case Manager</a>
+      <a class="btn btn-ghost" href="/fastpay.html">FastPay Studio</a>
+    </div>
+  </main>
+</body>
+</html>

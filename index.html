@@ -8,29 +8,96 @@
   <title>Lemango — Practical tools for AI, productivity & case management</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/lemango-touch-icon.png">
+  <link rel="canonical" href="https://lemango.org/">
 
   <!-- Open Graph / Social sharing -->
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Lemango">
   <meta property="og:url" content="https://lemango.org/">
   <meta property="og:title" content="Lemango — Practical tools for AI, productivity & case management">
   <meta property="og:description" content="Lemango builds practical tools for AI, productivity, and case management. Try Lemango AI and FastPay Studio today.">
   <meta property="og:image" content="https://lemango.org/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Lemango — practical tools for AI, productivity & case management">
+  <meta property="og:site_name" content="Lemango">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Lemango — Practical tools for AI, productivity & case management">
+  <meta name="twitter:description" content="Practical tools for AI, productivity, and case management — usable today.">
   <meta name="twitter:image" content="https://lemango.org/assets/og-image.png">
+  <meta name="twitter:image:alt" content="Lemango — practical tools for AI, productivity and case management">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yw.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/dmserifdisplay/v17/-nFnOHM81r4j6k0gjAW3mujVU2B2G_Bx0g.woff2">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
   <script src="app.js" defer></script>
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://lemango.org/#org",
+        "name": "Lemango",
+        "url": "https://lemango.org/",
+        "logo": "https://lemango.org/assets/lemango-touch-icon.png",
+        "description": "Lemango builds practical tools for AI, productivity, and case management."
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://lemango.org/#website",
+        "url": "https://lemango.org/",
+        "name": "Lemango",
+        "publisher": { "@id": "https://lemango.org/#org" }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "Lemango AI",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": "https://lemango.org/ai.html",
+        "description": "An AI chat assistant for exploring ideas, getting help with writing, and working through questions.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "Court & Notice Management",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": "https://lemango.org/court.html",
+        "description": "A workspace for organizing cases, documents, notices, schedules, and virtual proceedings.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "FastPay Agreement & Receipt Studio",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": "https://lemango.org/fastpay.html",
+        "description": "Build a signed service agreement and receipt and export a clean PDF, entirely in your browser.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Privacy-friendly analytics: add your token, then uncomment.
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "YOUR_CLOUDFLARE_TOKEN"}'>x</script>
+  -->
+</head>
 </head>
 <body>
   <header class="site-header">
     <div class="nav-wrap">
       <a class="brand" href="index.html" aria-label="Lemango home">
-        <img class="brand-mark" src="assets/lemango-flag.webp" alt="">
+        <img class="brand-mark" src="assets/lemango-flag.webp" width="1376" height="778" alt="">
         <span class="brand-name">le<span>mango</span></span>
       </a>
       <nav class="site-nav" aria-label="Primary" id="site-nav">
@@ -57,7 +124,7 @@
 
   <main>
     <aside class="construction-banner section-wrap" id="availability" role="note" aria-label="Service availability">
-      <img src="assets/lemango-flag.webp" alt="Lemango flag">
+      <img src="assets/lemango-flag.webp" width="1376" height="778" loading="lazy" decoding="async" alt="Lemango flag">
       <div class="construction-copy">
         <strong><span class="construction-dot"></span> Early preview</strong>
         <p>Lemango AI and Court &amp; Notice Management are live in early preview. Expect frequent improvements as we build.</p>
@@ -147,14 +214,14 @@
 
       <div class="product-grid">
         <article class="product-card product-ai reveal">
-          <div class="product-topline"><img class="product-logo product-logo-ai" src="assets/lemango-ai-logo.png" alt="Lemango AI logo"><span class="product-tag">AI &amp; productivity</span></div>
+          <div class="product-topline"><img class="product-logo product-logo-ai" src="assets/lemango-ai-logo.png" width="168" height="159" loading="lazy" decoding="async" alt="Lemango AI logo"><span class="product-tag">AI &amp; productivity</span></div>
           <h3>Lemango AI</h3>
           <p>An AI chat assistant for exploring ideas, getting help with writing, and working through questions.</p>
           <a class="product-link" href="ai.html">Open Lemango AI <span aria-hidden="true">→</span></a>
         </article>
 
         <article class="product-card product-court reveal">
-          <div class="product-topline"><img class="product-logo product-logo-nuca" src="assets/nuca-logo.png" alt="NUCA logo"><span class="product-tag">Case &amp; notice management</span></div>
+          <div class="product-topline"><img class="product-logo product-logo-nuca" src="assets/nuca-logo.png" width="632" height="403" loading="lazy" decoding="async" alt="NUCA logo"><span class="product-tag">Case &amp; notice management</span></div>
           <h3>Court &amp; Notice Management</h3>
           <p>A workspace for organizing cases, documents, notices, schedules, and virtual proceedings.</p>
           <p class="product-disclaimer">Independent organizational software — not legal advice or an official court service.</p>
@@ -162,7 +229,7 @@
         </article>
 
         <article class="product-card product-wide product-fastpay reveal">
-          <div class="product-topline"><img class="product-logo" src="assets/lemango-flag.webp" alt="FastPay Studio logo"><span class="product-tag">Agreements &amp; payments</span></div>
+          <div class="product-topline"><img class="product-logo" src="assets/lemango-flag.webp" width="1376" height="778" loading="lazy" decoding="async" alt="FastPay Studio logo"><span class="product-tag">Agreements &amp; payments</span></div>
           <h3>FastPay Agreement &amp; Receipt Studio</h3>
           <p>Build a signed service agreement and receipt in seconds — fill in the parties, add an e-signature, and export a clean, professional PDF. Runs entirely in your browser.</p>
           <a class="product-link" href="fastpay.html?v=2">Open FastPay Studio <span aria-hidden="true">→</span></a>
@@ -194,7 +261,7 @@
     </section>
 
     <section class="about section-wrap reveal" id="about">
-      <img class="about-flag" src="assets/lemango-flag.webp" alt="Lemango flag">
+      <img class="about-flag" src="assets/lemango-flag.webp" width="1376" height="778" loading="lazy" decoding="async" alt="Lemango flag">
       <div class="about-copy">
         <p class="eyebrow">A LITTLE ABOUT LEMANGO</p>
         <h2>Technology should make things feel simpler.</h2>
@@ -205,7 +272,7 @@
 
   <footer class="site-footer">
     <a class="brand footer-brand" href="index.html" aria-label="Lemango home">
-      <img class="brand-mark" src="assets/lemango-flag.webp" alt="">
+      <img class="brand-mark" src="assets/lemango-flag.webp" width="1376" height="778" alt="">
       <span class="brand-name">le<span>mango</span></span>
     </a>
     <p>Useful tools for a world that keeps moving.</p>
@@ -215,6 +282,8 @@
       <a href="court.html">Case Manager</a>
       <a href="fastpay.html?v=2">FastPay Studio</a>
       <a href="index.html#newsletter">Newsletter</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
     </nav>
     <span class="copyright">© <span id="current-year">2026</span> Lemango</span>
   </footer>

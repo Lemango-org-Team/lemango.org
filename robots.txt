@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lemango.org/sitemap.xml

@@ -4,7 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Court &amp; Notice Management — Lemango</title>
+    <meta name="description" content="A workspace for organizing cases, documents, notices, schedules, and virtual proceedings. Independent organizational software — not legal advice or an official court service.">
+    <link rel="canonical" href="https://lemango.org/court.html">
+    <meta name="theme-color" content="#112e51">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lemango.org/court.html">
+    <meta property="og:title" content="Court &amp; Notice Management — Lemango">
+    <meta property="og:description" content="Organize cases, documents, notices, schedules, and virtual proceedings in one workspace.">
+    <meta property="og:image" content="https://lemango.org/assets/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Court &amp; Notice Management — Lemango">
+    <meta name="twitter:description" content="Organize cases, documents, notices, and schedules in one workspace.">
+    <meta name="twitter:image" content="https://lemango.org/assets/og-image.png">
     <link rel="icon" type="image/png" href="assets/nuca-logo.png">
+    <link rel="apple-touch-icon" href="assets/lemango-touch-icon.png">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Court & Notice Management","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"https://lemango.org/court.html","description":"A workspace for organizing cases, documents, notices, schedules, and virtual proceedings.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+    </script>
     <link rel="stylesheet" href="nuca.css">
     <link rel="stylesheet" href="banner.css">
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -26,7 +44,7 @@
         <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:20px 20px;"></div>
         <div class="login-card w-[380px] p-10 text-center relative z-10 gov-shadow-lg" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(16px);">
             <div class="flex items-center justify-center gap-3 mb-8">
-                <img src="assets/nuca-logo.png" class="w-16 h-16 object-contain" alt="NUCA Logo">
+                <img src="assets/nuca-logo.png" width="632" height="403" class="w-16 h-16 object-contain" alt="NUCA Logo">
                 <div class="text-left">
                     <div class="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-400">NUCA</div>
                     <div class="text-sm font-black uppercase tracking-tight leading-none">Notice Portal</div>
@@ -49,7 +67,7 @@
     <section class="top-banner text-[11px] font-medium py-1.5 px-4 no-print" style="background: #0f172a; border-bottom: 1px solid #1e293b;">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2.5">
-                <img src="assets/nuca-logo.png" class="w-6 h-6 object-contain" alt="NUCA Logo">
+                <img src="assets/nuca-logo.png" width="632" height="403" class="w-6 h-6 object-contain" alt="NUCA Logo">
                 <span class="text-gray-400">An official website of the <span class="font-black uppercase" style="color:#e2e8f0;">Lemangoes Government</span></span>
                 <button onclick="App.toggleHeaderInfo()" class="text-blue-700 underline ml-1 hover:text-blue-900 transition-colors text-[10px] font-bold">How you know</button>
             </div>
@@ -71,7 +89,7 @@
         <div class="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center gap-6">
             <div class="flex items-center gap-5 cursor-pointer group shrink-0" onclick="App.navigate('home')">
                 <div class="relative w-14 h-14 overflow-hidden shadow-lg border border-gray-600 rounded-sm group-hover:shadow-xl transition-shadow" style="background: #0f172a;">
-                    <img src="assets/nuca-logo.png" class="w-full h-full object-contain p-2 transition-transform duration-500 group-hover:scale-110" alt="NUCA Logo">
+                    <img src="assets/nuca-logo.png" width="632" height="403" loading="lazy" decoding="async" class="w-full h-full object-contain p-2 transition-transform duration-500 group-hover:scale-110" alt="NUCA Logo">
                 </div>
                 <div class="hidden sm:block">
                     <h1 class="text-[15px] font-black uppercase tracking-tighter leading-none" style="color:#e2e8f0;">NUCA</h1>
@@ -105,7 +123,7 @@
     <div id="mobile-menu" class="fixed inset-0 z-[100] text-white translate-x-full transition-transform duration-300 lg:hidden flex flex-col no-print" style="background: #0f172a;" role="dialog" aria-modal="true" aria-hidden="true">
         <div class="p-6 flex justify-between items-center border-b border-gray-700">
             <div class="flex items-center gap-3">
-                <img src="assets/nuca-logo.png" class="w-10 h-10 object-contain" alt="NUCA Logo">
+                <img src="assets/nuca-logo.png" width="632" height="403" class="w-10 h-10 object-contain" alt="NUCA Logo">
                 <span class="font-black text-yellow-400 tracking-widest text-sm uppercase">NUCA</span>
             </div>
             <button id="mobile-menu-close" onclick="App.toggleMobileMenu(false)" class="p-2 hover:bg-gray-700 rounded transition" aria-label="Close menu">
@@ -127,7 +145,7 @@
     <!-- Beta banner -->
     <aside class="lm-banner-wrap no-print" aria-label="Service availability">
         <div class="lm-banner lm-dark" role="note">
-            <img src="assets/lemango-flag.webp" alt="Lemango flag">
+            <img src="assets/lemango-flag.webp" width="1376" height="778" decoding="async" alt="Lemango flag">
             <div class="lm-banner-copy">
                 <strong><span class="lm-banner-dot"></span> Early preview</strong>
                 <p>Lemango AI and Court &amp; Notice Management are live in early preview. Expect frequent improvements as we build.</p>
@@ -143,7 +161,7 @@
         <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-10 mb-12">
             <div class="md:col-span-2">
                 <div class="flex items-center gap-4 mb-5">
-                    <img src="assets/nuca-logo.png" class="w-12 h-12 object-contain" alt="NUCA Logo">
+                    <img src="assets/nuca-logo.png" width="632" height="403" loading="lazy" decoding="async" class="w-12 h-12 object-contain" alt="NUCA Logo">
                     <div>
                         <div class="font-black text-base uppercase tracking-tighter leading-none">NUCA</div>
                         <div class="text-[10px] text-yellow-400 font-bold uppercase tracking-[0.3em] mt-0.5">National Universal Court (for) All</div>
@@ -177,8 +195,8 @@
         <div class="max-w-7xl mx-auto px-6 pt-6 border-t border-gray-700 flex flex-col md:flex-row justify-between text-[10px] uppercase font-bold tracking-[0.3em] text-gray-500 gap-3">
             <span>© 2026 NUCA — Lemangoes Government</span>
             <div class="flex gap-6">
-                <a href="#" class="hover:text-gray-300 transition">Privacy</a>
-                <a href="#" class="hover:text-gray-300 transition">Accessibility</a>
+                <a href="privacy.html" class="hover:text-gray-300 transition">Privacy</a>
+                <a href="terms.html" class="hover:text-gray-300 transition">Terms</a>
                 <a href="#" class="hover:text-gray-300 transition">Feedback</a>
             </div>
         </div>
