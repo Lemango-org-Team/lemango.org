@@ -34,7 +34,11 @@
 
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+  background-color: var(--paper);
+}
 h1, h2, h3, p { margin-top: 0; }
 a { color: inherit; }
 button { font: inherit; cursor: pointer; }
@@ -43,11 +47,16 @@ img { display: block; }
 /* ── Base ── */
 body {
   margin: 0;
-  background-color: var(--paper);
+  background: transparent;
   color: var(--ink);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Warm paper base sits between the bg image and content */
+body > * {
+  position: relative;
 }
 
 /* Background image layer */
