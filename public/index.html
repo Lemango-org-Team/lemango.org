@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fffaf0">
+  <meta name="description" content="Lemango builds practical tools for AI, productivity, and case management. Try Lemango AI and Court & Notice Management in early preview.">
+  <title>Lemango — Practical tools for AI, productivity & case management</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-wrap">
+      <a class="brand" href="index.html" aria-label="Lemango home">
+        <img class="brand-mark" src="assets/lemango-flag.webp" alt="">
+        <span class="brand-name">le<span>mango</span></span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="index.html#products">Products</a>
+        <a href="ai.html">Lemango AI</a>
+        <a href="court.html">Case Manager</a>
+        <a class="nav-cta" href="index.html#newsletter">Get updates</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <aside class="construction-banner section-wrap" id="availability" role="note" aria-label="Service availability">
+      <img src="assets/lemango-flag.webp" alt="Lemango flag">
+      <div class="construction-copy">
+        <strong><span class="construction-dot"></span> Early preview</strong>
+        <p>Lemango AI and Court &amp; Notice Management are live in early preview. Expect frequent improvements as we build.</p>
+      </div>
+      <span class="construction-status">Beta</span>
+    </aside>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-dot"></span> A little more time. A lot more to come.</p>
+        <h1>Good ideas deserve <span>good tools.</span></h1>
+        <p class="hero-intro">Lemango builds practical tools for AI, productivity, and case management. Both products are in early preview and improving every week.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="ai.html">Try Lemango AI</a>
+          <a class="btn btn-ghost" href="court.html">Open Case Manager</a>
+        </div>
+        <div class="hero-note">
+          <span class="note-icon" aria-hidden="true">⌛</span>
+          <p>Still growing — more features landing soon.</p>
+        </div>
+      </div>
+
+      <div class="hero-art" aria-label="Lemango flag and launch status">
+        <p class="art-caption"><span class="caption-dot"></span> The Lemango flag</p>
+        <img class="flag-artwork" src="assets/lemango-flag.webp" alt="Lemango's red and green flag with its mango emblem">
+        <div class="art-footer">
+          <span class="art-footer-mark">L</span>
+          <span><strong>Lemango</strong><small>Growing something useful.</small></span>
+          <span class="art-footer-status"><span></span> Early preview</span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="ad-slot section-wrap" data-ad-slot="landing-top" data-ad-unit="" aria-label="Advertisement">
+      <span class="ad-label">Advertisement</span>
+      <div class="ad-mount"></div>
+    </aside>
+
+    <section class="products section-wrap" id="products">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">THE LEMANGO TOOLKIT</p>
+          <h2>Tools with a purpose.</h2>
+        </div>
+        <p class="section-description">Practical tools for AI chat and case management — usable today, improving fast.</p>
+      </div>
+
+      <div class="product-grid">
+        <article class="product-card product-ai">
+          <div class="product-topline"><img class="product-logo product-logo-ai" src="assets/lemango-ai-logo.png" alt="Lemango AI logo"><span class="product-tag">AI &amp; productivity</span></div>
+          <h3>Lemango AI</h3>
+          <p>An AI chat assistant for exploring ideas, getting help with writing, and working through questions.</p>
+          <a class="product-link" href="ai.html">Open Lemango AI <span aria-hidden="true">→</span></a>
+        </article>
+
+        <article class="product-card product-court">
+          <div class="product-topline"><img class="product-logo product-logo-nuca" src="assets/nuca-logo.png" alt="NUCA logo"><span class="product-tag">Case &amp; notice management</span></div>
+          <h3>Court &amp; Notice Management</h3>
+          <p>A workspace for organizing cases, documents, notices, schedules, and virtual proceedings.</p>
+          <p class="product-disclaimer">Independent organizational software — not legal advice or an official court service.</p>
+          <a class="product-link" href="court.html">Open Case Manager <span aria-hidden="true">→</span></a>
+        </article>
+      </div>
+      <p class="product-footnote">Both products are in early preview. Feedback helps us improve.</p>
+    </section>
+
+    <section class="newsletter section-wrap" id="newsletter">
+      <div class="newsletter-inner">
+        <div class="newsletter-copy">
+          <p class="eyebrow">STAY IN THE LOOP</p>
+          <h2>Get Lemango updates by email.</h2>
+          <p>Product launches, early-access invites, and updates. No spam — unsubscribe anytime.</p>
+        </div>
+        <form id="newsletter-form" class="newsletter-form" novalidate>
+          <label class="sr-only" for="nl-name">Name</label>
+          <input id="nl-name" type="text" name="name" placeholder="Name (optional)" autocomplete="name">
+          <label class="sr-only" for="nl-email">Email</label>
+          <input id="nl-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+          <button type="submit">Subscribe</button>
+          <p class="newsletter-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="about section-wrap" id="about">
+      <img class="about-flag" src="assets/lemango-flag.webp" alt="Lemango flag">
+      <div class="about-copy">
+        <p class="eyebrow">A LITTLE ABOUT LEMANGO</p>
+        <h2>Technology should make things feel simpler.</h2>
+        <p>We’re building a growing collection of straightforward digital tools. Our focus is simple: make software that feels approachable and helps people get things done.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <a class="brand footer-brand" href="index.html" aria-label="Lemango home">
+      <img class="brand-mark" src="assets/lemango-flag.webp" alt="">
+      <span class="brand-name">le<span>mango</span></span>
+    </a>
+    <p>Useful tools for a world that keeps moving.</p>
+    <nav class="footer-nav" aria-label="Footer">
+      <a href="index.html#products">Products</a>
+      <a href="ai.html">Lemango AI</a>
+      <a href="court.html">Case Manager</a>
+      <a href="index.html#newsletter">Newsletter</a>
+    </nav>
+    <span class="copyright">© <span id="current-year">2026</span> Lemango</span>
+  </footer>
+</body>
+</html>

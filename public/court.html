@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Court &amp; Notice Management — Lemango</title>
+    <link rel="icon" type="image/png" href="assets/nuca-logo.png">
+    <link rel="stylesheet" href="nuca.css">
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { gov: { navy: '#112e51', blue: '#005ea2', dark: '#0b1d33', gold: '#e5a50a', light: '#f0f3f5', flagGreen: '#007a33', flagRed: '#7b1113' } }, fontFamily: { sans: ['"Public Sans"', 'sans-serif'] } } }
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://meet.jit.si/external_api.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 flex flex-col min-h-screen thin-borders">
+
+    <a class="skip-link no-print" href="#main-content">Skip to main content</a>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="fixed inset-0 text-white flex items-center justify-center z-[9999]" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+        <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);background-size:20px 20px;"></div>
+        <div class="login-card w-[380px] p-10 text-center relative z-10 gov-shadow-lg" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(16px);">
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <img src="assets/nuca-logo.png" class="w-16 h-16 object-contain" alt="NUCA Logo">
+                <div class="text-left">
+                    <div class="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-400">NUCA</div>
+                    <div class="text-sm font-black uppercase tracking-tight leading-none">Notice Portal</div>
+                </div>
+            </div>
+            <div class="gold-bar mb-8 rounded-full"></div>
+            <h2 class="text-base font-black uppercase tracking-[0.2em] mb-1">Secure Access</h2>
+            <p class="text-[11px] text-white/40 uppercase tracking-widest mb-7">National Universal Court (for) All</p>
+            <input id="username" placeholder="User ID" class="w-full mb-3 px-4 py-3 text-sm font-medium" style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:2px;outline:none;" onfocus="this.style.borderColor='#e5a50a'" onblur="this.style.borderColor='rgba(255,255,255,0.15)'">
+            <input id="password" type="password" placeholder="Access Key" class="w-full mb-6 px-4 py-3 text-sm font-medium" style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:2px;outline:none;" onfocus="this.style.borderColor='#e5a50a'" onblur="this.style.borderColor='rgba(255,255,255,0.15)'">
+            <button onclick="App.login()" class="w-full py-3 font-black text-xs uppercase tracking-[0.2em] transition-all hover:opacity-90" style="background:#e5a50a;color:#112e51;border-radius:2px;">Authenticate</button>
+            <p id="login-error" class="text-red-400 text-xs mt-4 hidden font-black uppercase tracking-widest">⚠ Access Denied</p>
+            <div class="mt-8 pt-6 border-t border-white/10">
+                <a href="index.html" class="text-[11px] text-white/40 hover:text-white/70 transition font-bold uppercase tracking-widest">← Lemango</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Banner -->
+    <section class="top-banner text-[11px] font-medium py-1.5 px-4 no-print" style="background: #0f172a; border-bottom: 1px solid #1e293b;">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+                <img src="assets/nuca-logo.png" class="w-6 h-6 object-contain" alt="NUCA Logo">
+                <span class="text-gray-400">An official website of the <span class="font-black uppercase" style="color:#e2e8f0;">Lemangoes Government</span></span>
+                <button onclick="App.toggleHeaderInfo()" class="text-blue-700 underline ml-1 hover:text-blue-900 transition-colors text-[10px] font-bold">How you know</button>
+            </div>
+            <div class="hidden md:flex items-center gap-2 text-[10px] uppercase tracking-widest font-black" style="color:#10b981;">
+                <div class="pulse-dot"></div>
+                NUCA Systems Operational
+            </div>
+        </div>
+        <div id="header-info-box" class="hidden max-w-7xl mx-auto py-5 grid md:grid-cols-2 gap-8 border-t border-gray-700 mt-2 text-xs" style="background: #1e293b;">
+            <div><p class="font-black mb-1" style="color:#e2e8f0;">.gov domains are official</p><p class="text-gray-400">The <strong>.gov</strong> means it's official. Government entities use .gov for their digital presence.</p></div>
+            <div><p class="font-black mb-1" style="color:#e2e8f0;">HTTPS is secure</p><p class="text-gray-400">The <strong>lock icon</strong> or <strong>https://</strong> ensures your connection is encrypted.</p></div>
+        </div>
+    </section>
+
+    <div class="gold-bar no-print"></div>
+
+    <!-- Header -->
+    <header class="site-header sticky top-0 z-50 no-print" role="banner" style="background: #1e293b; border-bottom: 1px solid #334155;">
+        <div class="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center gap-6">
+            <div class="flex items-center gap-5 cursor-pointer group shrink-0" onclick="App.navigate('home')">
+                <div class="relative w-14 h-14 overflow-hidden shadow-lg border border-gray-600 rounded-sm group-hover:shadow-xl transition-shadow" style="background: #0f172a;">
+                    <img src="assets/nuca-logo.png" class="w-full h-full object-contain p-2 transition-transform duration-500 group-hover:scale-110" alt="NUCA Logo">
+                </div>
+                <div class="hidden sm:block">
+                    <h1 class="text-[15px] font-black uppercase tracking-tighter leading-none" style="color:#e2e8f0;">NUCA</h1>
+                    <p class="text-[9px] font-extrabold uppercase tracking-[0.35em] mt-1" style="color:#94a3b8;">National Universal Court (for) All</p>
+                </div>
+            </div>
+            <nav class="hidden lg:flex items-center gap-0.5" aria-label="Primary">
+                <button onclick="App.navigate('home')" class="nav-btn px-4 py-2 text-[11px] font-black uppercase tracking-widest text-gray-400" data-view="home">Home</button>
+                <button onclick="App.navigate('cases')" class="nav-btn px-4 py-2 text-[11px] font-black uppercase tracking-widest text-gray-400" data-view="cases">Cases</button>
+                <button onclick="App.navigate('documents')" class="nav-btn px-4 py-2 text-[11px] font-black uppercase tracking-widest text-gray-400" data-view="documents">Documents</button>
+                <button onclick="App.navigate('notices')" class="nav-btn px-4 py-2 text-[11px] font-black uppercase tracking-widest text-gray-400" data-view="notices">Notices</button>
+                <button onclick="App.navigate('filing')" class="nav-btn px-4 py-2 text-[11px] font-black uppercase tracking-widest text-gray-400" data-view="filing">Filing</button>
+                <button onclick="App.navigate('search')" class="nav-btn px-4 py-2 text-[11px] font-black uppercase tracking-widest text-gray-400" data-view="search">Search</button>
+                <button onclick="App.navigate('contact')" class="nav-btn px-4 py-2 text-[11px] font-black uppercase tracking-widest text-gray-400" data-view="contact">Contact</button>
+            </nav>
+            <div class="flex items-center gap-3">
+                <div id="search-shell" class="hidden md:block relative">
+                    <input id="global-search" type="search" placeholder="Search notices…" class="bg-gray-800 border border-gray-600 py-2 pl-9 pr-4 text-xs w-44 focus:w-60 outline-none transition-all rounded-sm focus:border-yellow-500 text-gray-100" autocomplete="off">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>
+                    <div id="search-results" class="hidden absolute right-0 mt-2 w-[22rem] bg-gray-800 border border-gray-600 shadow-xl overflow-hidden rounded-sm z-50"></div>
+                </div>
+                <button id="mobile-menu-open" onclick="App.toggleMobileMenu(true)" class="lg:hidden p-2 hover:bg-gray-700 rounded transition" aria-controls="mobile-menu" aria-expanded="false" aria-label="Open menu">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2.5"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="h-0.5 bg-gray-700"></div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 z-[100] text-white translate-x-full transition-transform duration-300 lg:hidden flex flex-col no-print" style="background: #0f172a;" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="p-6 flex justify-between items-center border-b border-gray-700">
+            <div class="flex items-center gap-3">
+                <img src="assets/nuca-logo.png" class="w-10 h-10 object-contain" alt="NUCA Logo">
+                <span class="font-black text-yellow-400 tracking-widest text-sm uppercase">NUCA</span>
+            </div>
+            <button id="mobile-menu-close" onclick="App.toggleMobileMenu(false)" class="p-2 hover:bg-gray-700 rounded transition" aria-label="Close menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5"></path></svg>
+            </button>
+        </div>
+        <div class="p-8 space-y-2 flex-grow">
+            <button onclick="App.navigate('home')" class="block w-full text-left text-3xl font-black py-3 border-b border-gray-700 hover:text-yellow-400 transition">HOME</button>
+            <button onclick="App.navigate('cases')" class="block w-full text-left text-3xl font-black py-3 border-b border-gray-700 hover:text-yellow-400 transition">CASES</button>
+            <button onclick="App.navigate('documents')" class="block w-full text-left text-3xl font-black py-3 border-b border-gray-700 hover:text-yellow-400 transition">DOCUMENTS</button>
+            <button onclick="App.navigate('notices')" class="block w-full text-left text-3xl font-black py-3 border-b border-gray-700 hover:text-yellow-400 transition">NOTICES</button>
+            <button onclick="App.navigate('filing')" class="block w-full text-left text-3xl font-black py-3 border-b border-gray-700 hover:text-yellow-400 transition">FILING</button>
+            <button onclick="App.navigate('search')" class="block w-full text-left text-3xl font-black py-3 border-b border-gray-700 hover:text-yellow-400 transition">SEARCH</button>
+            <button onclick="App.navigate('contact')" class="block w-full text-left text-3xl font-black py-3 hover:text-yellow-400 transition">CONTACT</button>
+        </div>
+        <div class="p-6 bg-gray-800 text-[10px] font-bold tracking-widest text-gray-400 uppercase">NUCA · Lemangoes Gov</div>
+    </div>
+
+    <main id="main-content" class="flex-grow view-transition" role="main" tabindex="-1"></main>
+
+    <!-- Footer -->
+    <footer class="site-footer text-white pt-16 pb-8 mt-auto no-print" style="background: linear-gradient(180deg, #0f172a 0%, #020617 100%); border-top: 4px solid #ca8a04;">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-10 mb-12">
+            <div class="md:col-span-2">
+                <div class="flex items-center gap-4 mb-5">
+                    <img src="assets/nuca-logo.png" class="w-12 h-12 object-contain" alt="NUCA Logo">
+                    <div>
+                        <div class="font-black text-base uppercase tracking-tighter leading-none">NUCA</div>
+                        <div class="text-[10px] text-yellow-400 font-bold uppercase tracking-[0.3em] mt-0.5">National Universal Court (for) All</div>
+                    </div>
+                </div>
+                <p class="text-gray-400 text-sm leading-relaxed max-w-sm">Centralized court and lawful action notice management system for the Lemangoes Government. Ensuring transparent legal proceedings and accessible justice for all citizens.</p>
+            </div>
+            <div>
+                <h4 class="font-black text-[10px] text-yellow-400 uppercase tracking-[0.3em] mb-5">Services</h4>
+                <ul class="text-sm text-gray-400 space-y-2.5 font-medium">
+                    <li><button onclick="App.navigate('cases')" class="hover:text-white transition-colors">Manage Cases</button></li>
+                    <li><button onclick="App.navigate('documents')" class="hover:text-white transition-colors">Document Builder</button></li>
+                    <li><button onclick="App.navigate('notices')" class="hover:text-white transition-colors">Court Notices</button></li>
+                    <li><button onclick="App.navigate('filing')" class="hover:text-white transition-colors">File Action</button></li>
+                    <li><button onclick="App.navigate('search')" class="hover:text-white transition-colors">Search Records</button></li>
+                    <li><a href="index.html" class="hover:text-white transition-colors">← Lemango Home</a></li>
+                    <li><a href="ai.html" class="hover:text-white transition-colors">Lemango AI</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-black text-[10px] text-yellow-400 uppercase tracking-[0.3em] mb-5">Contact</h4>
+                <p class="text-sm text-gray-300 font-bold mb-1">1-800-555-NUCA</p>
+                <p class="text-sm text-gray-400">notices@nuca.gov.lm</p>
+                <p class="text-sm text-gray-400 mt-1">1 Court Plaza, New Lema City</p>
+                <div class="mt-4 flex items-center gap-2">
+                    <div class="pulse-dot"></div>
+                    <span class="text-[10px] uppercase font-bold tracking-widest text-green-400">Systems Online</span>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 pt-6 border-t border-gray-700 flex flex-col md:flex-row justify-between text-[10px] uppercase font-bold tracking-[0.3em] text-gray-500 gap-3">
+            <span>© 2026 NUCA — Lemangoes Government</span>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-gray-300 transition">Privacy</a>
+                <a href="#" class="hover:text-gray-300 transition">Accessibility</a>
+                <a href="#" class="hover:text-gray-300 transition">Feedback</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 z-[200] hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-gray-800 w-full max-w-2xl rounded-sm p-10 relative gov-shadow-lg border-t-4 max-h-[90vh] overflow-y-auto" style="border-color:#ca8a04;">
+            <button onclick="App.closeModal()" class="absolute top-5 right-5 w-9 h-9 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 rounded-sm transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5"></path></svg>
+            </button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script defer src="court.js"></script>
+</body>
+</html>

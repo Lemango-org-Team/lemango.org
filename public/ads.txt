@@ -1,0 +1,6 @@
+# ads.txt — Authorized Digital Sellers
+# Google AdSense rejects this file until you replace the placeholder publisher ID
+# with your own (AdSense → Account → Account information → Publisher ID).
+#
+# Uncomment and edit the line below after Google approves your site:
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

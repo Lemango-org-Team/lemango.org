@@ -1,0 +1,136 @@
+// Multi-provider AI backend for Lemango AI.
+//
+// Every response is branded as "Lemango AI" and the underlying model/company
+// is never disclosed to the caller. Providers are tried in a chain; the first
+// one that answers wins. Pollinations is keyless so everything works out of
+// the box, while optional API keys unlock faster / stronger providers.
+
+const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 45000);
+
+export const BRAND = "Lemango AI";
+
+const PROVIDERS = {
+  pollinations: {
+    keyless: true,
+    baseUrl: "https://text.pollinations.ai/openai",
+    model: process.env.POLLINATIONS_MODEL || "openai",
+  },
+  groq: {
+    baseUrl: "https://api.groq.com/openai/v1",
+    envKey: "GROQ_API_KEY",
+    model: process.env.GROQ_MODEL || "llama-3.1-8b-instant",
+  },
+  openrouter: {
+    baseUrl: "https://openrouter.ai/api/v1",
+    envKey: "OPENROUTER_API_KEY",
+    model: process.env.OPENROUTER_MODEL || "meta-llama/llama-3.1-8b-instruct:free",
+    headers: { "HTTP-Referer": "https://lemango.org", "X-Title": BRAND },
+  },
+  gemini: {
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
+    envKey: "GEMINI_API_KEY",
+    model: process.env.GEMINI_MODEL || "gemini-2.0-flash",
+  },
+  huggingface: {
+    baseUrl: "https://router.huggingface.co/v1",
+    envKey: "HUGGINGFACE_API_KEY",
+    model: process.env.HUGGINGFACE_MODEL || "meta-llama/Llama-3.1-8B-Instruct",
+  },
+  deepseek: {
+    baseUrl: "https://api.deepseek.com/v1",
+    envKey: "DEEPSEEK_API_KEY",
+    model: process.env.DEEPSEEK_MODEL || "deepseek-chat",
+  },
+  openai: {
+    baseUrl: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
+    envKey: "OPENAI_API_KEY",
+    model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+  },
+};
+
+// Branded model names shown to users. Each maps to a chain of real providers.
+export const MODEL_CATALOG = [
+  { name: "Mango-Light", desc: "Fast, everyday answers", color: "#f59e0b", chain: ["pollinations", "groq"] },
+  { name: "Mango-Flash", desc: "Snappy and efficient", color: "#22c55e", chain: ["groq", "pollinations"] },
+  { name: "Mango-Core", desc: "Balanced for most tasks", color: "#3b82f6", chain: ["openrouter", "gemini", "pollinations"] },
+  { name: "Mango-Pro", desc: "Stronger reasoning", color: "#8b5cf6", chain: ["gemini", "openai", "openrouter", "pollinations"] },
+];
+
+function liveDisabled() {
+  const value = String(process.env.AI_DISABLE_LIVE || "").toLowerCase();
+  return value === "1" || value === "true" || value === "yes";
+}
+
+function providerAvailable(name) {
+  const cfg = PROVIDERS[name];
+  if (!cfg) return false;
+  if (cfg.keyless) return true;
+  return Boolean(process.env[cfg.envKey]);
+}
+
+export function catalogForClient() {
+  return MODEL_CATALOG.map(({ name, desc, color }) => ({ name, desc, color }));
+}
+
+export function aiConfigured() {
+  if (liveDisabled()) return false;
+  return MODEL_CATALOG.some((m) => m.chain.some(providerAvailable));
+}
+
+function chainFor(modelName) {
+  const entry = MODEL_CATALOG.find((m) => m.name === modelName) || MODEL_CATALOG[0];
+  return entry.chain.filter(providerAvailable);
+}
+
+async function callProvider(name, messages, opts) {
+  const cfg = PROVIDERS[name];
+  const url = `${cfg.baseUrl.replace(/\/$/, "")}/chat/completions`;
+  const headers = { "Content-Type": "application/json", ...(cfg.headers || {}) };
+  const apiKey = cfg.envKey ? process.env[cfg.envKey] : undefined;
+  if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        model: cfg.model,
+        messages,
+        temperature: opts.temperature,
+        max_tokens: opts.maxTokens,
+      }),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      throw new Error(`${name} responded ${res.status}: ${detail.slice(0, 200)}`);
+    }
+    const data = await res.json();
+    const text = data?.choices?.[0]?.message?.content;
+    if (!text || !String(text).trim()) throw new Error(`${name} returned an empty response`);
+    return { text: String(text).trim(), provider: name };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Try each available provider in the model's chain until one succeeds.
+export async function generateReply(messages, modelName, opts = {}) {
+  if (liveDisabled()) throw new Error("Live AI is disabled by configuration.");
+  const chain = chainFor(modelName);
+  if (!chain.length) throw new Error("No AI provider is available.");
+
+  const options = { temperature: opts.temperature ?? 0.7, maxTokens: opts.maxTokens || 2000 };
+  let lastError;
+  for (const provider of chain) {
+    try {
+      return await callProvider(provider, messages, options);
+    } catch (err) {
+      lastError = err;
+      console.warn(`[ai] provider '${provider}' failed: ${err.message}`);
+    }
+  }
+  throw lastError || new Error("All AI providers failed.");
+}
