@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: lemango-org
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATA_DIR
+        value: data
+      # Add the rest of your env vars in the Render dashboard
+      # (SMTP_*, AI keys, ADSENSE_CLIENT, etc.)
