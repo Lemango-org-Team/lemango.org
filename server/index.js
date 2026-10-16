@@ -64,6 +64,15 @@ app.use("/api/newsletter", rateLimit({ windowMs: 60_000, max: 10 }), newsletterR
 app.use("/api/ai", rateLimit({ windowMs: 60_000, max: 60 }), aiRouter);
 app.use("/api/court", courtRouter);
 
+// --- Clean URL redirects: strip .html extension ---
+// e.g. /ai.html → /ai, /court.html → /court
+app.get("/:page.html", (req, res) => {
+  const query = Object.keys(req.query).length
+    ? "?" + new URLSearchParams(req.query).toString()
+    : "";
+  res.redirect(301, `/${req.params.page}${query}`);
+});
+
 // --- Static frontend (served from the repo root) ---
 // Keep backend source and data private even though the frontend is at the root.
 const BLOCKED_DIR = /^\/(?:server|tests|data|node_modules|\.git)(?:\/|$)/i;
