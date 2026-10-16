@@ -77,11 +77,11 @@ body::before {
 
 /* ── Main layout ── */
 .auth-main {
-  width: min(480px, calc(100% - 40px));
-  margin: 52px auto 64px;
+  width: min(540px, calc(100% - 40px));
+  margin: 60px auto 80px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 /* ── Out of order banner — matches construction-banner from style.css ── */
@@ -147,7 +147,7 @@ body::before {
 }
 
 .auth-card-body {
-  padding: 30px 32px 28px;
+  padding: 36px 40px 32px;
 }
 
 /* Eyebrow — matches site eyebrow */
@@ -206,18 +206,18 @@ h1 {
 .google-btn {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  padding: 13px 18px;
-  border: 1px solid var(--line);
+  padding: 15px 20px;
+  border: 1.5px solid #c8cfc5;
   border-radius: 8px;
-  background: var(--white);
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 600;
+  background: #fff;
+  color: #1e2b22;
+  font-size: 14px;
+  font-weight: 700;
   cursor: not-allowed;
-  opacity: .5;
-  box-shadow: var(--shadow-sm);
+  opacity: .6;
+  box-shadow: 0 2px 6px rgba(30,43,34,.08);
   transition: none;
 }
 
@@ -250,7 +250,7 @@ h1 {
 
 /* Card footer */
 .auth-card-footer {
-  padding: 14px 32px;
+  padding: 16px 40px;
   border-top: 1px solid var(--line);
   background: #f8f6f0;
 }
@@ -272,8 +272,8 @@ a:focus-visible, button:focus-visible {
 /* Responsive */
 @media (max-width: 520px) {
   .auth-main { margin-top: 36px; }
-  .auth-card-body { padding: 24px 20px 22px; }
-  .auth-card-footer { padding: 14px 20px; }
+  .auth-card-body { padding: 26px 22px 22px; }
+  .auth-card-footer { padding: 14px 22px; }
   .site-nav a:not(:last-child) { display: none; }
   .construction-status { display: none; }
 }
