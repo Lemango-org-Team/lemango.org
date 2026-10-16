@@ -1,0 +1,155 @@
+/* ============================================================
+   auth.css — Lemango sign-in page
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: #f4f2ed;
+  background-image: url("assets/watermarked_img_Lemango_Site_bg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #1e2b22;
+  min-height: 100dvh;
+}
+
+.auth-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: rgba(244,242,237,.82);
+}
+
+/* ── Card ── */
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: #fdfcf8;
+  border: 1px solid #e3ddd1;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(30,43,34,.10), 0 2px 8px rgba(30,43,34,.06);
+  overflow: hidden;
+}
+
+/* ── Brand header ── */
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 20px 28px;
+  border-bottom: 1px solid #ede9df;
+  text-decoration: none;
+  color: #005c2d;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.9px;
+  background: #f8f6f0;
+  transition: background .15s;
+}
+.auth-brand:hover { background: #f0ede6; }
+.auth-brand img { border-radius: 3px; }
+.auth-brand em { color: #8c1605; font-style: normal; }
+
+/* ── Body ── */
+.auth-body {
+  padding: 32px 28px 28px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  color: #1e2b22;
+}
+
+.auth-sub {
+  margin: 0 0 24px;
+  color: #6b7a6e;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ── Error banner ── */
+.auth-error {
+  display: block;
+  margin-bottom: 18px;
+  padding: 11px 14px;
+  border: 1px solid #f5c6c0;
+  border-left: 4px solid #8c1605;
+  border-radius: 6px;
+  background: #fff5f4;
+  color: #7a1c0e;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ── Google button ── */
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 20px;
+  border: 1px solid #d8d3c8;
+  border-radius: 8px;
+  background: #fff;
+  color: #1e2b22;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, box-shadow .15s, transform .12s;
+  box-shadow: 0 1px 3px rgba(30,43,34,.07);
+}
+.google-btn:hover {
+  background: #f8f6f1;
+  border-color: #bdb7ab;
+  box-shadow: 0 3px 8px rgba(30,43,34,.10);
+  transform: translateY(-1px);
+}
+.google-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(30,43,34,.07);
+}
+
+/* ── Terms ── */
+.auth-terms {
+  margin: 18px 0 0;
+  color: #9aa096;
+  font-size: 11px;
+  line-height: 1.6;
+  text-align: center;
+}
+.auth-terms a {
+  color: #005c2d;
+  text-decoration: none;
+  font-weight: 500;
+}
+.auth-terms a:hover { text-decoration: underline; }
+
+/* ── Footer note ── */
+.auth-footer-note {
+  margin: 20px 0 0;
+  font-size: 12px;
+  color: #8a9185;
+}
+.auth-footer-note a {
+  color: #005c2d;
+  text-decoration: none;
+  font-weight: 500;
+}
+.auth-footer-note a:hover { text-decoration: underline; }
+
+@media (max-width: 420px) {
+  .auth-body { padding: 24px 20px 22px; }
+  .auth-brand { padding: 16px 20px; }
+}
