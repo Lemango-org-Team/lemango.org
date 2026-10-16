@@ -2,14 +2,15 @@ import "dotenv/config";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import express from "express";
+import cookieParser from "cookie-parser";
 import { newsletterRouter } from "./routes/newsletter.js";
 import { aiRouter, aiConfigured } from "./routes/ai.js";
 import { courtRouter } from "./routes/court.js";
+import { authRouter } from "./routes/auth.js";
+import { sessionMiddleware } from "./sessions.js";
 import { isSmtpConfigured } from "./mailer.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// The frontend lives at the repo root so static hosts (GitHub Pages, Cloudflare)
-// serve it directly, while this Node server serves the same files.
 const ROOT_DIR = path.resolve(__dirname, "..");
 const PORT = Number(process.env.PORT || 3000);
 const NEWSLETTER_INBOX = process.env.NEWSLETTER_INBOX || "lemangonewsletter@gmail.com";
@@ -18,6 +19,8 @@ const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", true);
 app.use(express.json({ limit: "256kb" }));
+app.use(cookieParser());
+app.use(sessionMiddleware);
 
 // --- Tiny in-memory rate limiter (per IP) for write endpoints ---
 const hits = new Map();
@@ -47,6 +50,7 @@ app.get("/api/health", (_req, res) => {
       ai: aiConfigured(),
       email: isSmtpConfigured() ? "smtp" : "draft",
       newsletterInbox: NEWSLETTER_INBOX,
+      auth: Boolean(process.env.GOOGLE_CLIENT_ID),
     },
     time: new Date().toISOString(),
   });
@@ -57,15 +61,16 @@ app.get("/api/config", (_req, res) => {
     adsenseClient: process.env.ADSENSE_CLIENT || null,
     newsletterInbox: NEWSLETTER_INBOX,
     aiConfigured: aiConfigured(),
+    authEnabled: Boolean(process.env.GOOGLE_CLIENT_ID),
   });
 });
 
+app.use("/api/auth", rateLimit({ windowMs: 60_000, max: 30 }), authRouter);
 app.use("/api/newsletter", rateLimit({ windowMs: 60_000, max: 10 }), newsletterRouter);
 app.use("/api/ai", rateLimit({ windowMs: 60_000, max: 60 }), aiRouter);
 app.use("/api/court", courtRouter);
 
 // --- Clean URL redirects: strip .html extension ---
-// e.g. /ai.html → /ai, /court.html → /court
 app.get("/:page.html", (req, res) => {
   const query = Object.keys(req.query).length
     ? "?" + new URLSearchParams(req.query).toString()
@@ -73,9 +78,8 @@ app.get("/:page.html", (req, res) => {
   res.redirect(301, `/${req.params.page}${query}`);
 });
 
-// --- Static frontend (served from the repo root) ---
-// Keep backend source and data private even though the frontend is at the root.
-const BLOCKED_DIR = /^\/(?:server|tests|data|node_modules|\.git)(?:\/|$)/i;
+// --- Static frontend ---
+const BLOCKED_DIR = /^\/(?:server|tests|data|node_modules|\.git|temp)(?:\/|$)/i;
 const BLOCKED_FILES = /^\/(?:package(?:-lock)?\.json|readme\.md|cname|dockerfile|license|\.env(?:\.example)?|\.gitignore|\.nojekyll)$/i;
 app.use((req, res, next) => {
   if (BLOCKED_DIR.test(req.path) || BLOCKED_FILES.test(req.path)) {
@@ -88,7 +92,6 @@ app.use(express.static(ROOT_DIR, { extensions: ["html"], index: "index.html", do
 
 app.use("/api", (_req, res) => res.status(404).json({ ok: false, error: "Not found." }));
 
-// Fallback to the landing page for unknown non-API routes.
 app.get("*", (_req, res) => {
   res.sendFile(path.join(ROOT_DIR, "index.html"));
 });
@@ -107,6 +110,7 @@ export function start(port = PORT) {
     console.log(`  AI provider:    ${aiConfigured() ? "configured" : "not configured (demo mode)"}`);
     console.log(`  Email delivery: ${isSmtpConfigured() ? "SMTP" : "draft to data/outbox"}`);
     console.log(`  Newsletter to:  ${NEWSLETTER_INBOX}`);
+    console.log(`  Google auth:    ${process.env.GOOGLE_CLIENT_ID ? "configured" : "not configured"}`);
   });
   return server;
 }

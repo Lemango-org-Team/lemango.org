@@ -4,3 +4,4 @@ data/
 *.log
 index.html.bak
 .DS_Store
+temp/
