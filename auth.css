@@ -1,224 +1,279 @@
 /* ============================================================
-   auth.css — Lemango sign-in page
+   auth.css — matches style.css exactly
    ============================================================ */
 
+:root {
+  --paper:       #f8f6f1;
+  --white:       #fdfcf8;
+  --ink:         #1e2b22;
+  --muted:       #6b6659;
+  --green:       #007a33;
+  --green-dark:  #005c2d;
+  --green-soft:  #e6f0e8;
+  --flag-red:    #8c1605;
+  --flag-orange: #f99d1c;
+  --flag-yellow: #fff000;
+  --line:        #e3ddd1;
+  --sans:        "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  --display:     "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  --shadow-sm:   0 1px 3px rgba(30,43,34,.06), 0 1px 2px rgba(30,43,34,.04);
+  --shadow-md:   0 4px 12px rgba(30,43,34,.08), 0 2px 4px rgba(30,43,34,.04);
+  --ease:        cubic-bezier(.25,.46,.45,.94);
+}
+
 *, *::before, *::after { box-sizing: border-box; }
+h1, h2, h3, p { margin-top: 0; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; }
+img { display: block; }
 
 body {
   margin: 0;
-  font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
-  background-color: #f4f2ed;
-  background-image: url("assets/watermarked_img_Lemango_Site_bg.jpg");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  color: #1e2b22;
+  -moz-osx-font-smoothing: grayscale;
   min-height: 100dvh;
 }
 
-.auth-page {
-  min-height: 100dvh;
+/* Background image — exact same as main site */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url("assets/watermarked_img_Lemango_Site_bg.jpg") center / cover no-repeat;
+  opacity: .3;
+  pointer-events: none;
+}
+
+/* ── Header — copy of site-header from style.css ── */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 72px;
+  border-bottom: 1px solid rgba(30,43,34,.07);
+  background: rgba(248,246,241,.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.nav-wrap {
+  width: min(1160px, calc(100% - 64px));
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand { display: inline-flex; align-items: center; gap: 9px; color: var(--green); text-decoration: none; }
+.brand-mark { width: 40px; height: 27px; border-radius: 3px; object-fit: cover; }
+.brand-name { font-family: var(--display); font-size: 21px; font-weight: 800; line-height: 1; letter-spacing: -1.1px; }
+.brand-name span { color: var(--flag-red); }
+.site-nav { display: flex; align-items: center; gap: 24px; }
+.site-nav a { color: var(--ink); font-size: 13px; font-weight: 600; text-decoration: none; transition: color .18s; }
+.site-nav a:hover { color: var(--green-dark); }
+
+/* ── Main layout ── */
+.auth-main {
+  width: min(480px, calc(100% - 40px));
+  margin: 52px auto 64px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 32px 16px;
-  background: rgba(244,242,237,.80);
+  gap: 14px;
 }
 
-/* ── Out of order banner ── */
-.auth-outoforder {
+/* ── Out of order banner — matches construction-banner from style.css ── */
+.auth-ood {
   display: flex;
   align-items: center;
   gap: 14px;
-  width: 100%;
-  max-width: 400px;
   padding: 14px 18px;
-  border: 1px solid #f5d87a;
-  border-left: 4px solid #d4900a;
-  border-radius: 10px;
-  background: #fffbeb;
-  box-shadow: 0 2px 8px rgba(180,120,0,.08);
+  border: 1px solid #e9d5a4;
+  border-left: 4px solid var(--flag-red);
+  border-radius: 8px;
+  background: #fff8e8;
+  box-shadow: var(--shadow-sm);
 }
-
-.ood-icon {
-  font-size: 22px;
-  flex-shrink: 0;
-  line-height: 1;
-}
-
-.ood-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.ood-text strong {
-  font-size: 13px;
-  font-weight: 700;
-  color: #92620a;
-}
-
-.ood-text span {
-  font-size: 11px;
-  color: #b07d2a;
-  line-height: 1.5;
-}
-
-/* ── Card ── */
-.auth-card {
-  width: 100%;
-  max-width: 400px;
-  background: #fdfcf8;
-  border: 1px solid #e3ddd1;
-  border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(30,43,34,.10), 0 2px 8px rgba(30,43,34,.06);
-  overflow: hidden;
-}
-
-/* ── Brand header ── */
-.auth-brand {
+.auth-ood > div { flex: 1; }
+.auth-ood strong {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 22px 28px;
-  border-bottom: 1px solid #ede9df;
-  text-decoration: none;
-  color: #005c2d;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -1px;
-  background: #f8f6f0;
-  transition: background .15s;
+  gap: 7px;
+  margin-bottom: 3px;
+  color: var(--flag-red);
+  font-size: 12px;
+  font-weight: 700;
 }
-.auth-brand:hover { background: #f0ede6; }
-.auth-brand img { border-radius: 3px; flex-shrink: 0; }
-.auth-brand em { color: #8c1605; font-style: normal; }
+.auth-ood p {
+  margin: 0;
+  color: #706449;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.construction-dot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--flag-orange);
+  box-shadow: 0 0 0 3px rgba(249,157,28,.18);
+}
+.construction-status {
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: #f9e7b9;
+  color: #795013;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
-/* ── Body ── */
-.auth-body {
-  padding: 28px 28px 24px;
+/* ── Card — matches product-card from style.css ── */
+.auth-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+/* Lemango flag accent bar — matches product-card::before */
+.auth-card-bar {
+  height: 3px;
+  background: linear-gradient(90deg, var(--green) 0 50%, var(--flag-red) 50% 75%, var(--flag-orange) 75% 88%, var(--flag-yellow) 88%);
+}
+
+.auth-card-body {
+  padding: 30px 32px 28px;
+}
+
+/* Eyebrow — matches site eyebrow */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  color: #6c6b55;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+.eyebrow-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
 }
 
 h1 {
-  margin: 0 0 6px;
-  font-size: 21px;
-  font-weight: 800;
-  letter-spacing: -0.7px;
-  color: #1e2b22;
+  margin: 0 0 8px;
+  color: var(--green-dark);
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1.1px;
+  line-height: 1.15;
 }
 
 .auth-sub {
-  margin: 0 0 24px;
-  color: #6b7a6e;
+  margin: 0 0 26px;
+  color: #697268;
   font-size: 13px;
-  line-height: 1.65;
+  line-height: 1.75;
 }
 
-/* ── Error banner ── */
+/* Error banner */
 .auth-error {
   display: block;
-  margin-bottom: 18px;
-  padding: 11px 14px;
+  margin-bottom: 20px;
+  padding: 12px 14px;
   border: 1px solid #f5c6c0;
-  border-left: 4px solid #8c1605;
-  border-radius: 8px;
+  border-left: 4px solid var(--flag-red);
+  border-radius: 6px;
   background: #fff5f4;
   color: #7a1c0e;
   font-size: 13px;
   line-height: 1.5;
 }
 
-/* ── Divider label ── */
-.auth-divider-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-  color: #a8b0a5;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-}
-.auth-divider-label::before,
-.auth-divider-label::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: #e8e3d8;
-}
-
-/* ── Google button ── */
+/* Google button */
 .google-btn {
-  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 10px;
   width: 100%;
-  padding: 13px 20px;
-  border: 1px solid #ddd8cc;
-  border-radius: 10px;
-  background: #fff;
-  color: #1e2b22;
-  font-size: 14px;
+  padding: 13px 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 13px;
   font-weight: 600;
-  text-decoration: none;
   cursor: not-allowed;
-  opacity: .55;
-  filter: grayscale(.3);
-  pointer-events: none;
-  box-shadow: 0 1px 3px rgba(30,43,34,.06);
+  opacity: .5;
+  box-shadow: var(--shadow-sm);
+  transition: none;
 }
 
-/* Unavailable pill inside button */
-.btn-unavailable-pill {
+.google-btn-pill {
   margin-left: auto;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: 999px;
-  background: #fff0d0;
-  color: #a06800;
-  font-size: 10px;
+  background: #f9e7b9;
+  color: #795013;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: .3px;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
-/* ── Terms ── */
+/* Terms */
 .auth-terms {
-  margin: 18px 0 0;
-  color: #a8b0a5;
+  margin: 20px 0 0;
+  color: #9aa096;
   font-size: 11px;
   line-height: 1.7;
   text-align: center;
 }
 .auth-terms a {
-  color: #005c2d;
-  text-decoration: none;
-  font-weight: 500;
+  color: var(--green-dark);
+  font-weight: 600;
 }
 .auth-terms a:hover { text-decoration: underline; }
 
-/* ── Card footer ── */
+/* Card footer */
 .auth-card-footer {
-  padding: 14px 28px;
-  border-top: 1px solid #ede9df;
+  padding: 14px 32px;
+  border-top: 1px solid var(--line);
   background: #f8f6f0;
 }
 .auth-card-footer a {
+  color: var(--muted);
   font-size: 12px;
   font-weight: 600;
-  color: #6b7a6e;
-  text-decoration: none;
-  transition: color .15s;
+  transition: color .18s;
 }
-.auth-card-footer a:hover { color: #005c2d; }
+.auth-card-footer a:hover { color: var(--green-dark); }
 
-@media (max-width: 440px) {
-  .auth-body { padding: 24px 20px 20px; }
-  .auth-brand { padding: 18px 20px; }
+/* Focus */
+a:focus-visible, button:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* Responsive */
+@media (max-width: 520px) {
+  .auth-main { margin-top: 36px; }
+  .auth-card-body { padding: 24px 20px 22px; }
   .auth-card-footer { padding: 14px 20px; }
+  .site-nav a:not(:last-child) { display: none; }
+  .construction-status { display: none; }
 }
