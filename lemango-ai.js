@@ -134,6 +134,13 @@
     }
 
     async function viaBackend(path, body, pick) {
+        var data = await viaBackendRaw(path, body);
+        var text = pick(data);
+        if (!text || !String(text).trim()) throw new Error("backend-empty");
+        return String(text).trim();
+    }
+
+    async function viaBackendRaw(path, body) {
         var res = await fetch(path, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -143,9 +150,7 @@
         if (ct.indexOf("application/json") === -1) throw new Error("backend-unavailable");
         var data = await res.json();
         if (!res.ok || (data && data.ok === false)) throw new Error((data && data.error) || "backend-error");
-        var text = pick(data);
-        if (!text || !String(text).trim()) throw new Error("backend-empty");
-        return String(text).trim();
+        return data;
     }
 
     async function viaPublic(messages) {
@@ -190,29 +195,33 @@
             recordUse();
         }
         try {
-            return await viaBackend(
+            var data = await viaBackendRaw(
                 "/api/ai/chat",
-                { message: opts.message, model: opts.model, history: opts.history },
-                function (d) { return d.response || d.reply; }
+                { message: opts.message, model: opts.model, history: opts.history }
             );
+            var text = (data && (data.response || data.reply)) || "";
+            if (!text || !String(text).trim()) throw new Error("backend-empty");
+            return { text: String(text).trim(), reasoning: (data && data.reasoning) ? String(data.reasoning).trim() : null };
         } catch (err) { /* fall back to the keyless public provider */ }
-        return viaPublic(buildMessages(opts.history, opts.message, SYSTEM));
+        return { text: await viaPublic(buildMessages(opts.history, opts.message, SYSTEM)), reasoning: null };
     }
 
     async function document(opts) {
         opts = opts || {};
         var prompt = String(opts.prompt == null ? "" : opts.prompt).trim();
         try {
-            return await viaBackend(
+            var data = await viaBackendRaw(
                 "/api/ai/generate-document",
-                { prompt: prompt, model: opts.model },
-                function (d) { return d.text || d.response; }
+                { prompt: prompt, model: opts.model }
             );
+            var text = (data && (data.text || data.response)) || "";
+            if (!text || !String(text).trim()) throw new Error("backend-empty");
+            return { text: String(text).trim(), reasoning: (data && data.reasoning) ? String(data.reasoning).trim() : null };
         } catch (e) { /* fall through */ }
-        return viaPublic([
+        return { text: await viaPublic([
             { role: "system", content: SYSTEM + "\n" + LEGAL_SYSTEM },
             { role: "user", content: "Create a legal document based on this request: " + prompt }
-        ]);
+        ]), reasoning: null };
     }
 
     async function models() {

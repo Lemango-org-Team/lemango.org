@@ -80,7 +80,7 @@ function saveSessions(){try{localStorage.setItem(SESSION_KEY,JSON.stringify(sess
 function getOrCreateActiveSession(){if(activeSessionId){const f=sessions.find(s=>s.id===activeSessionId);if(f)return f.messages}const s=createSession();return s.messages}
 function createSession(){const s={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:"New chat",created:Date.now(),messages:[]};sessions.unshift(s);activeSessionId=s.id;localStorage.setItem(ACTIVE_KEY,activeSessionId);saveSessions();return s}
 function switchSession(id){const s=sessions.find(x=>x.id===id);if(!s)return;activeSessionId=id;history=s.messages;localStorage.setItem(ACTIVE_KEY,activeSessionId);welcomeRemoved=false;rebuildChat();closeSidebar();updateRegenVisibility();updateScrollPill()}
-function rebuildChat(){chatContainer.innerHTML="";if(history.length){history.forEach(m=>renderMessage(m.t,m.r,false));scrollToBottom(false)}else{chatContainer.appendChild(buildWelcome())}updateRightPanel()}
+function rebuildChat(){chatContainer.innerHTML="";if(history.length){history.forEach(m=>renderMessage(m.t,m.r,false,m.rsn||null));scrollToBottom(false)}else{chatContainer.appendChild(buildWelcome())}updateRightPanel()}
 function deleteSession(id){sessions=sessions.filter(s=>s.id!==id);saveSessions();if(activeSessionId===id){const s=sessions.length?sessions[0]:createSession();activeSessionId=s.id;history=s.messages;localStorage.setItem(ACTIVE_KEY,activeSessionId);welcomeRemoved=false;rebuildChat();updateRegenVisibility()}renderSessionList()}
 function sessionTitle(s){if(!s.messages.length)return s.title;const f=s.messages.find(m=>m.r==="user");return f?f.t.slice(0,50):s.title}
 
@@ -159,7 +159,7 @@ function removeWelcome(){if(!welcomeRemoved){const w=chatContainer.querySelector
 
 function getTimestamp(){const n=new Date();let h=n.getHours(),m=n.getMinutes();return(h%12||12)+":"+(m<10?"0":"")+m+(h>=12?"PM":"AM")}
 
-function renderMessage(text,sender,save=true){
+function renderMessage(text,sender,save=true,reasoning=null){
     removeWelcome();
     const msg=document.createElement("div"); msg.className="message "+sender;
 
@@ -176,6 +176,13 @@ function renderMessage(text,sender,save=true){
     bubble.innerHTML=sender==="bot"?mdToHtml(text):""; if(sender!=="bot")bubble.textContent=text;
 
     content.appendChild(bubble);
+
+    if(sender==="bot" && reasoning){
+        const think=document.createElement("details"); think.className="think-block";
+        const sum=document.createElement("summary"); sum.textContent="Thinking"; think.appendChild(sum);
+        const body=document.createElement("div"); body.className="think-body"; body.textContent=reasoning; think.appendChild(body);
+        content.appendChild(think);
+    }
 
     const ts=document.createElement("div"); ts.className="message-timestamp"; ts.textContent=getTimestamp();
     content.appendChild(ts);
@@ -200,7 +207,7 @@ function renderMessage(text,sender,save=true){
     msg.appendChild(inner);
     chatContainer.appendChild(msg);
 
-    if(save){history.push({r:sender,t:text});saveSessions();updateSessionTitle();logChat(sender==="user"?"user":"assistant",text)}
+    if(save){history.push({r:sender,t:text,rsn:reasoning||null});saveSessions();updateSessionTitle();logChat(sender==="user"?"user":"assistant",text)}
     requestAnimationFrame(()=>{chatContainer.scrollTop=chatContainer.scrollHeight;updateScrollPill()});
     return msg;
 }
@@ -259,7 +266,7 @@ async function sendMessage(text,displayUser=true){
     sending=true;updateSendState();updateRegenVisibility();
     if(displayUser)addMessage(text,"user");
     messageInput.value="";autoResizeInput();showTyping();
-    try{const historyPayload=history.map(m=>({role:m.r==="user"?"user":"assistant",content:m.t}));const reply=await window.LemangoAI.chat({message:text,model:currentModel,history:historyPayload,count:displayUser});removeTyping();addMessage(reply,"bot")}
+    try{const historyPayload=history.map(m=>({role:m.r==="user"?"user":"assistant",content:m.t}));const result=await window.LemangoAI.chat({message:text,model:currentModel,history:historyPayload,count:displayUser});removeTyping();const reply=(result&&result.text)?result.text:result;addMessage(reply,"bot",result&&result.reasoning)}
     catch(err){removeTyping();if(err&&err.code==="daily-limit"){addMessage(err.message||"You've reached the Lemango AI beta limit of 4 questions per day. Please come back tomorrow!","bot")}else{addMessage("Connection error. Please try again.","bot")}}
     sending=false;updateSendState();updateRegenVisibility();messageInput.focus();
 }

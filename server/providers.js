@@ -109,6 +109,7 @@ async function callProvider(name, messages, opts) {
         messages,
         temperature: opts.temperature,
         max_tokens: opts.maxTokens,
+        ...(opts.reasoning ? { reasoning: opts.reasoning } : {}),
       }),
       signal: controller.signal,
     });
@@ -117,9 +118,17 @@ async function callProvider(name, messages, opts) {
       throw new Error(`${name} responded ${res.status}: ${detail.slice(0, 200)}`);
     }
     const data = await res.json();
-    const text = data?.choices?.[0]?.message?.content;
+    const msg = data?.choices?.[0]?.message || {};
+    let text = msg.content || "";
+    let reasoning = msg.reasoning || msg.reasoning_content || null;
+    // Some models inline thinking in <think>...</think> tags.
+    const thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/i);
+    if (thinkMatch) {
+      reasoning = (reasoning ? reasoning + "\n" : "") + thinkMatch[1].trim();
+      text = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+    }
     if (!text || !String(text).trim()) throw new Error(`${name} returned an empty response`);
-    return { text: String(text).trim(), provider: name };
+    return { text: String(text).trim(), reasoning: reasoning ? String(reasoning).trim() : null, provider: name };
   } finally {
     clearTimeout(timer);
   }
@@ -131,7 +140,7 @@ export async function generateReply(messages, modelName, opts = {}) {
   const chain = chainFor(modelName);
   if (!chain.length) throw new Error("No AI provider is available.");
 
-  const options = { temperature: opts.temperature ?? 0.7, maxTokens: opts.maxTokens || 2000 };
+  const options = { temperature: opts.temperature ?? 0.7, maxTokens: opts.maxTokens || 2000, reasoning: opts.reasoning };
   let lastError;
   for (const provider of chain) {
     try {

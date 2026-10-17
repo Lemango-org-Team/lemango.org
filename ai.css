@@ -731,6 +731,10 @@ body.dark .code-block { background: #171717; }
 
 .message.user .message-timestamp { text-align: right; }
 .chat-log-note { font-size: 9px; color: var(--text-dim); margin-top: 2px; font-style: italic; opacity: 0.6; }
+.think-block { margin-top: 8px; padding: 8px 12px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--surface); font-size: 12px; color: var(--text-secondary); }
+.think-block summary { cursor: pointer; font-weight: 600; color: var(--primary-light); user-select: none; }
+.think-block[open] summary { margin-bottom: 6px; }
+.think-body { white-space: pre-wrap; line-height: 1.5; }
 .message.user .chat-log-note { text-align: right; }
 .message.user .feedback-buttons { justify-content: flex-end; }
 
