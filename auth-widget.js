@@ -59,6 +59,9 @@
       btn.href = `/auth?next=${encodeURIComponent(location.pathname + location.search)}`;
       btn.className = "lm-auth-signin";
       btn.textContent = "Sign in";
+      btn.style.background = "#ffffff";
+      btn.style.color = "#1e2b22";
+      btn.style.border = "1.5px solid #c8cfc5";
       return btn;
     },
 
