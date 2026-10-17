@@ -445,6 +445,15 @@ body.dark .capability-icon {
     font-size: 13px;
     margin-bottom: 16px;
 }
+.chat-log-notice {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-style: italic;
+    margin: 12px 0 0;
+    padding: 8px 12px;
+    border: 1px dashed var(--border-light);
+    border-radius: 8px;
+}
 
 .starter-chips {
     display: grid;
@@ -721,6 +730,8 @@ body.dark .code-block { background: #171717; }
 }
 
 .message.user .message-timestamp { text-align: right; }
+.chat-log-note { font-size: 9px; color: var(--text-dim); margin-top: 2px; font-style: italic; opacity: 0.6; }
+.message.user .chat-log-note { text-align: right; }
 .message.user .feedback-buttons { justify-content: flex-end; }
 
 /* Scroll pill */

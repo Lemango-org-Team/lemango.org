@@ -34,7 +34,15 @@
         "signature block.";
 
     /* ---- Beta daily question limit (per browser, per day) ---- */
-    var DAILY_LIMIT = 4;
+    // Signed-in users get a higher daily limit as a perk.
+    function dailyLimit() {
+        try {
+            var raw = localStorage.getItem("lemango_user");
+            if (raw) { var u = JSON.parse(raw); if (u && u.email) return 8; }
+        } catch (e) { /* ignore */ }
+        return 4;
+    }
+    var DAILY_LIMIT = dailyLimit();
     var USAGE_KEY = "lemango_ai_usage";
 
     function todayKey() {
@@ -64,12 +72,13 @@
     }
 
     function limitInfo() {
+        var limit = dailyLimit();
         var usage = readUsage();
         return {
             date: usage.date,
             count: usage.count,
-            limit: DAILY_LIMIT,
-            remaining: Math.max(0, DAILY_LIMIT - usage.count)
+            limit: limit,
+            remaining: Math.max(0, limit - usage.count)
         };
     }
 
@@ -81,8 +90,9 @@
     }
 
     function limitReached() {
+        var limit = dailyLimit();
         var err = new Error(
-            "You've reached the Lemango AI beta limit of " + DAILY_LIMIT +
+            "You've reached the Lemango AI beta limit of " + limit +
             " questions per day. Please come back tomorrow!"
         );
         err.code = "daily-limit";
@@ -219,7 +229,8 @@
     window.LemangoAI = {
         BRAND: BRAND,
         MODELS: MODELS,
-        DAILY_LIMIT: DAILY_LIMIT,
+        DAILY_LIMIT: dailyLimit(),
+        dailyLimit: dailyLimit,
         limitInfo: limitInfo,
         chat: chat,
         document: document,

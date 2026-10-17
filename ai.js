@@ -179,6 +179,8 @@ function renderMessage(text,sender,save=true){
 
     const ts=document.createElement("div"); ts.className="message-timestamp"; ts.textContent=getTimestamp();
     content.appendChild(ts);
+    const logNote=document.createElement("div"); logNote.className="chat-log-note"; logNote.textContent="Chats are logged for product improvement.";
+    content.appendChild(logNote);
 
     const actions=document.createElement("div"); actions.className="feedback-buttons always-show-copy";
     const copyBtn=document.createElement("button"); copyBtn.type="button"; copyBtn.className="feedback-btn"; copyBtn.textContent="Copy"; copyBtn.title="Copy";
@@ -198,11 +200,26 @@ function renderMessage(text,sender,save=true){
     msg.appendChild(inner);
     chatContainer.appendChild(msg);
 
-    if(save){history.push({r:sender,t:text});saveSessions();updateSessionTitle()}
+    if(save){history.push({r:sender,t:text});saveSessions();updateSessionTitle();logChat(sender==="user"?"user":"assistant",text)}
     requestAnimationFrame(()=>{chatContainer.scrollTop=chatContainer.scrollHeight;updateScrollPill()});
     return msg;
 }
 
+function logChat(role, text) {
+  try {
+    const entry = { t: Date.now(), role: role, text: String(text), session: activeSessionId, model: currentModel };
+    const raw = localStorage.getItem("lemango_chat_log");
+    const arr = raw ? JSON.parse(raw) : [];
+    arr.push(entry);
+    // keep last 2000 entries to avoid unbounded growth
+    if (arr.length > 2000) arr.splice(0, arr.length - 2000);
+    localStorage.setItem("lemango_chat_log", JSON.stringify(arr));
+  } catch (e) { /* ignore */ }
+  // Best-effort server-side log (only if backend is running)
+  try {
+    fetch("/api/ai/log", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: role, text: String(text), session: activeSessionId, model: currentModel }) }).catch(() => {});
+  } catch (e) {}
+}
 function addMessage(text,sender){renderMessage(text,sender);updateRegenVisibility()}
 
 function updateSessionTitle(){const s=sessions.find(x=>x.id===activeSessionId);if(s&&history.length){const f=history.find(m=>m.r==="user");if(f)s.title=f.t.slice(0,50);saveSessions()}}
@@ -263,6 +280,7 @@ async function regenerateLast(){
    ============================================================ */
 
 function exportChat(){try{const s=sessions.find(x=>x.id===activeSessionId);const msgs=(s&&s.messages)||history||[];const out=msgs.map(m=>(m.r==="user"?"You":botName)+": "+m.t).join("\n\n")||"(empty chat)";const blob=new Blob([out],{type:"text/plain;charset=utf-8"});const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download="lemango_ai_chat.txt";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}catch{alert("Failed to export chat.")}}
+function exportChatLog(){try{const raw=localStorage.getItem("lemango_chat_log");const arr=raw?JSON.parse(raw):[];const blob=new Blob([JSON.stringify(arr,null,2)],{type:"application/json;charset=utf-8"});const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download="lemango_chat_log.json";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}catch{alert("Failed to export chat log.")}}
 
 const STARTER_PROMPTS=["Tell me a fun fact","What can you do?","Tell me a joke","Explain AI like I'm five"];
 
@@ -270,7 +288,8 @@ function buildWelcome(){
     welcomeRemoved=false;
     const w=document.createElement("div");w.className="welcome-message";
     w.innerHTML="<h2>What can I help with?</h2>"+
-        '<p class="welcome-hint">Ask me anything, or try one of these:</p>';
+        '<p class="welcome-hint">Ask me anything, or try one of these:</p>'+
+        '<p class="chat-log-notice">Note: chats are logged to help improve Lemango AI. Do not share sensitive personal information.</p>';
     const chips=document.createElement("div");chips.className="starter-chips";chips.id="starterChips";
     STARTER_PROMPTS.forEach(p=>{const c=document.createElement("button");c.type="button";c.className="starter-chip";c.textContent=p;c.onclick=()=>sendMessage(p);chips.appendChild(c)});
     w.appendChild(chips);return w;
