@@ -8,6 +8,9 @@
   const slots = document.querySelectorAll(".ad-slot");
   if (!slots.length) return;
 
+  // Fallback client ID used on static hosting where /api/config is unavailable.
+  const FALLBACK_CLIENT = "ca-pub-2231892231966691";
+
   let adsenseClient = null;
   try {
     const res = await fetch("/api/config");
@@ -16,8 +19,9 @@
       adsenseClient = cfg.adsenseClient || null;
     }
   } catch {
-    /* server offline — show placeholder */
+    /* server offline — fall back to the hardcoded client ID */
   }
+  if (!adsenseClient) adsenseClient = FALLBACK_CLIENT;
 
   if (adsenseClient) {
     // Only inject the AdSense script once per page
