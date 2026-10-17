@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { appendFileSync, mkdirSync } from "node:fs";
+import path from "node:path";
 import { BRAND, aiConfigured, catalogForClient, generateReply } from "../providers.js";
 
 export { aiConfigured };
@@ -81,6 +83,26 @@ aiRouter.post("/rate", (_req, res) => {
 });
 
 aiRouter.post("/clear", (_req, res) => {
+  res.json({ ok: true });
+});
+
+// Best-effort chat logging for model training. Never blocks the response.
+aiRouter.post("/log", (req, res) => {
+  try {
+    const entry = {
+      t: new Date().toISOString(),
+      role: String(req.body?.role || "").slice(0, 20),
+      text: String(req.body?.text || "").slice(0, 8000),
+      session: String(req.body?.session || "").slice(0, 60),
+      model: String(req.body?.model || "").slice(0, 60),
+      ip: req.ip,
+    };
+    const dir = path.resolve(process.cwd(), "data");
+    mkdirSync(dir, { recursive: true });
+    appendFileSync(path.join(dir, "chatlog.jsonl"), JSON.stringify(entry) + "\n");
+  } catch (e) {
+    // ignore logging failures
+  }
   res.json({ ok: true });
 });
 

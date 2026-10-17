@@ -17,14 +17,23 @@
     user: null,
 
     async init() {
-      try {
-        const res = await fetch("/api/auth/me", { credentials: "include" });
-        if (res.ok) {
-          const data = await res.json();
-          this.user = data.user || null;
+      // Prefer client-side auth (works on static hosting)
+      if (window.LemangoAuth) {
+        this.user = window.LemangoAuth.user || null;
+        document.addEventListener("lm:auth", (e) => {
+          this.user = e.detail.user;
+          document.querySelectorAll("[data-auth-widget]").forEach((el) => this.mount(el));
+        });
+      } else {
+        try {
+          const res = await fetch("/api/auth/me", { credentials: "include" });
+          if (res.ok) {
+            const data = await res.json();
+            this.user = data.user || null;
+          }
+        } catch {
+          this.user = null;
         }
-      } catch {
-        this.user = null;
       }
 
       // Auto-mount into any [data-auth-widget] elements
