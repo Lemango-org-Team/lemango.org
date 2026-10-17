@@ -55,14 +55,15 @@
       btn.type = "button";
       btn.className = "lm-auth-signin";
       btn.textContent = "Sign in with Google";
-      btn.style.background = "#005c2d";
-      btn.style.color = "#fff";
-      btn.style.border = "none";
+      btn.style.background = "#ffffff";
+      btn.style.color = "#1e2b22";
+      btn.style.border = "1.5px solid #c8cfc5";
       btn.style.borderRadius = "6px";
       btn.style.padding = "7px 14px";
       btn.style.fontWeight = "700";
       btn.style.cursor = "pointer";
       btn.style.fontSize = "12px";
+      btn.style.boxShadow = "0 2px 6px rgba(30,43,34,.08)";
       btn.addEventListener("click", () => this.signIn(container));
       return btn;
     },
@@ -122,8 +123,8 @@
   // Inject minimal styles (reuse auth-widget look)
   const style = document.createElement("style");
   style.textContent = `
-    .lm-auth-signin { display:inline-flex;align-items:center;padding:7px 14px;border-radius:6px;background:#005c2d;color:#fff;font-size:12px;font-weight:700;text-decoration:none;font-family:inherit;border:none;cursor:pointer;transition:background .15s,transform .12s;white-space:nowrap; }
-    .lm-auth-signin:hover { background:#007a33;transform:translateY(-1px); }
+    .lm-auth-signin { display:inline-flex;align-items:center;padding:7px 14px;border-radius:6px;background:#ffffff;color:#1e2b22;font-size:12px;font-weight:700;text-decoration:none;font-family:inherit;border:1.5px solid #c8cfc5;cursor:pointer;transition:background .15s,transform .12s;white-space:nowrap;box-shadow:0 2px 6px rgba(30,43,34,.08); }
+    .lm-auth-signin:hover { background:#f8f6f1;transform:translateY(-1px); }
     .lm-auth-chip { position:relative;display:inline-flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border:1px solid rgba(0,0,0,.10);border-radius:999px;background:rgba(255,255,255,.6);font-family:inherit;font-size:12px;font-weight:600;color:inherit; }
     .lm-auth-avatar { width:28px;height:28px;border-radius:50%;background:#005c2d;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0; }
     .lm-auth-avatar img { width:28px;height:28px;border-radius:50%;object-fit:cover; }
