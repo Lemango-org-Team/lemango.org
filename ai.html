@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="/a11y.css">
   <link rel="manifest" href="/manifest.json">
   <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-THFCXR1KLW"></script>
@@ -13,13 +14,13 @@
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lemango AI — AI chat assistant | Lemango</title>
+    <title>Lemango AI ï¿½ AI chat assistant | Lemango</title>
     <meta name="description" content="Lemango AI is a free AI chat assistant for exploring ideas, getting help with writing, and working through questions. Runs in your browser.">
     <link rel="canonical" href="https://lemango.org/ai">
     <meta name="theme-color" content="#0a0f1a">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://lemango.org/ai">
-    <meta property="og:title" content="Lemango AI — AI chat assistant">
+    <meta property="og:title" content="Lemango AI ï¿½ AI chat assistant">
     <meta property="og:description" content="An AI chat assistant for exploring ideas, getting help with writing, and working through questions.">
     <meta property="og:image" content="https://lemango.org/assets/og-image.png">
     <meta property="og:image:width" content="1200">
@@ -37,6 +38,7 @@
     </script>
 </head>
 <body>
+  <a class="lm-skip" href="#main">Skip to main content</a>
 <div class="shell">
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <aside class="sidebar" id="sidebar">
@@ -50,7 +52,7 @@
             </button>
         </div>
         <div class="sidebar-new">
-            <button class="sidebar-new-btn" id="newChatBtn">
+            <button class="sidebar-new-btn" id="newChatBtn" aria-label="New chat">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 New chat
             </button>
@@ -105,7 +107,7 @@
             </div>
         </header>
 
-        <div class="chat-container" id="chatContainer"></div>
+        <div class="chat-container" id="chatContainer" role="log" aria-live="polite" aria-label="Chat messages"></div>
 
         <button class="scroll-pill" id="scrollDownBtn" onclick="scrollToBottom(true)" title="Jump to latest">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
@@ -186,7 +188,7 @@
     </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
         <script src="auth-widget.js" defer></script>
         <script src="lemango-ai.js"></script>
         <script src="ai.js"></script>
