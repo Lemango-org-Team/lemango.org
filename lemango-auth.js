@@ -55,6 +55,14 @@
       btn.type = "button";
       btn.className = "lm-auth-signin";
       btn.textContent = "Sign in with Google";
+      btn.style.background = "#005c2d";
+      btn.style.color = "#fff";
+      btn.style.border = "none";
+      btn.style.borderRadius = "6px";
+      btn.style.padding = "7px 14px";
+      btn.style.fontWeight = "700";
+      btn.style.cursor = "pointer";
+      btn.style.fontSize = "12px";
       btn.addEventListener("click", () => this.signIn(container));
       return btn;
     },

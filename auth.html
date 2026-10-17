@@ -114,6 +114,7 @@
         if (slot) {
           var btn = document.createElement("button");
           btn.type = "button"; btn.className = "lm-auth-signin"; btn.style.fontSize = "14px"; btn.style.padding = "10px 18px";
+          btn.style.background = "#005c2d"; btn.style.color = "#fff"; btn.style.border = "none"; btn.style.borderRadius = "8px"; btn.style.fontWeight = "700"; btn.style.cursor = "pointer";
           btn.textContent = "Continue with Google";
           btn.addEventListener("click", function () { window.LemangoAuth.signIn(slot); });
           slot.appendChild(btn);
