@@ -18,6 +18,24 @@ const NEWSLETTER_INBOX = process.env.NEWSLETTER_INBOX || "lemangonewsletter@gmai
 const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", true);
+
+// CORS for split hosting (frontend on GitHub Pages, backend elsewhere).
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
+  .split(",").map((s) => s.trim()).filter(Boolean);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const ok = !origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin) || allowedOrigins.includes("*");
+  if (ok && origin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
+  }
+  if (req.method === "OPTIONS") return res.status(204).end();
+  next();
+});
+
 app.use(express.json({ limit: "256kb" }));
 app.use(cookieParser());
 app.use(sessionMiddleware);

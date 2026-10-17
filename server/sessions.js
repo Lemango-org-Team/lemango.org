@@ -10,6 +10,7 @@ import { JsonStore } from "./store.js";
 
 const SESSION_COOKIE = "lm_sid";
 const SESSION_SECRET = process.env.SESSION_SECRET || "lemango-dev-secret-change-in-prod";
+const CROSS_ORIGIN = Boolean(process.env.ALLOWED_ORIGINS);
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14; // 14 days
 
 const store = new JsonStore("sessions", {});
@@ -54,8 +55,8 @@ export async function createSession(res, data) {
 
   res.cookie(SESSION_COOKIE, sign(id), {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: CROSS_ORIGIN || process.env.NODE_ENV === "production",
+    sameSite: CROSS_ORIGIN ? "none" : "lax",
     maxAge: SESSION_TTL_MS,
     path: "/",
   });
