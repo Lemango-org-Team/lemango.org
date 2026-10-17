@@ -340,7 +340,7 @@ newChatBtn.addEventListener("click",()=>{const s=createSession();history=s.messa
 sidebarSearch.addEventListener("input",()=>renderSessionList());
 sessionList.addEventListener("click",e=>{const d=e.target.closest(".session-delete");if(d){e.stopPropagation();deleteSession(d.dataset.del);return}const i=e.target.closest(".session-item");if(i)switchSession(i.dataset.id)});
 
-document.getElementById("themeToggle").addEventListener("click",toggleTheme);
+// Theme is locked to dark for Lemango AI (light mode breaks the layout).
 
 modelTrigger.addEventListener("click",e=>{e.stopPropagation();toggleModelDropdown()});
 modelDropdown.addEventListener("click",e=>{const o=e.target.closest(".model-option");if(o)switchModel(o.dataset.model)});
@@ -351,9 +351,7 @@ document.addEventListener("click",e=>{if(!modelDropdown.contains(e.target)&&!mod
    ============================================================ */
 
 (function init(){
-    let t=null;try{t=localStorage.getItem(THEME_KEY)}catch{}
-    if(!t)t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
-    applyTheme(t);
+    applyTheme("dark");
     rebuildChat();autoResizeInput();updateSendState();updateRegenVisibility();
     modelLabel.textContent=currentModel;fetchModels();
 })();
