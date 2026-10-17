@@ -104,7 +104,8 @@
         { name: "Mango-Light", desc: "Fast, everyday answers", color: "#f59e0b" },
         { name: "Mango-Flash", desc: "Snappy and efficient", color: "#22c55e" },
         { name: "Mango-Core", desc: "Balanced for most tasks", color: "#3b82f6" },
-        { name: "Mango-Pro", desc: "Stronger reasoning", color: "#8b5cf6" }
+        { name: "Mango-Pro", desc: "Stronger reasoning", color: "#8b5cf6" },
+        { name: "Mango-Ultra", desc: "1M context, deep reasoning", color: "#ec4899" }
     ];
 
     var PUBLIC_ENDPOINT = "https://text.pollinations.ai/openai";
