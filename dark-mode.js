@@ -8,7 +8,7 @@
   const KEY = "lemango_theme";
   const html = document.documentElement;
   let theme = "light";
-  try { theme = localStorage.getItem(KEY) || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"); } catch {}
+  try { theme = localStorage.getItem(KEY) || "light"; } catch {}
 
   function apply(t) {
     html.classList.toggle("dark", t === "dark");
