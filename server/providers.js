@@ -26,6 +26,12 @@ const PROVIDERS = {
     model: process.env.OPENROUTER_MODEL || "meta-llama/llama-3.1-8b-instruct:free",
     headers: { "HTTP-Referer": "https://lemango.org", "X-Title": BRAND },
   },
+  spacebunny: {
+    baseUrl: "https://openrouter.ai/api/v1",
+    envKey: ["SPACEBUNNY_API_KEY", "OPENROUTER_API_KEY"],
+    model: process.env.SPACEBUNNY_MODEL || "stealth/space-bunny-alpha",
+    headers: { "HTTP-Referer": "https://lemango.org", "X-Title": BRAND },
+  },
   gemini: {
     baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
     envKey: "GEMINI_API_KEY",
@@ -54,6 +60,7 @@ export const MODEL_CATALOG = [
   { name: "Mango-Flash", desc: "Snappy and efficient", color: "#22c55e", chain: ["groq", "pollinations"] },
   { name: "Mango-Core", desc: "Balanced for most tasks", color: "#3b82f6", chain: ["openrouter", "gemini", "pollinations"] },
   { name: "Mango-Pro", desc: "Stronger reasoning", color: "#8b5cf6", chain: ["gemini", "openai", "openrouter", "pollinations"] },
+  { name: "Mango-Ultra", desc: "1M context, deep reasoning", color: "#ec4899", chain: ["spacebunny", "openrouter", "gemini", "pollinations"] },
 ];
 
 function liveDisabled() {
@@ -65,7 +72,8 @@ function providerAvailable(name) {
   const cfg = PROVIDERS[name];
   if (!cfg) return false;
   if (cfg.keyless) return true;
-  return Boolean(process.env[cfg.envKey]);
+  const keys = Array.isArray(cfg.envKey) ? cfg.envKey : [cfg.envKey];
+  return keys.some((k) => Boolean(process.env[k]));
 }
 
 export function catalogForClient() {
@@ -86,7 +94,8 @@ async function callProvider(name, messages, opts) {
   const cfg = PROVIDERS[name];
   const url = `${cfg.baseUrl.replace(/\/$/, "")}/chat/completions`;
   const headers = { "Content-Type": "application/json", ...(cfg.headers || {}) };
-  const apiKey = cfg.envKey ? process.env[cfg.envKey] : undefined;
+  const keys = Array.isArray(cfg.envKey) ? cfg.envKey : (cfg.envKey ? [cfg.envKey] : []);
+  const apiKey = keys.map((k) => process.env[k]).find(Boolean);
   if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
 
   const controller = new AbortController();
