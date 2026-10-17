@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="/manifest.json">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-THFCXR1KLW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-THFCXR1KLW');
+</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fffaf0">
+  <title>Payment Complete — Lemango</title>
+  <meta name="description" content="Your Lemango payment has been completed. Thank you.">
+  <meta name="robots" content="noindex">
+  <link rel="canonical" href="https://lemango.org/payment-complete">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/lemango-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #f8f6f1; --white: #fdfcf8; --ink: #1e2b22; --muted: #6b6659;
+      --green: #007a33; --green-dark: #005c2d; --line: #e3ddd1;
+      --sans: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+      --serif: "DM Serif Display", Georgia, serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    body::before { content: ""; position: fixed; inset: 0; z-index: -1;
+      background: url("assets/watermarked_img_Lemango_Site_bg.jpg") center / cover no-repeat; opacity: .18; pointer-events: none; }
+    header { border-bottom: 1px solid var(--line); background: rgba(253,252,248,.85); backdrop-filter: blur(8px); position: sticky; top: 0; }
+    .wrap { width: min(820px, 92vw); margin: 0 auto; }
+    .bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; font-weight: 800; font-size: 20px; letter-spacing: -.4px; }
+    .brand img { width: 32px; height: 32px; border-radius: 8px; }
+    .brand b { color: var(--green); }
+    nav a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600; margin-left: 18px; }
+    nav a:hover { color: var(--green-dark); }
+    main { padding: 64px 0 24px; text-align: center; }
+    .eyebrow { color: var(--green-dark); font-weight: 800; letter-spacing: .14em; font-size: 12px; text-transform: uppercase; margin: 0 0 10px; }
+    h1 { font-family: var(--serif); font-size: 42px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -.5px; }
+    p { color: #3d3a32; font-size: 15px; max-width: 560px; margin: 0 auto 16px; }
+    .card { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 28px 24px; margin: 32px auto; max-width: 520px; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
+    .check { width: 64px; height: 64px; border-radius: 50%; background: #dcfce7; color: #166534; display: inline-flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 16px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 10px; background: var(--green); color: #fff; font-weight: 700; font-size: 14px; text-decoration: none; margin-top: 8px; }
+    .btn:hover { background: var(--green-dark); }
+    footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 26px 0 40px; color: var(--muted); font-size: 13px; text-align: center; }
+    footer a { color: var(--green-dark); text-decoration: none; font-weight: 600; margin: 0 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap bar">
+      <a class="brand" href="/"><img src="assets/lemango-flag.webp" alt="">le<b>mango</b></a>
+      <nav><a href="/">Home</a><a href="/payments">Payments</a></nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="card">
+      <div class="check" aria-hidden="true">&#10003;</div>
+      <h1>Payment complete</h1>
+      <p>Thank you. Your payment has been received and your account is being set up. A confirmation email will arrive shortly.</p>
+      <p style="font-size:13px;color:var(--muted);">This page is used for conversion tracking. If you arrived here by mistake, you can return home.</p>
+      <a class="btn" href="/">Back to Lemango</a>
+    </div>
+  </main>
+
+  <footer>
+    <div>© <span id="yr">2026</span> Lemango · <a href="/">Home</a><a href="/payments">Payments</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div>
+  </footer>
+  <script>document.getElementById("yr").textContent = new Date().getFullYear();</script>
+  <script src="cookie-consent.js" defer></script>
+  <script src="dark-mode.js" defer></script>
+</body>
+</html>

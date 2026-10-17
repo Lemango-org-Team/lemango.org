@@ -1,10 +1,20 @@
-ï»¿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="/manifest.json">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-THFCXR1KLW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-THFCXR1KLW');
+</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#fffaf0">
-  <title>Privacy Policy â€” Lemango</title>
+  <title>Privacy Policy — Lemango</title>
   <meta name="description" content="How Lemango handles information across Lemango AI, Case Manager, and FastPay Studio.">
   <link rel="canonical" href="https://lemango.org/privacy">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -105,10 +115,12 @@
 
   <footer>
     <div class="wrap">
-      <span>Â© <span id="yr">2026</span> Lemango</span>
+      <span>© <span id="yr">2026</span> Lemango</span>
       <span><a href="/">Home</a><a href="/terms">Terms of Use</a></span>
     </div>
   </footer>
   <script>document.getElementById("yr").textContent = new Date().getFullYear();</script>
+  <script src="cookie-consent.js" defer></script>
+  <script src="dark-mode.js" defer></script>
 </body>
 </html>

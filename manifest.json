@@ -1,0 +1,13 @@
+{
+  "name": "Lemango",
+  "short_name": "Lemango",
+  "description": "Practical tools for AI, productivity, and case management.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f6f1",
+  "theme_color": "#007a33",
+  "icons": [
+    { "src": "assets/lemango-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

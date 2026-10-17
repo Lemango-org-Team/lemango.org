@@ -1,21 +1,31 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="/manifest.json">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-THFCXR1KLW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-THFCXR1KLW');
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Court &amp; Notice Management — Lemango</title>
-    <meta name="description" content="A workspace for organizing cases, documents, notices, schedules, and virtual proceedings. Independent organizational software — not legal advice or an official court service.">
+    <title>Court &amp; Notice Management � Lemango</title>
+    <meta name="description" content="A workspace for organizing cases, documents, notices, schedules, and virtual proceedings. Independent organizational software � not legal advice or an official court service.">
     <link rel="canonical" href="https://lemango.org/court">
     <meta name="theme-color" content="#112e51">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://lemango.org/court">
-    <meta property="og:title" content="Court &amp; Notice Management — Lemango">
+    <meta property="og:title" content="Court &amp; Notice Management � Lemango">
     <meta property="og:description" content="Organize cases, documents, notices, schedules, and virtual proceedings in one workspace.">
     <meta property="og:image" content="https://lemango.org/assets/og-image.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Court &amp; Notice Management — Lemango">
+    <meta name="twitter:title" content="Court &amp; Notice Management � Lemango">
     <meta name="twitter:description" content="Organize cases, documents, notices, and schedules in one workspace.">
     <meta name="twitter:image" content="https://lemango.org/assets/og-image.png">
     <link rel="icon" type="image/png" href="assets/nuca-logo.png">
@@ -26,12 +36,12 @@
     <link rel="stylesheet" href="nuca.css">
     <link rel="stylesheet" href="banner.css">
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: { extend: { colors: { gov: { navy: '#112e51', blue: '#005ea2', dark: '#0b1d33', gold: '#e5a50a', light: '#f0f3f5', flagGreen: '#007a33', flagRed: '#7b1113' } }, fontFamily: { sans: ['"Public Sans"', 'sans-serif'] } } }
         }
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://meet.jit.si/external_api.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -56,9 +66,9 @@
             <input id="username" placeholder="User ID" class="w-full mb-3 px-4 py-3 text-sm font-medium" style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:2px;outline:none;" onfocus="this.style.borderColor='#e5a50a'" onblur="this.style.borderColor='rgba(255,255,255,0.15)'">
             <input id="password" type="password" placeholder="Access Key" class="w-full mb-6 px-4 py-3 text-sm font-medium" style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:2px;outline:none;" onfocus="this.style.borderColor='#e5a50a'" onblur="this.style.borderColor='rgba(255,255,255,0.15)'">
             <button onclick="App.login()" class="w-full py-3 font-black text-xs uppercase tracking-[0.2em] transition-all hover:opacity-90" style="background:#e5a50a;color:#112e51;border-radius:2px;">Authenticate</button>
-            <p id="login-error" class="text-red-400 text-xs mt-4 hidden font-black uppercase tracking-widest">⚠ Access Denied</p>
+            <p id="login-error" class="text-red-400 text-xs mt-4 hidden font-black uppercase tracking-widest">? Access Denied</p>
             <div class="mt-8 pt-6 border-t border-white/10">
-                <a href="/" class="text-[11px] text-white/40 hover:text-white/70 transition font-bold uppercase tracking-widest">← Lemango</a>
+                <a href="/" class="text-[11px] text-white/40 hover:text-white/70 transition font-bold uppercase tracking-widest">? Lemango</a>
             </div>
         </div>
     </div>
@@ -107,7 +117,7 @@
             </nav>
             <div class="flex items-center gap-3">
                 <div id="search-shell" class="hidden md:block relative">
-                    <input id="global-search" type="search" placeholder="Search notices…" class="bg-gray-800 border border-gray-600 py-2 pl-9 pr-4 text-xs w-44 focus:w-60 outline-none transition-all rounded-sm focus:border-yellow-500 text-gray-100" autocomplete="off">
+                    <input id="global-search" type="search" placeholder="Search notices�" class="bg-gray-800 border border-gray-600 py-2 pl-9 pr-4 text-xs w-44 focus:w-60 outline-none transition-all rounded-sm focus:border-yellow-500 text-gray-100" autocomplete="off">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/></svg>
                     <div id="search-results" class="hidden absolute right-0 mt-2 w-[22rem] bg-gray-800 border border-gray-600 shadow-xl overflow-hidden rounded-sm z-50"></div>
                 </div>
@@ -140,7 +150,7 @@
             <button onclick="App.navigate('search')" class="block w-full text-left text-3xl font-black py-3 border-b border-gray-700 hover:text-yellow-400 transition">SEARCH</button>
             <button onclick="App.navigate('contact')" class="block w-full text-left text-3xl font-black py-3 hover:text-yellow-400 transition">CONTACT</button>
         </div>
-        <div class="p-6 bg-gray-800 text-[10px] font-bold tracking-widest text-gray-400 uppercase">NUCA · Lemangoes Gov</div>
+        <div class="p-6 bg-gray-800 text-[10px] font-bold tracking-widest text-gray-400 uppercase">NUCA � Lemangoes Gov</div>
     </div>
 
     <!-- Beta banner -->
@@ -178,7 +188,7 @@
                     <li><button onclick="App.navigate('notices')" class="hover:text-white transition-colors">Court Notices</button></li>
                     <li><button onclick="App.navigate('filing')" class="hover:text-white transition-colors">File Action</button></li>
                     <li><button onclick="App.navigate('search')" class="hover:text-white transition-colors">Search Records</button></li>
-                    <li><a href="/" class="hover:text-white transition-colors">← Lemango Home</a></li>
+                    <li><a href="/" class="hover:text-white transition-colors">? Lemango Home</a></li>
                     <li><a href="/ai" class="hover:text-white transition-colors">Lemango AI</a></li>
                 </ul>
             </div>
@@ -194,10 +204,12 @@
             </div>
         </div>
         <div class="max-w-7xl mx-auto px-6 pt-6 border-t border-gray-700 flex flex-col md:flex-row justify-between text-[10px] uppercase font-bold tracking-[0.3em] text-gray-500 gap-3">
-            <span>© 2026 NUCA — Lemangoes Government</span>
+            <span>� 2026 NUCA � Lemangoes Government</span>
             <div class="flex gap-6">
                 <a href="/privacy" class="hover:text-gray-300 transition">Privacy</a>
                 <a href="/terms" class="hover:text-gray-300 transition">Terms</a>
+                <a href="/security" class="hover:text-gray-300 transition">Security</a>
+                <a href="/payments" class="hover:text-gray-300 transition">Payments</a>
                 <a href="#" class="hover:text-gray-300 transition">Feedback</a>
             </div>
         </div>
@@ -225,5 +237,7 @@
       <span style="display:block;font-size:10px;color:#64748b;margin-bottom:4px;letter-spacing:.05em;text-transform:uppercase;">Advertisement</span>
       <div class="ad-mount"></div>
     </aside>
+  <script src="cookie-consent.js" defer></script>
+  <script src="dark-mode.js" defer></script>
 </body>
 </html>

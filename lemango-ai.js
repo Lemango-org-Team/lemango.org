@@ -118,7 +118,8 @@
         if (text && (!last || last.role !== "user" || String(last.content).trim() !== text)) {
             out.push({ role: "user", content: text });
         }
-        return out.slice(-21);
+        if (out.length <= 21) return out;
+        return [out[0]].concat(out.slice(-20));
     }
 
     async function viaBackend(path, body, pick) {

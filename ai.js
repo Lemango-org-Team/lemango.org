@@ -75,7 +75,7 @@ function mdToHtml(raw) {
    Sessions
    ============================================================ */
 
-function loadSessions(){try{const r=localStorage.getItem(SESSION_KEY);const p=r?JSON.parse(r):[];return Array.isArray?p.filter(s=>s&&typeof s.id==="string"):[]}catch{return[]}}
+function loadSessions(){try{const r=localStorage.getItem(SESSION_KEY);const p=r?JSON.parse(r):[];return Array.isArray(p)?p.filter(s=>s&&typeof s.id==="string"):[]}catch{return[]}}
 function saveSessions(){try{localStorage.setItem(SESSION_KEY,JSON.stringify(sessions))}catch{}}
 function getOrCreateActiveSession(){if(activeSessionId){const f=sessions.find(s=>s.id===activeSessionId);if(f)return f.messages}const s=createSession();return s.messages}
 function createSession(){const s={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:"New chat",created:Date.now(),messages:[]};sessions.unshift(s);activeSessionId=s.id;localStorage.setItem(ACTIVE_KEY,activeSessionId);saveSessions();return s}
