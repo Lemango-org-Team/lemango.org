@@ -277,8 +277,8 @@ async function regenerateLast(){
     if(sending||!history.length||history[history.length-1].r!=="bot")return;
     let lastUser=null; for(let i=history.length-2;i>=0;i--){if(history[i].r==="user"){lastUser=history[i].t;break}}
     if(!lastUser)return;
-    history.pop();saveSessions();
     const bots=chatContainer.querySelectorAll(".message.bot:not(#typing)");const last=bots[bots.length-1];if(last)last.remove();
+    history.pop();saveSessions();
     updateRegenVisibility();await sendMessage(lastUser,false);
 }
 
