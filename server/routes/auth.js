@@ -106,10 +106,11 @@ authRouter.get("/google", (req, res) => {
 
   const state = crypto.randomBytes(16).toString("hex");
   // Store state in a short-lived cookie so we can verify it on callback
+  const crossOrigin = Boolean(process.env.ALLOWED_ORIGINS);
   res.cookie("lm_oauth_state", state, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: crossOrigin || process.env.NODE_ENV === "production",
+    sameSite: crossOrigin ? "none" : "lax",
     maxAge: 10 * 60 * 1000, // 10 minutes
     path: "/",
   });
@@ -120,8 +121,8 @@ authRouter.get("/google", (req, res) => {
   const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
   res.cookie("lm_oauth_next", next, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: crossOrigin || process.env.NODE_ENV === "production",
+    sameSite: crossOrigin ? "none" : "lax",
     maxAge: 10 * 60 * 1000,
     path: "/",
   });
