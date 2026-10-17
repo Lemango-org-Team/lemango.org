@@ -266,9 +266,28 @@ async function sendMessage(text,displayUser=true){
     sending=true;updateSendState();updateRegenVisibility();
     if(displayUser)addMessage(text,"user");
     messageInput.value="";autoResizeInput();showTyping();
-    try{const historyPayload=history.map(m=>({role:m.r==="user"?"user":"assistant",content:m.t}));const result=await window.LemangoAI.chat({message:text,model:currentModel,history:historyPayload,count:displayUser});removeTyping();const reply=(result&&result.text)?result.text:result;addMessage(reply,"bot",result&&result.reasoning)}
-    catch(err){removeTyping();if(err&&err.code==="daily-limit"){addMessage(err.message||"You've reached the Lemango AI beta limit of 4 questions per day. Please come back tomorrow!","bot")}else{addMessage("Connection error. Please try again.","bot")}}
-    sending=false;updateSendState();updateRegenVisibility();messageInput.focus();
+    try{
+        const historyPayload=history.filter(m=>m&&m.t).map(m=>({role:m&&m.r==="user"?"user":"assistant",content:String(m.t)}));
+        let result;
+        try {
+            result=await window.LemangoAI.chat({message:text,model:currentModel,history:historyPayload,count:displayUser});
+        } catch (e1) {
+            if (e1 && e1.code === "daily-limit") throw e1;
+            // one automatic retry on transient failure
+            await new Promise(r=>setTimeout(r,800));
+            result=await window.LemangoAI.chat({message:text,model:currentModel,history:historyPayload,count:false});
+        }
+        removeTyping();
+        const reply=(result&&result.text)?result.text:(typeof result==="string"?result:"");
+        addMessage(reply||"I couldn't generate a response. Please try again.","bot",result&&result.reasoning);
+    } catch(err){
+        removeTyping();
+        if(err&&err.code==="daily-limit"){addMessage(err.message||"You've reached the Lemango AI daily limit. Please come back tomorrow!","bot")}
+        else{addMessage("Connection error. Please try again, or deploy the backend for reliable AI.","bot")}
+    } finally {
+        sending=false;updateSendState();updateRegenVisibility();
+        try{messageInput.focus()}catch(e){}
+    }
 }
 
 function updateRegenVisibility(){regenBtn.classList.toggle("hidden",sending||!history.length||history[history.length-1].r!=="bot")}

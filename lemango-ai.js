@@ -188,38 +188,52 @@
     }
 
     async function viaBackendRaw(path, body) {
-        var res = await fetch(path, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-        });
-        var ct = res.headers.get("content-type") || "";
-        if (ct.indexOf("application/json") === -1) throw new Error("backend-unavailable");
-        var data = await res.json();
-        if (!res.ok || (data && data.ok === false)) throw new Error((data && data.error) || "backend-error");
-        return data;
-    }
+        var controller = new AbortController();
+        var timer = setTimeout(function () { controller.abort(); }, 25000);
+          try {
+              var res = await fetch(path, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(body),
+                  signal: controller.signal
+              });
+              var ct = res.headers.get("content-type") || "";
+              if (ct.indexOf("application/json") === -1) throw new Error("backend-unavailable");
+              var data = await res.json();
+              if (!res.ok || (data && data.ok === false)) throw new Error((data && data.error) || "backend-error");
+              return data;
+          } finally {
+              clearTimeout(timer);
+          }
+      }
 
     async function viaPublic(messages, model) {
         var pubModel = (model && PUBLIC_MODELS[model]) || PUBLIC_MODEL;
+        var controller = new AbortController();
+        var timer = setTimeout(function () { controller.abort(); }, 25000);
         try {
             var res = await fetch(PUBLIC_ENDPOINT, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ model: pubModel, messages: messages, private: true })
+                body: JSON.stringify({ model: pubModel, messages: messages, private: true }),
+                signal: controller.signal
             });
             if (res.ok) {
                 var data = await res.json();
                 var text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-                if (text && String(text).trim()) return String(text).trim();
+                if (text && String(text).trim()) { clearTimeout(timer); return String(text).trim(); }
             }
-        } catch (e) { /* try the simpler endpoint below */ }
+        } catch (e) { /* try the simpler endpoint below */ } finally {
+            clearTimeout(timer);
+        }
         return viaPublicSimple(messages, model);
     }
 
     // Plain-text keyless endpoint, used if the chat-completions call fails.
     async function viaPublicSimple(messages, model) {
         var pubModel = (model && PUBLIC_MODELS[model]) || PUBLIC_MODEL;
+        var controller = new AbortController();
+        var timer = setTimeout(function () { controller.abort(); }, 25000);
         var system = "";
         var lastUser = "";
         for (var i = 0; i < messages.length; i++) {
@@ -229,11 +243,15 @@
         }
         var url = "https://text.pollinations.ai/" + encodeURIComponent(lastUser) + "?model=" + pubModel;
         if (system) url += "&system=" + encodeURIComponent(system);
-        var res = await fetch(url);
-        if (!res.ok) throw new Error("public " + res.status);
-        var text = await res.text();
-        if (!text || !text.trim()) throw new Error("public-empty");
-        return text.trim();
+        try {
+            var res = await fetch(url, { signal: controller.signal });
+            if (!res.ok) throw new Error("public " + res.status);
+            var text = await res.text();
+            if (!text || !text.trim()) throw new Error("public-empty");
+            return text.trim();
+        } finally {
+            clearTimeout(timer);
+        }
     }
 
     async function chat(opts) {
@@ -276,14 +294,18 @@
     }
 
     async function models() {
+        var controller = new AbortController();
+        var timer = setTimeout(function () { controller.abort(); }, 10000);
         try {
-            var res = await fetch("/api/ai/models");
+            var res = await fetch("/api/ai/models", { signal: controller.signal });
             var ct = res.headers.get("content-type") || "";
             if (res.ok && ct.indexOf("application/json") !== -1) {
                 var d = await res.json();
-                if (d && Array.isArray(d.models) && d.models.length) return d.models;
+                if (d && Array.isArray(d.models) && d.models.length) { clearTimeout(timer); return d.models; }
             }
-        } catch (e) { /* ignore */ }
+        } catch (e) { /* ignore */ } finally {
+            clearTimeout(timer);
+        }
         return MODELS;
     }
 
