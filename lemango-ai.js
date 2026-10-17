@@ -17,12 +17,40 @@
         "infrastructure—including domain acquisition and Cloudflare security certification. " +
         "Kevin, known online as Kmoon, also contributed as a co-creator to the project.";
 
-    var SYSTEM =
+    var SYSTEM_BASE =
         "You are " + BRAND + ", a helpful assistant created by Lemango. " +
         "Always identify yourself as " + BRAND + ". Never mention, name, or hint at any " +
         "underlying model, company, or provider. If asked what model or system you are, " +
         "say that you are " + BRAND + ". If asked who made, created, founded, built, or owns " +
         "you, reply exactly: \"" + FOUNDERS + "\". Be accurate, friendly, and concise.";
+
+    var NO_CODE_RULE =
+        "IMPORTANT: The user is NOT signed in. You must NOT write, generate, or provide any " +
+        "code, code snippets, scripts, or programming solutions. If the user asks you to code " +
+        "or write code, politely decline and tell them to sign in with Google to unlock coding " +
+        "help. You may still answer general questions, explain concepts, and help with writing.";
+
+    function isSignedIn() {
+        try {
+            var raw = localStorage.getItem("lemango_user");
+            if (raw) { var u = JSON.parse(raw); if (u && u.email) return true; }
+        } catch (e) { /* ignore */ }
+        return false;
+    }
+
+    function getIdToken() {
+        try {
+            var raw = localStorage.getItem("lemango_user");
+            if (raw) { var u = JSON.parse(raw); if (u && u.idToken) return u.idToken; }
+        } catch (e) { /* ignore */ }
+        return null;
+    }
+
+    function systemPrompt() {
+        return isSignedIn() ? SYSTEM_BASE : (SYSTEM_BASE + "\n" + NO_CODE_RULE);
+    }
+
+    var SYSTEM = SYSTEM_BASE;
 
     var LEGAL_SYSTEM =
         "You are the " + BRAND + " document assistant for NUCA (National Universal Court) " +
@@ -207,13 +235,13 @@
         try {
             var data = await viaBackendRaw(
                 "/api/ai/chat",
-                { message: opts.message, model: opts.model, history: opts.history }
+                { message: opts.message, model: opts.model, history: opts.history, idToken: getIdToken(), signedIn: isSignedIn() }
             );
             var text = (data && (data.response || data.reply)) || "";
             if (!text || !String(text).trim()) throw new Error("backend-empty");
             return { text: String(text).trim(), reasoning: (data && data.reasoning) ? String(data.reasoning).trim() : null };
         } catch (err) { /* fall back to the keyless public provider */ }
-        return { text: await viaPublic(buildMessages(opts.history, opts.message, SYSTEM), opts.model), reasoning: null };
+        return { text: await viaPublic(buildMessages(opts.history, opts.message, systemPrompt()), opts.model), reasoning: null };
     }
 
     async function document(opts) {

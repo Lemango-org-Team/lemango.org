@@ -113,7 +113,8 @@
                 if (!u) return;
                 window.LemangoAuth.user = {
                   googleId: u.sub, email: u.email, name: u.name,
-                  given_name: u.given_name || "", picture: u.picture || "", avatar: u.picture || ""
+                  given_name: u.given_name || "", picture: u.picture || "", avatar: u.picture || "",
+                  idToken: resp.credential
                 };
                 try { localStorage.setItem("lemango_user", JSON.stringify(window.LemangoAuth.user)); } catch {}
                 slot.innerHTML = "";

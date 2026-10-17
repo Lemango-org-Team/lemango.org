@@ -124,6 +124,31 @@ function aiDailyLimit(req, res, next) {
   next();
 }
 
+// Verify a Google ID token (best-effort). Returns the decoded payload or null.
+const idTokenCache = new Map();
+async function verifyIdToken(token) {
+  if (!token || typeof token !== "string") return null;
+  const cached = idTokenCache.get(token);
+  if (cached && cached.exp > Date.now()) return cached.payload;
+  try {
+    const r = await fetch("https://oauth2.googleapis.com/tokeninfo?id_token=" + encodeURIComponent(token));
+    if (!r.ok) return null;
+    const payload = await r.json();
+    if (!payload || !payload.email || !payload.email_verified) return null;
+    if (payload.aud !== process.env.GOOGLE_CLIENT_ID) return null;
+    idTokenCache.set(token, { payload, exp: Date.now() + 5 * 60 * 1000 });
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+const NO_CODE_RULE =
+  "IMPORTANT: The user is NOT signed in. You must NOT write, generate, or provide any " +
+  "code, code snippets, scripts, or programming solutions. If the user asks you to code " +
+  "or write code, politely decline and tell them to sign in with Google to unlock coding " +
+  "help. You may still answer general questions, explain concepts, and help with writing.";
+
 aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
   try {
     const messages = normalizeMessages(req.body || {});
@@ -133,13 +158,21 @@ aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
 
     const model = typeof req.body?.model === "string" ? req.body.model : "Mango-Light";
 
+    // Determine if the caller is a verified signed-in user (unlocks coding help).
+    let codeAllowed = false;
+    const token = req.body && req.body.idToken;
+    const verified = await verifyIdToken(token);
+    if (verified) codeAllowed = true;
+
+    const systemPrompt = codeAllowed ? CHAT_SYSTEM : (CHAT_SYSTEM + "\n" + NO_CODE_RULE);
+
     if (!aiConfigured()) {
       const reply = `Hi! I'm ${BRAND}. I'm in preview mode right now, so I can't give live answers yet. Please try again soon.`;
       return res.json({ ok: true, configured: false, response: reply, reply, model, provider: BRAND });
     }
 
     const { text, reasoning } = await generateReply(
-      [{ role: "system", content: CHAT_SYSTEM }, ...messages],
+      [{ role: "system", content: systemPrompt }, ...messages],
       model,
       { reasoning: { effort: "medium" } }
     );

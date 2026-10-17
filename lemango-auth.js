@@ -69,7 +69,8 @@
             if (!u) return;
             this.user = {
               googleId: u.sub, email: u.email, name: u.name,
-              given_name: u.given_name || "", picture: u.picture || "", avatar: u.picture || ""
+              given_name: u.given_name || "", picture: u.picture || "", avatar: u.picture || "",
+              idToken: resp.credential
             };
             try { localStorage.setItem(USER_KEY, JSON.stringify(this.user)); } catch {}
             this.mount(container);
@@ -106,7 +107,8 @@
             if (!u) return;
             this.user = {
               googleId: u.sub, email: u.email, name: u.name,
-              given_name: u.given_name || "", picture: u.picture || "", avatar: u.picture || ""
+              given_name: u.given_name || "", picture: u.picture || "", avatar: u.picture || "",
+              idToken: resp.credential
             };
             try { localStorage.setItem(USER_KEY, JSON.stringify(this.user)); } catch {}
             this.mount(container);
