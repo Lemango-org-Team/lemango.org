@@ -1045,7 +1045,8 @@ const App = (() => {
     try {
       // Uses the shared Lemango AI client: backend first, then a free keyless
       // public provider so generation also works on static hosting.
-      const generatedContent = (await window.LemangoAI.document({ prompt: prompt, model: 'Mango-Core' })) || '';
+       const _doc = (await window.LemangoAI.document({ prompt: prompt, model: 'Mango-Core' })) || {};
+       const generatedContent = (_doc && _doc.text) ? _doc.text : (_doc || '');
       if (!generatedContent.trim()) {
         throw new Error('Empty AI response');
       }

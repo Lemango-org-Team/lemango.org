@@ -120,12 +120,13 @@ aiRouter.post("/chat", async (req, res) => {
       return res.json({ ok: true, configured: false, response: reply, reply, model, provider: BRAND });
     }
 
-    const { text } = await generateReply(
+    const { text, reasoning } = await generateReply(
       [{ role: "system", content: CHAT_SYSTEM }, ...messages],
-      model
+      model,
+      { reasoning: { effort: "medium" } }
     );
 
-    res.json({ ok: true, configured: true, response: text, reply: text, model, provider: BRAND });
+    res.json({ ok: true, configured: true, response: text, reply: text, reasoning: reasoning || null, model, provider: BRAND });
   } catch (err) {
     console.error("[ai] chat failed:", err?.message || err);
     res.status(502).json({
@@ -150,8 +151,8 @@ aiRouter.post("/generate-document", async (req, res) => {
       { role: "system", content: `${BRAND} document assistant.\n${LEGAL_SYSTEM}` },
       { role: "user", content: `Create a legal document based on this request: ${prompt}` },
     ];
-    const { text } = await generateReply(messages, req.body?.model || "Mango-Core", { maxTokens: 2500 });
-    res.json({ ok: true, text, response: text, provider: BRAND });
+    const { text, reasoning } = await generateReply(messages, req.body?.model || "Mango-Core", { maxTokens: 2500, reasoning: { effort: "medium" } });
+    res.json({ ok: true, text, response: text, reasoning: reasoning || null, provider: BRAND });
   } catch (err) {
     console.error("[ai] document generation failed:", err?.message || err);
     res.status(502).json({
