@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="/a11y.css">
   <link rel="manifest" href="/manifest.json">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -23,7 +24,7 @@
     gtag('config', 'G-THFCXR1KLW');
   </script>
   <style>
-    :root { --paper: #f8f6f1; --white: #fdfcf8; --ink: #1e2b22; --muted: #6b6659; --green: #007a33; --green-dark: #005c2d; --line: #e3ddd1; --sans: "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif; --serif: "DM Serif Display",Georgia,serif; }
+    :root { --paper: #f8f6f1; --white: #fdfcf8; --ink: #1e2b22; --muted: #5a5549; --green: #007a33; --green-dark: #005c2d; --line: #e3ddd1; --sans: "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif; --serif: "DM Serif Display",Georgia,serif; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.7; -webkit-font-smoothing: antialiased; }
     body::before { content: ""; position: fixed; inset: 0; z-index: -1; background: url("assets/watermarked_img_Lemango_Site_bg.jpg") center / cover no-repeat; opacity: .18; pointer-events: none; }
@@ -52,13 +53,14 @@
   </style>
 </head>
 <body>
+  <a class="lm-skip" href="#main">Skip to main content</a>
   <header>
     <div class="wrap bar">
       <a class="brand" href="/"><img src="assets/lemango-flag.webp" alt="">le<b>mango</b></a>
       <nav><a href="/">Home</a><a href="/faq">FAQ</a><a href="/changelog">Changelog</a></nav>
     </div>
   </header>
-  <main class="wrap">
+  <main id="main" class="wrap">
     <p class="eyebrow">Status</p>
     <h1>Service Status</h1>
     <p class="updated">Last updated: October 17, 2026</p>

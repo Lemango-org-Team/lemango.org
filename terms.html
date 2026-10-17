@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="/a11y.css">
   <link rel="manifest" href="/manifest.json">
   <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-THFCXR1KLW"></script>
@@ -24,7 +25,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <style>
     :root {
-      --paper: #f8f6f1; --white: #fdfcf8; --ink: #1e2b22; --muted: #6b6659;
+      --paper: #f8f6f1; --white: #fdfcf8; --ink: #1e2b22; --muted: #5a5549;
       --green: #007a33; --green-dark: #005c2d; --line: #e3ddd1;
       --sans: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
       --serif: "DM Serif Display", Georgia, serif;
@@ -57,6 +58,7 @@
   </style>
 </head>
 <body>
+  <a class="lm-skip" href="#main">Skip to main content</a>
   <header>
     <div class="wrap bar">
       <a class="brand" href="/"><img src="assets/lemango-flag.webp" alt="">le<b>mango</b></a>
@@ -64,7 +66,7 @@
     </div>
   </header>
 
-  <main class="wrap">
+  <main id="main" class="wrap">
     <p class="eyebrow">Legal</p>
     <h1>Terms of Use</h1>
     <p class="updated">Last updated: October 15, 2026</p>
