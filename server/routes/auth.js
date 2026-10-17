@@ -114,8 +114,10 @@ authRouter.get("/google", (req, res) => {
     path: "/",
   });
 
-  // Optional: where to redirect after login (passed as ?next=/ai etc.)
-  const next = req.query.next || "/";
+  // Optional: where to redirect after login (passed as ?next=/ai etc.).
+  // Only allow relative paths to prevent open redirects.
+  const rawNext = String(req.query.next || "/");
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
   res.cookie("lm_oauth_next", next, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

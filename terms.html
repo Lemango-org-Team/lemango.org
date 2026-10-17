@@ -1,10 +1,20 @@
-ï»¿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="/manifest.json">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-THFCXR1KLW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-THFCXR1KLW');
+</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#fffaf0">
-  <title>Terms of Use â€” Lemango</title>
+  <title>Terms of Use — Lemango</title>
   <meta name="description" content="Terms of use for Lemango AI, Case Manager, and FastPay Studio.">
   <link rel="canonical" href="https://lemango.org/terms">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -80,7 +90,7 @@
     <p>To the maximum extent permitted by law, Lemango disclaims all warranties, express or implied, including merchantability, fitness for a particular purpose, and non-infringement. We do not warrant that the tools will be uninterrupted, error-free, or that outputs will be accurate or suitable for your purpose.</p>
 
     <h2>4. Documents and payment features</h2>
-    <p>FastPay lets you generate agreements and receipts in your browser. You are responsible for the content of any document you create and for confirming it meets your legal needs. The payment area in FastPay is currently a <strong>demonstration only</strong> â€” no real charge is made, no card data is transmitted, and no payment is processed unless a live payment provider is explicitly enabled.</p>
+    <p>FastPay lets you generate agreements and receipts in your browser. You are responsible for the content of any document you create and for confirming it meets your legal needs. The payment area in FastPay is currently a <strong>demonstration only</strong> — no real charge is made, no card data is transmitted, and no payment is processed unless a live payment provider is explicitly enabled.</p>
 
     <h2>5. AI outputs</h2>
     <p>Lemango AI generates content automatically and may produce inaccurate or incomplete results. Verify anything important before relying on it.</p>
@@ -103,10 +113,12 @@
 
   <footer>
     <div class="wrap">
-      <span>Â© <span id="yr">2026</span> Lemango</span>
+      <span>© <span id="yr">2026</span> Lemango</span>
       <span><a href="/">Home</a><a href="/privacy">Privacy Policy</a></span>
     </div>
   </footer>
   <script>document.getElementById("yr").textContent = new Date().getFullYear();</script>
+  <script src="cookie-consent.js" defer></script>
+  <script src="dark-mode.js" defer></script>
 </body>
 </html>

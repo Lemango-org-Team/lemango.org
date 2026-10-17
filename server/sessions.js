@@ -27,8 +27,16 @@ function unsign(signed) {
   const dot = signed.lastIndexOf(".");
   if (dot === -1) return null;
   const value = signed.slice(0, dot);
+  const mac = signed.slice(dot + 1);
   const expected = sign(value);
-  if (!crypto.timingSafeEqual(Buffer.from(signed), Buffer.from(expected))) return null;
+  const expectedDot = expected.lastIndexOf(".");
+  const expectedMac = expected.slice(expectedDot + 1);
+  if (mac.length !== expectedMac.length) return null;
+  try {
+    if (!crypto.timingSafeEqual(Buffer.from(mac), Buffer.from(expectedMac))) return null;
+  } catch {
+    return null;
+  }
   return value;
 }
 
