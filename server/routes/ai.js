@@ -164,7 +164,9 @@ aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
     const verified = await verifyIdToken(token);
     if (verified) codeAllowed = true;
 
-    const systemPrompt = codeAllowed ? CHAT_SYSTEM : (CHAT_SYSTEM + "\n" + NO_CODE_RULE);
+    const systemPromptBase = codeAllowed ? CHAT_SYSTEM : (CHAT_SYSTEM + "\n" + NO_CODE_RULE);
+    const hint = typeof req.body?.systemHint === "string" ? req.body.systemHint.slice(0, 200) : "";
+    const systemPrompt = hint ? (systemPromptBase + "\n" + hint) : systemPromptBase;
 
     if (!aiConfigured()) {
       const reply = `Hi! I'm ${BRAND}. I'm in preview mode right now, so I can't give live answers yet. Please try again soon.`;

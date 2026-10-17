@@ -50,6 +50,17 @@
         return isSignedIn() ? SYSTEM_BASE : (SYSTEM_BASE + "\n" + NO_CODE_RULE);
     }
 
+    function modelHint(model) {
+        var hints = {
+            "Mango-Light": "Keep your answer short and to the point.",
+            "Mango-Flash": "Be quick and snappy.",
+            "Mango-Core": "Give a balanced, helpful answer.",
+            "Mango-Pro": "Think step by step and give a thorough answer.",
+            "Mango-Ultra": "Reason deeply and provide a detailed, well-structured answer."
+        };
+        return hints[model] || "";
+    }
+
     var SYSTEM = SYSTEM_BASE;
 
     var LEGAL_SYSTEM =
@@ -235,13 +246,15 @@
         try {
             var data = await viaBackendRaw(
                 "/api/ai/chat",
-                { message: opts.message, model: opts.model, history: opts.history, idToken: getIdToken(), signedIn: isSignedIn() }
+                { message: opts.message, model: opts.model, history: opts.history, idToken: getIdToken(), signedIn: isSignedIn(), systemHint: modelHint(opts.model) }
             );
             var text = (data && (data.response || data.reply)) || "";
             if (!text || !String(text).trim()) throw new Error("backend-empty");
             return { text: String(text).trim(), reasoning: (data && data.reasoning) ? String(data.reasoning).trim() : null };
         } catch (err) { /* fall back to the keyless public provider */ }
-        return { text: await viaPublic(buildMessages(opts.history, opts.message, systemPrompt()), opts.model), reasoning: null };
+        var hint = modelHint(opts.model);
+        var sys = systemPrompt() + (hint ? ("\n" + hint) : "");
+        return { text: await viaPublic(buildMessages(opts.history, opts.message, sys), opts.model), reasoning: null };
     }
 
     async function document(opts) {
