@@ -110,6 +110,14 @@
 
     var PUBLIC_ENDPOINT = "https://text.pollinations.ai/openai";
     var PUBLIC_MODEL = "openai";
+    // Map branded models to free public provider models so switching works on static hosting.
+    var PUBLIC_MODELS = {
+        "Mango-Light": "openai",
+        "Mango-Flash": "mistral",
+        "Mango-Core": "openai",
+        "Mango-Pro": "openai",
+        "Mango-Ultra": "openai"
+    };
 
     function buildMessages(history, message, system) {
         var out = [{ role: "system", content: system }];
@@ -153,12 +161,13 @@
         return data;
     }
 
-    async function viaPublic(messages) {
+    async function viaPublic(messages, model) {
+        var pubModel = (model && PUBLIC_MODELS[model]) || PUBLIC_MODEL;
         try {
             var res = await fetch(PUBLIC_ENDPOINT, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ model: PUBLIC_MODEL, messages: messages, private: true })
+                body: JSON.stringify({ model: pubModel, messages: messages, private: true })
             });
             if (res.ok) {
                 var data = await res.json();
@@ -166,11 +175,12 @@
                 if (text && String(text).trim()) return String(text).trim();
             }
         } catch (e) { /* try the simpler endpoint below */ }
-        return viaPublicSimple(messages);
+        return viaPublicSimple(messages, model);
     }
 
     // Plain-text keyless endpoint, used if the chat-completions call fails.
-    async function viaPublicSimple(messages) {
+    async function viaPublicSimple(messages, model) {
+        var pubModel = (model && PUBLIC_MODELS[model]) || PUBLIC_MODEL;
         var system = "";
         var lastUser = "";
         for (var i = 0; i < messages.length; i++) {
@@ -178,7 +188,7 @@
             if (m.role === "system") system += (system ? " " : "") + m.content;
             else if (m.role === "user") lastUser = m.content;
         }
-        var url = "https://text.pollinations.ai/" + encodeURIComponent(lastUser) + "?model=" + PUBLIC_MODEL;
+        var url = "https://text.pollinations.ai/" + encodeURIComponent(lastUser) + "?model=" + pubModel;
         if (system) url += "&system=" + encodeURIComponent(system);
         var res = await fetch(url);
         if (!res.ok) throw new Error("public " + res.status);
@@ -203,7 +213,7 @@
             if (!text || !String(text).trim()) throw new Error("backend-empty");
             return { text: String(text).trim(), reasoning: (data && data.reasoning) ? String(data.reasoning).trim() : null };
         } catch (err) { /* fall back to the keyless public provider */ }
-        return { text: await viaPublic(buildMessages(opts.history, opts.message, SYSTEM)), reasoning: null };
+        return { text: await viaPublic(buildMessages(opts.history, opts.message, SYSTEM), opts.model), reasoning: null };
     }
 
     async function document(opts) {
