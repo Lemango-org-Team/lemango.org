@@ -127,7 +127,7 @@ function renderModelDropdown(){
     }
     modelDropdown.innerHTML=models.map(m=>{
         const a=m.name===currentModel;
-        return '<button type="button" class="model-option'+(a?" active":'"')+' data-model="'+escapeHtml(m.name)+'"><span class="model-option-dot" style="background:'+(m.color||"var(--accent)")+'"></span><div class="model-option-info"><div>'+escapeHtml(m.name)+'</div>'+(m.desc?'<div class="model-option-desc">'+escapeHtml(m.desc)+'</div>':"")+'</div><span class="model-option-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span></button>';
+        return '<button type="button" class="model-option'+(a?" active":"")+'" data-model="'+escapeHtml(m.name)+'"><span class="model-option-dot" style="background:'+(m.color||"var(--accent)")+'"></span><div class="model-option-info"><div>'+escapeHtml(m.name)+'</div>'+(m.desc?'<div class="model-option-desc">'+escapeHtml(m.desc)+'</div>':"")+'</div><span class="model-option-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span></button>';
     }).join("");
 }
 
