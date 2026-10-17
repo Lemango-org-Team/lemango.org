@@ -33,7 +33,7 @@ const LEGAL_SYSTEM =
 function normalizeMessages(body = {}) {
   const out = [];
   const push = (role, content) => {
-    const text = String(content ?? "").slice(0, 8000);
+    const text = String(content ?? "").slice(0, 4000);
     if (text.trim()) out.push({ role, content: text });
   };
 
@@ -53,7 +53,7 @@ function normalizeMessages(body = {}) {
   if (message) {
     const last = messages_last(out);
     if (!last || last.role !== "user" || last.content.trim() !== message) {
-      out.push({ role: "user", content: message.slice(0, 8000) });
+      out.push({ role: "user", content: message.slice(0, 4000) });
     }
   }
 
@@ -106,7 +106,25 @@ aiRouter.post("/log", (req, res) => {
   res.json({ ok: true });
 });
 
-aiRouter.post("/chat", async (req, res) => {
+// --- Per-IP daily cap to prevent abuse (resets at midnight UTC) ---
+const aiDailyHits = new Map();
+function aiDailyLimit(req, res, next) {
+  const key = req.ip || "unknown";
+  const day = new Date().toISOString().slice(0, 10);
+  const entry = aiDailyHits.get(key);
+  if (!entry || entry.day !== day) {
+    aiDailyHits.set(key, { day, count: 0 });
+  }
+  const e = aiDailyHits.get(key);
+  const MAX_PER_DAY = 60;
+  if (e.count >= MAX_PER_DAY) {
+    return res.status(429).json({ ok: false, error: "Daily AI limit reached. Please try again tomorrow." });
+  }
+  e.count += 1;
+  next();
+}
+
+aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
   try {
     const messages = normalizeMessages(req.body || {});
     if (!messages.length) {

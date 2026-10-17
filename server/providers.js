@@ -23,13 +23,13 @@ const PROVIDERS = {
   openrouter: {
     baseUrl: "https://openrouter.ai/api/v1",
     envKey: "OPENROUTER_API_KEY",
-    model: process.env.OPENROUTER_MODEL || "meta-llama/llama-3.1-8b-instruct:free",
+    model: process.env.OPENROUTER_MODEL || "google/gemma-4-31b-it:free",
     headers: { "HTTP-Referer": "https://lemango.org", "X-Title": BRAND },
   },
-  spacebunny: {
+  nemotron: {
     baseUrl: "https://openrouter.ai/api/v1",
-    envKey: ["SPACEBUNNY_API_KEY", "OPENROUTER_API_KEY"],
-    model: process.env.SPACEBUNNY_MODEL || "stealth/space-bunny-alpha",
+    envKey: "OPENROUTER_API_KEY",
+    model: process.env.NEMOTRON_MODEL || "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
     headers: { "HTTP-Referer": "https://lemango.org", "X-Title": BRAND },
   },
   gemini: {
@@ -60,7 +60,7 @@ export const MODEL_CATALOG = [
   { name: "Mango-Flash", desc: "Snappy and efficient", color: "#22c55e", chain: ["groq", "pollinations"] },
   { name: "Mango-Core", desc: "Balanced for most tasks", color: "#3b82f6", chain: ["openrouter", "gemini", "pollinations"] },
   { name: "Mango-Pro", desc: "Stronger reasoning", color: "#8b5cf6", chain: ["gemini", "openai", "openrouter", "pollinations"] },
-  { name: "Mango-Ultra", desc: "1M context, deep reasoning", color: "#ec4899", chain: ["spacebunny", "openrouter", "gemini", "pollinations"] },
+  { name: "Mango-Ultra", desc: "Deep reasoning, free", color: "#ec4899", chain: ["nemotron", "openrouter", "gemini", "pollinations"] },
 ];
 
 function liveDisabled() {
