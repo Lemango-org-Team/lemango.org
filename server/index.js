@@ -7,6 +7,7 @@ import { newsletterRouter } from "./routes/newsletter.js";
 import { aiRouter, aiConfigured } from "./routes/ai.js";
 import { courtRouter } from "./routes/court.js";
 import { authRouter } from "./routes/auth.js";
+import { adminRouter } from "./routes/admin.js";
 import { sessionMiddleware } from "./sessions.js";
 import { isSmtpConfigured } from "./mailer.js";
 
@@ -84,6 +85,7 @@ app.get("/api/config", (_req, res) => {
 });
 
 app.use("/api/auth", rateLimit({ windowMs: 60_000, max: 30 }), authRouter);
+app.use("/api/admin", rateLimit({ windowMs: 60_000, max: 60 }), adminRouter);
 app.use("/api/newsletter", rateLimit({ windowMs: 60_000, max: 10 }), newsletterRouter);
 app.use("/api/ai", rateLimit({ windowMs: 60_000, max: 60 }), aiRouter);
 app.use("/api/court", courtRouter);

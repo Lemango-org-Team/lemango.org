@@ -3,7 +3,7 @@ import { appendFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { BRAND, aiConfigured, catalogForClient, generateReply } from "../providers.js";
 
-export { aiConfigured };
+export { aiConfigured, verifyIdToken };
 
 export const aiRouter = Router();
 
