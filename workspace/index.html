@@ -1927,14 +1927,16 @@ async function* streamChat(messages, options) {
   // Use Lemango AI backend (no user API keys required).
   const base = (window.LEMANGO_API_BASE || "").replace(/\/+$/, "");
   const url = (base || "") + "/api/ai/chat";
+  const last = (messages && messages.length) ? messages[messages.length - 1] : null;
+  const hist = (messages || []).slice(0, -1).filter(function (m) { return m && (m.role === "user" || m.role === "assistant"); }).map(function (m) { return { role: m.role, content: m.content }; });
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify({
-      message: (messages && messages.length ? messages[messages.length - 1].content : ""),
+      message: last ? last.content : "",
       model: "Mango-Core",
-      history: (messages || []).slice(0, -1).map(function (m) { return { role: m.role, content: m.content }; }),
+      history: hist,
     }),
     signal: options && options.signal,
   });

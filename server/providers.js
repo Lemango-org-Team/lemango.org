@@ -26,10 +26,28 @@ const PROVIDERS = {
     model: process.env.OPENROUTER_MODEL || "google/gemma-4-31b-it:free",
     headers: { "HTTP-Referer": "https://lemango.org", "X-Title": BRAND },
   },
+  gemma26: {
+    baseUrl: "https://openrouter.ai/api/v1",
+    envKey: "OPENROUTER_API_KEY",
+    model: process.env.GEMMA26_MODEL || "google/gemma-4-26b-a4b-it:free",
+    headers: { "HTTP-Referer": "https://lemango.org", "X-Title": BRAND },
+  },
   nemotron: {
     baseUrl: "https://openrouter.ai/api/v1",
     envKey: "OPENROUTER_API_KEY",
     model: process.env.NEMOTRON_MODEL || "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+    headers: { "HTTP-Referer": "https://lemango.org", "X-Title": BRAND },
+  },
+  nemotronSuper: {
+    baseUrl: "https://openrouter.ai/api/v1",
+    envKey: "OPENROUTER_API_KEY",
+    model: process.env.NEMOTRON_SUPER_MODEL || "nvidia/nemotron-3-super-120b-a12b:free",
+    headers: { "HTTP-Referer": "https://lemango.org", "X-Title": BRAND },
+  },
+  lfm: {
+    baseUrl: "https://openrouter.ai/api/v1",
+    envKey: "OPENROUTER_API_KEY",
+    model: process.env.LFM_MODEL || "liquid/lfm-2.5-2.6b:free",
     headers: { "HTTP-Referer": "https://lemango.org", "X-Title": BRAND },
   },
   gemini: {
@@ -56,11 +74,11 @@ const PROVIDERS = {
 
 // Branded model names shown to users. Each maps to a chain of real providers.
 export const MODEL_CATALOG = [
-  { name: "Mango-Light", desc: "Fast, everyday answers", color: "#f59e0b", chain: ["pollinations", "groq"] },
-  { name: "Mango-Flash", desc: "Snappy and efficient", color: "#22c55e", chain: ["groq", "pollinations"] },
-  { name: "Mango-Core", desc: "Balanced for most tasks", color: "#3b82f6", chain: ["openrouter", "gemini", "pollinations"] },
-  { name: "Mango-Pro", desc: "Stronger reasoning", color: "#8b5cf6", chain: ["gemini", "openai", "openrouter", "pollinations"] },
-  { name: "Mango-Ultra", desc: "Deep reasoning, free", color: "#ec4899", chain: ["nemotron", "openrouter", "gemini", "pollinations"] },
+  { name: "Mango-Light", desc: "Fast, everyday answers", color: "#f59e0b", chain: ["nemotron", "gemma26", "openrouter", "pollinations"] },
+  { name: "Mango-Flash", desc: "Snappy and efficient", color: "#22c55e", chain: ["lfm", "gemma26", "openrouter", "pollinations"] },
+  { name: "Mango-Core", desc: "Balanced for most tasks", color: "#3b82f6", chain: ["openrouter", "gemma26", "nemotron", "nemotronSuper", "pollinations"] },
+  { name: "Mango-Pro", desc: "Stronger reasoning", color: "#8b5cf6", chain: ["nemotronSuper", "nemotron", "openrouter", "gemma26", "pollinations"] },
+  { name: "Mango-Ultra", desc: "Deep reasoning, free", color: "#ec4899", chain: ["nemotron", "nemotronSuper", "openrouter", "gemma26", "pollinations"] },
 ];
 
 function liveDisabled() {
