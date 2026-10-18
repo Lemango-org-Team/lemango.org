@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <title>Admin — Lemango</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <meta name="lemango-api-base" content="https://lemango-org.onrender.com">
+  <script src="/api-base.js"></script>
+  <script src="/lemango-auth.js" defer></script>
+  <style>
+    :root { --bg:#0f172a; --panel:#1e293b; --line:#334155; --fg:#e2e8f0; --muted:#94a3b8; --green:#22c55e; --red:#f87171; --amber:#fbbf24; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--fg); font-family:"Plus Jakarta Sans",system-ui,sans-serif; }
+    .wrap { max-width:1100px; margin:0 auto; padding:24px; }
+    h1 { font-size:28px; margin:0 0 8px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; margin:16px 0; }
+    .row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); }
+    .row:last-child { border-bottom:none; }
+    .btn { padding:6px 12px; border-radius:6px; border:1px solid var(--line); background:var(--panel); color:var(--fg); cursor:pointer; font-size:12px; font-weight:600; }
+    .btn.approve { background:#065f46; border-color:#065f46; color:#fff; }
+    .btn.reject { background:#7f1d1d; border-color:#7f1d1d; color:#fff; }
+    .btn.force { background:#78350f; border-color:#78350f; color:#fff; }
+    .badge { padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; }
+    .badge.pending { background:#78350f; color:#fbbf24; }
+    .badge.approved { background:#065f46; color:#22c55e; }
+    .badge.rejected { background:#7f1d1d; color:#f87171; }
+    .score { font-weight:700; }
+    .score.low { color:#f87171; }
+    .score.mid { color:#fbbf24; }
+    .score.high { color:#22c55e; }
+    input.pw { width:100%; padding:10px; background:#0f172a; border:1px solid var(--line); border-radius:6px; color:var(--fg); font-family:"JetBrains Mono",monospace; font-size:13px; }
+    .gate { max-width:480px; margin:80px auto; text-align:center; }
+    .legal { font-size:12px; color:var(--muted); line-height:1.6; }
+    .legal h3 { color:var(--fg); font-size:14px; margin:12px 0 4px; }
+  </style>
+</head>
+<body>
+  <div id="gate" class="gate">
+    <h1>Admin Access</h1>
+    <p style="color:var(--muted);margin-bottom:16px;">Enter the admin password to continue.</p>
+    <input class="pw" type="password" id="adminPw" placeholder="Admin password" />
+    <button class="btn" style="margin-top:12px;width:100%;" id="adminPwBtn">Unlock</button>
+    <div id="adminPwErr" style="color:#f87171;margin-top:8px;font-size:12px;"></div>
+  </div>
+
+  <div id="admin-app" style="display:none;">
+    <div class="wrap">
+      <h1>Admin Dashboard</h1>
+      <p style="color:var(--muted);">Lemango zero-trust admin. Signed in as <span id="adminEmail"></span> (<span id="adminRank"></span>).</p>
+
+      <div class="card">
+        <h2 style="margin:0 0 12px;font-size:18px;">Pending Queue</h2>
+        <div id="queueList">Loading...</div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 12px;font-size:18px;">Invite Links</h2>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <input id="inviteEmail" placeholder="Email to invite" style="flex:1;padding:8px;background:#0f172a;border:1px solid var(--line);border-radius:6px;color:var(--fg);" />
+          <button class="btn" id="createInviteBtn">Create Invite</button>
+        </div>
+        <div id="inviteResult" style="font-size:12px;color:var(--muted);"></div>
+        <div id="invitesList" style="margin-top:12px;"></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 12px;font-size:18px;">Admin Auth & Legal</h2>
+        <div class="legal">
+          <h3>Admin Authorization</h3>
+          <p>By accessing this admin panel, you agree that any misuse, unauthorized access, data breach, or harmful action taken using this system will result in immediate action by Lemango higher-ups, including but not limited to: revocation of all access, legal action, and any punishment deemed reasonable. You are responsible for all actions performed under your admin account.</p>
+          <h3>Terms of Service</h3>
+          <p>Admins must comply with the <a href="/terms" target="_blank" style="color:#34d399;">Terms of Service</a>, <a href="/privacy" target="_blank" style="color:#34d399;">Privacy Policy</a>, and <a href="/security" target="_blank" style="color:#34d399;">Security Policy</a>. Admin actions are logged.</p>
+          <h3>Ranking System</h3>
+          <p>Ranks: <strong>superadmin</strong> (full access, can manage admins), <strong>admin</strong> (can approve/reject queue), <strong>moderator</strong> (read-only). The two founding accounts are superadmins.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PW = "Forage-Sumac-Cirrus-Toggle-Socket-Firm-Send-Slope-Bloom-Ewe";
+
+    document.getElementById("adminPwBtn").addEventListener("click", async () => {
+      const pw = document.getElementById("adminPw").value;
+      const err = document.getElementById("adminPwErr");
+      if (pw !== ADMIN_PW) { err.textContent = "Incorrect password."; return; }
+      err.textContent = "";
+      // Now verify the signed-in user is an admin
+      await window.LemangoAuth.load().catch(()=>{});
+      const authUser = window.LemangoAuth.user;
+      if (!authUser) {
+        // Need to sign in first
+        const slot = document.createElement("div");
+        slot.style.marginTop = "16px";
+        document.getElementById("gate").appendChild(slot);
+        window.LemangoAuth.mount(slot);
+        // wait for sign-in
+        document.addEventListener("lm:auth", async (e) => {
+          if (e.detail.user) {
+            await checkAdmin(e.detail.user);
+          }
+        }, { once: true });
+        return;
+      }
+      await checkAdmin(authUser);
+    });
+
+    async function checkAdmin(user) {
+      try {
+        const res = await fetch("/api/admin/check?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+        const data = await res.json();
+        if (!data.ok || !data.isAdmin) {
+          document.getElementById("adminPwErr").textContent = "Your account is not an admin.";
+          return;
+        }
+        document.getElementById("gate").style.display = "none";
+        document.getElementById("admin-app").style.display = "block";
+        document.getElementById("adminEmail").textContent = data.email;
+        document.getElementById("adminRank").textContent = data.rank;
+        loadQueue();
+        loadInvites();
+      } catch (e) {
+        document.getElementById("adminPwErr").textContent = "Error: " + e.message;
+      }
+    }
+
+    // Enter key on password
+    document.getElementById("adminPw").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("adminPwBtn").click();
+    });
+
+    async function loadQueue() {
+      const user = window.LemangoAuth.user;
+      if (!user) return;
+      try {
+        const res = await fetch("/api/admin/queue?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+        const data = await res.json();
+        const list = document.getElementById("queueList");
+        if (!data.ok || !data.queue || !data.queue.length) {
+          list.innerHTML = "<div style='color:var(--muted);'>No pending requests.</div>";
+          return;
+        }
+        list.innerHTML = data.queue.map((q) => {
+          const scoreClass = q.safetyScore >= 90 ? "high" : q.safetyScore >= 70 ? "mid" : "low";
+          return `<div class="row">
+            <div>
+              <div style="font-weight:600;">${q.email}</div>
+              <div style="font-size:11px;color:var(--muted);">${q.name || ""} · Safety: <span class="score ${scoreClass}">${q.safetyScore}</span> · TOS: ${q.tosAccepted ? "✓" : "✗"} · <span class="badge ${q.status}">${q.status}</span></div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              ${q.status === "pending" ? `
+                <button class="btn approve" onclick="approveUser('${q.token}', false)">Approve</button>
+                ${q.safetyScore < 90 ? `<button class="btn force" onclick="approveUser('${q.token}', true)">Force (score<90)</button>` : ""}
+                <button class="btn reject" onclick="rejectUser('${q.token}')">Reject</button>
+              ` : ""}
+            </div>
+          </div>`;
+        }).join("");
+      } catch (e) {
+        document.getElementById("queueList").innerHTML = "<div style='color:#f87171;'>Error: " + e.message + "</div>";
+      }
+    }
+
+    async function approveUser(token, force) {
+      const user = window.LemangoAuth.user;
+      try {
+        const res = await fetch("/api/admin/approve", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ idToken: user.idToken, token, force })
+        });
+        const data = await res.json();
+        if (data.ok) { alert("Approved!"); loadQueue(); }
+        else { alert(data.error || "Failed"); if (data.score < 90) {} }
+      } catch (e) { alert("Error: " + e.message); }
+    }
+
+    async function rejectUser(token) {
+      const user = window.LemangoAuth.user;
+      try {
+        const res = await fetch("/api/admin/reject", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ idToken: user.idToken, token })
+        });
+        const data = await res.json();
+        if (data.ok) { alert("Rejected."); loadQueue(); }
+        else { alert(data.error || "Failed"); }
+      } catch (e) { alert("Error: " + e.message); }
+    }
+
+    document.getElementById("createInviteBtn").addEventListener("click", async () => {
+      const email = document.getElementById("inviteEmail").value.trim();
+      const user = window.LemangoAuth.user;
+      if (!email) { alert("Enter an email"); return; }
+      try {
+        const res = await fetch("/api/admin/invite", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ idToken: user.idToken, email })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById("inviteResult").innerHTML = `<div style="margin-top:8px;padding:8px;background:#0f172a;border-radius:6px;word-break:break-all;"><strong>Invite link:</strong> <a href="${data.inviteUrl}" target="_blank" style="color:#34d399;">${data.inviteUrl}</a><br><button class="btn" style="margin-top:6px;" onclick="navigator.clipboard.writeText('${data.inviteUrl}')">Copy</button></div>`;
+          loadInvites();
+        } else {
+          document.getElementById("inviteResult").textContent = data.error || "Failed";
+        }
+      } catch (e) {
+        document.getElementById("inviteResult").textContent = "Error: " + e.message;
+      }
+    });
+
+    async function loadInvites() {
+      const user = window.LemangoAuth.user;
+      if (!user) return;
+      try {
+        const res = await fetch("/api/admin/invites?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById("invitesList").innerHTML = data.invites.map((inv) =>
+            `<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--line);">${inv.email} — ${inv.used ? "used" : "active"} — by ${inv.createdBy}</div>`
+          ).join("") || "<div style='color:var(--muted);font-size:12px;'>No invites.</div>";
+        }
+      } catch (e) { /* ignore */ }
+    }
+  </script>
+  <script src="admin-button.js" defer></script>
+</body>
+</html>
