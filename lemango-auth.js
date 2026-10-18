@@ -52,6 +52,42 @@
         container.appendChild(this._buildSignInBtn(container));
       }
     },
+    _buildUserChip(user) {
+      const wrap = document.createElement("div");
+      wrap.className = "lm-auth-chip";
+      const avatar = document.createElement("span");
+      avatar.className = "lm-auth-avatar";
+      if (user.avatar || user.picture) {
+        const img = document.createElement("img");
+        img.src = user.avatar || user.picture;
+        img.alt = user.name || "";
+        img.width = 28; img.height = 28;
+        img.referrerPolicy = "no-referrer";
+        avatar.appendChild(img);
+      } else {
+        avatar.textContent = (user.given_name || user.name || "?")[0].toUpperCase();
+      }
+      const name = document.createElement("span");
+      name.className = "lm-auth-name";
+      name.textContent = user.given_name || user.name || user.email;
+      wrap.appendChild(avatar);
+      wrap.appendChild(name);
+
+      const out = document.createElement("button");
+      out.type = "button";
+      out.className = "lm-auth-signout";
+      out.textContent = "Sign out";
+      out.style.background = "transparent";
+      out.style.border = "none";
+      out.style.color = "#8c1605";
+      out.style.fontWeight = "600";
+      out.style.cursor = "pointer";
+      out.style.fontSize = "12px";
+      out.addEventListener("click", (e) => { e.stopPropagation(); this.signOut(); });
+      wrap.appendChild(out);
+      return wrap;
+    },
+
     _buildSignInBtn(container) {
       const wrap = document.createElement("div");
       wrap.className = "lm-auth-signin-wrap";
