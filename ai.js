@@ -281,6 +281,10 @@ async function sendMessage(text,displayUser=true){
         }
         removeTyping();
         const reply=(result&&result.text)?result.text:(typeof result==="string"?result:"");
+        if (reply && /^\s*</.test(reply)) {
+            // Backend returned HTML instead of text — treat as failure
+            throw new Error("backend returned HTML");
+        }
         if(window.addToken && reply) window.addToken(Math.max(1, Math.ceil(reply.length/4)));
         addMessage(reply||"I couldn't generate a response. Please try again.","bot",result&&result.reasoning);
     } catch(err){
