@@ -299,6 +299,10 @@
           body: JSON.stringify({ idToken: user.idToken, email })
         });
         const data = await res.json();
+        if (res.status === 401 || res.status === 403) {
+          document.getElementById("inviteResult").textContent = "Session expired or not authorized. Please sign out and sign in again.";
+          return;
+        }
         if (data.ok) {
           document.getElementById("inviteResult").innerHTML = `<div style="margin-top:8px;padding:8px;background:#0f172a;border-radius:6px;word-break:break-all;"><strong>Invite link:</strong> <a href="${data.inviteUrl}" target="_blank" style="color:#34d399;">${data.inviteUrl}</a><br><button class="btn" style="margin-top:6px;" onclick="navigator.clipboard.writeText('${data.inviteUrl}')">Copy</button></div>`;
           loadInvites();
