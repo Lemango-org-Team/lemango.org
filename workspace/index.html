@@ -2124,12 +2124,7 @@ function buildMessages(userText) {
 
 async function sendAIMessage(text) {
   if (!text.trim() || state.ai.streaming) return;
-  const apiKey = getApiKey(state.settings.provider);
-  if (!apiKey) {
-    showToast('Add your ' + PROVIDER_LABELS[state.settings.provider] + ' API key in settings', 'error');
-    openSettingsModal();
-    return;
-  }
+  // Lemango AI backend is used; no user API key required.
 
   const messagesEl = document.getElementById('aiMessages');
   const welcome = messagesEl.querySelector('.ai-welcome');
@@ -2550,8 +2545,9 @@ function autoResize(el) {
 }
 
 function openSettingsModal() {
-  applySettingsToUI();
-  document.getElementById('settingsModal').hidden = false;
+  // Lemango AI is powered by the Lemango backend — no provider/key setup needed.
+  showToast('AI is powered by Lemango AI. No configuration required.', 'success');
+  return;
 }
 
 function closeSettingsModal() {
