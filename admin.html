@@ -117,7 +117,11 @@
     async function tryAutoAdmin() {
       await window.LemangoAuth.load().catch(()=>{});
       const u = window.LemangoAuth.user;
-      if (!u) return false;
+      if (!u || !u.idToken) {
+        const slot = document.getElementById("adminSignInSlot");
+        if (slot && window.LemangoAuth) window.LemangoAuth.mount(slot);
+        return false;
+      }
       if (OWNER_EMAILS.indexOf(String(u.email).toLowerCase()) === -1) return false;
       // Verify admin status on backend
       try {
@@ -277,6 +281,10 @@
       const email = document.getElementById("inviteEmail").value.trim();
       const user = window.LemangoAuth.user;
       if (!email) { alert("Enter an email"); return; }
+      if (!user || !user.idToken) {
+        document.getElementById("inviteResult").textContent = "Please sign out and sign in again to refresh your session.";
+        return;
+      }
       try {
         const res = await fetch("/api/admin/invite", {
           method: "POST",
@@ -289,7 +297,7 @@
           document.getElementById("inviteResult").innerHTML = `<div style="margin-top:8px;padding:8px;background:#0f172a;border-radius:6px;word-break:break-all;"><strong>Invite link:</strong> <a href="${data.inviteUrl}" target="_blank" style="color:#34d399;">${data.inviteUrl}</a><br><button class="btn" style="margin-top:6px;" onclick="navigator.clipboard.writeText('${data.inviteUrl}')">Copy</button></div>`;
           loadInvites();
         } else {
-          document.getElementById("inviteResult").textContent = data.error || "Failed";
+          document.getElementById("inviteResult").textContent = (data.error || "Failed") + (data.code ? " (" + data.code + ")" : "");
         }
       } catch (e) {
         document.getElementById("inviteResult").textContent = "Error: " + e.message;
