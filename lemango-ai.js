@@ -292,7 +292,7 @@
         try {
             var data = await viaBackendRaw(
                 "/api/ai/chat",
-                { message: opts.message, model: opts.model, history: opts.history, idToken: getIdToken(), signedIn: isSignedIn(), systemHint: opts.systemHint || modelHint(opts.model) }
+                { message: opts.message, model: opts.model, history: opts.history, idToken: getIdToken(), signedIn: isSignedIn(), systemHint: opts.systemHint || modelHint(opts.model), context: opts.context || null }
             );
             var text = (data && (data.response || data.reply)) || "";
             if (!text || !String(text).trim()) throw new Error("backend-empty");
@@ -300,6 +300,7 @@
         } catch (err) { /* fall back to the keyless public provider */ }
         var hint = opts.systemHint || modelHint(opts.model);
         var sys = systemPrompt() + (hint ? ("\n" + hint) : "");
+        if (opts.context) sys += "\n\n" + String(opts.context).slice(0, 8000);
         return { text: await viaPublic(buildMessages(opts.history, opts.message, sys), opts.model), reasoning: null };
     }
 
