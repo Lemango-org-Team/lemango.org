@@ -31,15 +31,29 @@
       script.crossOrigin = "anonymous";
       script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(adsenseClient)}`;
       script.onerror = function () {
-        // Ad blocker or network block — hide the ad slot gracefully
-        document.querySelectorAll(".promo-slot").forEach((slot) => {
-          const mount = slot.querySelector(".promo-mount");
-          if (mount) mount.textContent = "";
-          slot.style.display = "none";
-        });
+        // Ad blocker or network block — keep the promo cards visible (no-op)
       };
       document.head.appendChild(script);
     }
+  }
+
+  function renderPromo(mount) {
+    const channels = [
+      { name: "Official Lemango", url: "https://www.youtube.com/@OfficialLemangoAccount", desc: "Tutorials & updates" },
+      { name: "PineCocoApnuts", url: "https://www.youtube.com/@PineCocoApnuts", desc: "Dev logs & behind the scenes" }
+    ];
+    const pick = channels[Math.floor(Math.random() * channels.length)];
+    mount.style.cssText = "padding:10px 12px;text-align:center;font-size:12px;background:linear-gradient(135deg,#fff,#f0fdfa);border:1px dashed #cbd5e1;border-radius:8px;";
+    mount.innerHTML = "";
+    const a = document.createElement("a");
+    a.href = pick.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.style.cssText = "display:block;text-decoration:none;color:#0f172a;font-weight:700;";
+    a.innerHTML = `<span style="display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#007a33;margin-bottom:2px;">Subscribe on YouTube</span>
+      <span style="display:block;font-size:13px;">${pick.name}</span>
+      <span style="display:block;font-size:11px;color:#64748b;font-weight:400;margin-top:2px;">${pick.desc}</span>`;
+    mount.appendChild(a);
   }
 
   slots.forEach((slot) => {
@@ -47,40 +61,35 @@
     if (!mount) return;
     const unit = slot.dataset.adUnit;
 
+    // Always show the promo as the default content.
+    renderPromo(mount);
+
     if (adsenseClient && unit) {
-      const ins = document.createElement("ins");
-      ins.className = "adsbygoogle";
-      ins.style.display = "block";
-      ins.setAttribute("data-ad-client", adsenseClient);
-      ins.setAttribute("data-ad-slot", unit);
-      ins.setAttribute("data-ad-format", "auto");
-      ins.setAttribute("data-full-width-responsive", "true");
-      mount.textContent = "";
-      mount.dataset.filled = "true";
-      mount.appendChild(ins);
-      try {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch {
-        /* AdSense not ready yet */
-      }
-    } else {
-      // Placeholder promo (until AdSense is approved): promote Lemango's YouTube channels
-      const channels = [
-        { name: "Official Lemango", url: "https://www.youtube.com/@OfficialLemangoAccount", desc: "Tutorials & updates" },
-        { name: "PineCocoApnuts", url: "https://www.youtube.com/@PineCocoApnuts", desc: "Dev logs & behind the scenes" }
-      ];
-      const pick = channels[Math.floor(Math.random() * channels.length)];
-      mount.style.cssText = "padding:10px 12px;text-align:center;font-size:12px;background:linear-gradient(135deg,#fff,#f0fdfa);border:1px dashed #cbd5e1;border-radius:8px;";
-      mount.innerHTML = "";
-      const a = document.createElement("a");
-      a.href = pick.url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      a.style.cssText = "display:block;text-decoration:none;color:#0f172a;font-weight:700;";
-      a.innerHTML = `<span style="display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#007a33;margin-bottom:2px;">Subscribe on YouTube</span>
-        <span style="display:block;font-size:13px;">${pick.name}</span>
-        <span style="display:block;font-size:11px;color:#64748b;font-weight:400;margin-top:2px;">${pick.desc}</span>`;
-      mount.appendChild(a);
+      // Try to replace the promo with a real ad after a short delay.
+      setTimeout(() => {
+        const ins = document.createElement("ins");
+        ins.className = "adsbygoogle";
+        ins.style.display = "block";
+        ins.setAttribute("data-ad-client", adsenseClient);
+        ins.setAttribute("data-ad-slot", unit);
+        ins.setAttribute("data-ad-format", "auto");
+        ins.setAttribute("data-full-width-responsive", "true");
+        mount.innerHTML = "";
+        mount.dataset.filled = "true";
+        mount.appendChild(ins);
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch {
+          /* AdSense not ready yet — restore promo */
+          renderPromo(mount);
+        }
+        // If the ad doesn't render within 6s, restore the promo.
+        setTimeout(() => {
+          if (!ins.offsetHeight || ins.offsetHeight < 10) {
+            renderPromo(mount);
+          }
+        }, 6000);
+      }, 1200);
     }
   });
 }());
