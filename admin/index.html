@@ -90,7 +90,7 @@
           <input id="inviteEmail" placeholder="Email to invite" style="flex:1;padding:8px;background:#0f172a;border:1px solid var(--line);border-radius:6px;color:var(--fg);" />
           <button class="btn" id="createInviteBtn">Create Invite</button>
         </div>
-        <div id="inviteResult" style="font-size:12px;color:var(--muted);"></div>
+        <div id="inviteResult" style="font-size:13px;color:#fbbf24;font-weight:600;min-height:20px;margin-top:8px;"></div>
         <div id="invitesList" style="margin-top:12px;"></div>
       </div>
 
@@ -117,15 +117,21 @@
     async function tryAutoAdmin() {
       await window.LemangoAuth.load().catch(()=>{});
       const u = window.LemangoAuth.user;
-      if (!u || !u.idToken) {
+      // Clear stale sessions (no idToken) so user re-signs in cleanly
+      if (u && !u.idToken) {
+        try { localStorage.removeItem("lemango_user"); } catch {}
+        window.LemangoAuth.user = null;
+      }
+      const u2 = window.LemangoAuth.user;
+      if (!u2 || !u2.idToken) {
         const slot = document.getElementById("adminSignInSlot");
         if (slot && window.LemangoAuth) window.LemangoAuth.mount(slot);
         return false;
       }
-      if (OWNER_EMAILS.indexOf(String(u.email).toLowerCase()) === -1) return false;
+      if (OWNER_EMAILS.indexOf(String(u2.email).toLowerCase()) === -1) return false;
       // Verify admin status on backend
       try {
-        const res = await fetch("/api/admin/check?idToken=" + encodeURIComponent(u.idToken), { credentials: "include" });
+        const res = await fetch("/api/admin/check?idToken=" + encodeURIComponent(u2.idToken), { credentials: "include" });
         const data = await res.json();
         if (data.ok && data.isAdmin) {
           document.getElementById("gate").style.display = "none";
