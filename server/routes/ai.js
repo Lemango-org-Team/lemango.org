@@ -107,8 +107,17 @@ aiRouter.post("/log", (req, res) => {
 });
 
 // --- Per-IP daily cap to prevent abuse (resets at midnight UTC) ---
+const UNLIMITED_EMAILS = ["kcrespo102512@gmail.com"];
 const aiDailyHits = new Map();
-function aiDailyLimit(req, res, next) {
+async function aiDailyLimit(req, res, next) {
+  // Unlimited for the owner account (verified via Google ID token).
+  const token = req.body && req.body.idToken;
+  if (token) {
+    const v = await verifyIdToken(token);
+    if (v && v.email && UNLIMITED_EMAILS.indexOf(String(v.email).toLowerCase()) !== -1) {
+      return next();
+    }
+  }
   const key = req.ip || "unknown";
   const day = new Date().toISOString().slice(0, 10);
   const entry = aiDailyHits.get(key);

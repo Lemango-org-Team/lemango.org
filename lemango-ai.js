@@ -74,7 +74,21 @@
 
     /* ---- Beta daily question limit (per browser, per day) ---- */
     // Signed-in users get a higher daily limit as a perk.
+    var UNLIMITED_EMAILS = ["kcrespo102512@gmail.com"];
+
+    function isUnlimited() {
+        try {
+            var raw = localStorage.getItem("lemango_user");
+            if (raw) {
+                var u = JSON.parse(raw);
+                if (u && u.email && UNLIMITED_EMAILS.indexOf(String(u.email).toLowerCase()) !== -1) return true;
+            }
+        } catch (e) { /* ignore */ }
+        return false;
+    }
+
     function dailyLimit() {
+        if (isUnlimited()) return 999999;
         try {
             var raw = localStorage.getItem("lemango_user");
             if (raw) { var u = JSON.parse(raw); if (u && u.email) return 8; }
@@ -257,7 +271,7 @@
     async function chat(opts) {
         opts = opts || {};
         var counts = opts.count !== false;
-        if (counts) {
+        if (counts && !isUnlimited()) {
             if (limitInfo().remaining <= 0) throw limitReached();
             recordUse();
         }
