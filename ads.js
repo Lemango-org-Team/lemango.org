@@ -64,8 +64,23 @@
         /* AdSense not ready yet */
       }
     } else {
-      mount.style.cssText = "padding:8px;text-align:center;font-size:11px;color:#94a3b8;";
-      mount.textContent = "Ad space available";
+      // Placeholder promo (until AdSense is approved): promote Lemango's YouTube channels
+      const channels = [
+        { name: "Official Lemango", url: "https://www.youtube.com/@OfficialLemangoAccount", desc: "Tutorials & updates" },
+        { name: "PineCocoApnuts", url: "https://www.youtube.com/@PineCocoApnuts", desc: "Dev logs & behind the scenes" }
+      ];
+      const pick = channels[Math.floor(Math.random() * channels.length)];
+      mount.style.cssText = "padding:10px 12px;text-align:center;font-size:12px;background:linear-gradient(135deg,#fff,#f0fdfa);border:1px dashed #cbd5e1;border-radius:8px;";
+      mount.innerHTML = "";
+      const a = document.createElement("a");
+      a.href = pick.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.style.cssText = "display:block;text-decoration:none;color:#0f172a;font-weight:700;";
+      a.innerHTML = `<span style="display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#007a33;margin-bottom:2px;">Subscribe on YouTube</span>
+        <span style="display:block;font-size:13px;">${pick.name}</span>
+        <span style="display:block;font-size:11px;color:#64748b;font-weight:400;margin-top:2px;">${pick.desc}</span>`;
+      mount.appendChild(a);
     }
   });
 }());
