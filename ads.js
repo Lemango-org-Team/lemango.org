@@ -2,10 +2,10 @@
 /**
  * ads.js — shared AdSense loader for all Lemango pages.
  * Fetches the publisher ID from /api/config, then injects
- * AdSense script + <ins> tags into every .ad-slot on the page.
+ * AdSense script + <ins> tags into every .promo-slot on the page.
  */
 (async function setupAds() {
-  const slots = document.querySelectorAll(".ad-slot");
+  const slots = document.querySelectorAll(".promo-slot");
   if (!slots.length) return;
 
   // Fallback client ID used on static hosting where /api/config is unavailable.
@@ -32,8 +32,8 @@
       script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(adsenseClient)}`;
       script.onerror = function () {
         // Ad blocker or network block — hide the ad slot gracefully
-        document.querySelectorAll(".ad-slot").forEach((slot) => {
-          const mount = slot.querySelector(".ad-mount");
+        document.querySelectorAll(".promo-slot").forEach((slot) => {
+          const mount = slot.querySelector(".promo-mount");
           if (mount) mount.textContent = "";
           slot.style.display = "none";
         });
@@ -43,7 +43,7 @@
   }
 
   slots.forEach((slot) => {
-    const mount = slot.querySelector(".ad-mount");
+    const mount = slot.querySelector(".promo-mount");
     if (!mount) return;
     const unit = slot.dataset.adUnit;
 
