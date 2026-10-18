@@ -314,6 +314,7 @@ body {
 }
 
 .clear-btn:hover { background: var(--surface-hover); color: var(--text); }
+.clear-btn.active { background: var(--primary); color: #fff; }
 
 .icon-sun { display: none; }
 body.dark .icon-moon { display: none; }

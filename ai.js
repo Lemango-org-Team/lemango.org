@@ -31,6 +31,7 @@ let welcomeRemoved = false;
 let sending = false;
 let toastTimer = null;
 let currentModel = localStorage.getItem("lemango_model") || "Mango-Light";
+let agentsMode = localStorage.getItem("lemango_agents") === "1";
 let models = [];
 
 /* ============================================================
@@ -261,8 +262,40 @@ function removeTyping(){const el=document.getElementById("typing");if(el)el.remo
 
 function updateSendState(){sendBtn.disabled=sending||!messageInput.value.trim()}
 
+async function sendAgentsMessage(text){
+    if(!text.trim())return;
+    sending=true;updateSendState();updateRegenVisibility();
+    addMessage(text,"user");
+    messageInput.value="";autoResizeInput();
+    const agents = [
+        { name: "Planner", model: "Mango-Light", role: "Break the request into a clear plan." },
+        { name: "Researcher", model: "Mango-Core", role: "Research and gather relevant facts." },
+        { name: "Builder", model: "Mango-Pro", role: "Produce the final answer/code." },
+        { name: "Reviewer", model: "Mango-Ultra", role: "Review and refine the answer." }
+    ];
+    const thread = [{role:"user", content:text}];
+    for (let i=0;i<agents.length;i++){
+        const ag = agents[i];
+        showTyping();
+        try {
+            const sysHint = "You are the " + ag.name + " agent in a multi-agent workspace. " + ag.role + " Build on the previous agents' outputs. Be concise.";
+            const r = await window.LemangoAI.chat({message: text, model: ag.model, history: thread.slice(), count:false, systemHint: sysHint});
+            removeTyping();
+            const reply = (r && r.text) ? r.text : (typeof r === "string" ? r : "");
+            addMessage("**" + ag.name + "** (" + ag.model + ")\n\n" + (reply || "(no response)"), "bot", r && r.reasoning);
+            thread.push({role:"assistant", content: ag.name + ": " + reply});
+        } catch (e) {
+            removeTyping();
+            addMessage("**" + ag.name + "** failed: " + (e && e.message ? e.message : "error"), "bot");
+        }
+    }
+    sending=false;updateSendState();updateRegenVisibility();
+    try{messageInput.focus()}catch(e){}
+}
+
 async function sendMessage(text,displayUser=true){
     if(!text.trim())return;
+    if (agentsMode && displayUser) { return sendAgentsMessage(text); }
     sending=true;updateSendState();updateRegenVisibility();
     if(displayUser)addMessage(text,"user");
     messageInput.value="";autoResizeInput();showTyping();
@@ -380,4 +413,23 @@ document.addEventListener("click",e=>{if(!modelDropdown.contains(e.target)&&!mod
     applyTheme("dark");
     rebuildChat();autoResizeInput();updateSendState();updateRegenVisibility();
     modelLabel.textContent=currentModel;fetchModels();
+    // Agents mode toggle (only for allowlisted accounts)
+    const agentsBtn = document.getElementById("agentsToggle");
+    if (agentsBtn && window.LemangoAI && typeof window.LemangoAI.hasAgents === "function" && window.LemangoAI.hasAgents()) {
+        agentsBtn.style.display = "inline-flex";
+        agentsBtn.classList.remove("hidden");
+        if (agentsMode) {
+            agentsBtn.classList.add("active");
+            const lbl = document.getElementById("agentsLabel");
+            if (lbl) lbl.textContent = "Agents: ON";
+        }
+        agentsBtn.addEventListener("click", () => {
+            agentsMode = !agentsMode;
+            try { localStorage.setItem("lemango_agents", agentsMode ? "1" : "0"); } catch {}
+            agentsBtn.classList.toggle("active", agentsMode);
+            const lbl = document.getElementById("agentsLabel");
+            if (lbl) lbl.textContent = agentsMode ? "Agents: ON" : "Agents";
+            showToast(agentsMode ? "Agents mode enabled" : "Agents mode disabled");
+        });
+    }
 })();
