@@ -65,12 +65,12 @@ async function fetchGoogleProfile(accessToken) {
   return res.json();
 }
 
-async function upsertUser(profile) {
+async function upsertUser(profile, ip) {
   let user = null;
+  let isNew = false;
   await users.update((list) => {
     const existing = list.find((u) => u.googleId === profile.sub);
     if (existing) {
-      // Refresh name/avatar in case they changed
       existing.name      = profile.name;
       existing.firstName = profile.given_name || "";
       existing.avatar    = profile.picture || "";
@@ -88,9 +88,19 @@ async function upsertUser(profile) {
         lastLogin: new Date().toISOString(),
       };
       list.push(user);
+      isNew = true;
     }
     return user;
   });
+  // Log sign-up / login
+  try {
+    const { appendFileSync, mkdirSync } = await import("node:fs");
+    const pathMod = await import("node:path");
+    const dir = pathMod.resolve(process.cwd(), "data");
+    mkdirSync(dir, { recursive: true });
+    const entry = { t: new Date().toISOString(), type: isNew ? "signup" : "login", email: profile.email, name: profile.name, ip: ip || null };
+    appendFileSync(pathMod.join(dir, "users-log.jsonl"), JSON.stringify(entry) + "\n");
+  } catch (e) { /* ignore */ }
   return user;
 }
 
@@ -154,7 +164,7 @@ authRouter.get("/google/callback", async (req, res) => {
   try {
     const tokens  = await exchangeCode(code);
     const profile = await fetchGoogleProfile(tokens.access_token);
-    const user    = await upsertUser(profile);
+    const user    = await upsertUser(profile, req.ip);
 
     await createSession(res, {
       userId:    user.id,

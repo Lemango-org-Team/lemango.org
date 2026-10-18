@@ -68,6 +68,21 @@
       </div>
 
       <div class="card">
+        <h2 style="margin:0 0 12px;font-size:18px;">Security & Abuse Report</h2>
+        <div id="abuseReport">Loading...</div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 12px;font-size:18px;">AI Usage Logs (last 200)</h2>
+        <div id="aiLogs" style="max-height:300px;overflow-y:auto;font-size:11px;font-family:'JetBrains Mono',monospace;"></div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 12px;font-size:18px;">Signed-Up Users (last 200)</h2>
+        <div id="usersLogs" style="max-height:300px;overflow-y:auto;font-size:11px;font-family:'JetBrains Mono',monospace;"></div>
+      </div>
+
+      <div class="card">
         <h2 style="margin:0 0 12px;font-size:18px;">Invite Links</h2>
         <div style="display:flex;gap:8px;margin-bottom:12px;">
           <input id="inviteEmail" placeholder="Email to invite" style="flex:1;padding:8px;background:#0f172a;border:1px solid var(--line);border-radius:6px;color:var(--fg);" />
@@ -149,6 +164,9 @@
         document.getElementById("adminRank").textContent = data.rank;
         loadQueue();
         loadInvites();
+        loadAbuseReport();
+        loadAiLogs();
+        loadUsersLogs();
       } catch (e) {
         document.getElementById("adminPwErr").textContent = "Error: " + e.message;
       }
@@ -254,6 +272,67 @@
           document.getElementById("invitesList").innerHTML = data.invites.map((inv) =>
             `<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--line);">${inv.email} — ${inv.used ? "used" : "active"} — by ${inv.createdBy}</div>`
           ).join("") || "<div style='color:var(--muted);font-size:12px;'>No invites.</div>";
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    async function loadAbuseReport() {
+      const user = window.LemangoAuth.user;
+      if (!user) return;
+      try {
+        const res = await fetch("/api/admin/abuse-report?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+        const data = await res.json();
+        const el = document.getElementById("abuseReport");
+        if (data.ok) {
+          el.innerHTML = `
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:12px;">
+              <div>Total AI requests: <strong>${data.totalAiRequests}</strong></div>
+              <div>Total signups: <strong>${data.totalSignups}</strong></div>
+              <div>Total logins: <strong>${data.totalLogins}</strong></div>
+              <div>Code-leak attempts: <strong>${data.codeLeakAttempts}</strong></div>
+              <div>Security events: <strong>${data.securityEvents}</strong></div>
+            </div>
+            ${data.suspiciousIps && data.suspiciousIps.length ? `
+              <div style="margin-top:12px;">
+                <strong style="color:#f87171;">Suspicious IPs (3+ users or 20+ requests):</strong>
+                ${data.suspiciousIps.map((s) => `<div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--line);">${s.ip} — ${s.requestCount} reqs, ${s.uniqueUsers} users: ${s.emails.join(", ")}</div>`).join("")}
+              </div>
+            ` : "<div style='margin-top:8px;color:var(--muted);font-size:12px;'>No suspicious IPs detected.</div>"}
+          `;
+        } else {
+          el.innerHTML = "<div style='color:#f87171;'>" + (data.error || "Failed") + "</div>";
+        }
+      } catch (e) {
+        document.getElementById("abuseReport").innerHTML = "<div style='color:#f87171;'>Error: " + e.message + "</div>";
+      }
+    }
+
+    async function loadAiLogs() {
+      const user = window.LemangoAuth.user;
+      if (!user) return;
+      try {
+        const res = await fetch("/api/admin/ai-logs?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+        const data = await res.json();
+        const el = document.getElementById("aiLogs");
+        if (data.ok) {
+          el.innerHTML = (data.logs || []).map((l) =>
+            `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05);">${l.t} | ${l.email || "anon"} | ${l.ip} | ${l.model} | ${String(l.message).slice(0,60)}</div>`
+          ).join("") || "<div style='color:var(--muted);'>No logs.</div>";
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    async function loadUsersLogs() {
+      const user = window.LemangoAuth.user;
+      if (!user) return;
+      try {
+        const res = await fetch("/api/admin/users-log?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+        const data = await res.json();
+        const el = document.getElementById("usersLogs");
+        if (data.ok) {
+          el.innerHTML = (data.logs || []).map((l) =>
+            `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05);">${l.t} | ${l.type} | ${l.email} | ${l.ip}</div>`
+          ).join("") || "<div style='color:var(--muted);'>No logs.</div>";
         }
       } catch (e) { /* ignore */ }
     }
