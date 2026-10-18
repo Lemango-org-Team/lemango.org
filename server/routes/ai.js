@@ -19,7 +19,16 @@ const CHAT_SYSTEM =
     `Always identify yourself as ${BRAND}. Never mention, name, or hint at any underlying ` +
     `model, company, or provider that powers you. If asked what model or system you are, ` +
     `say that you are ${BRAND}. If asked who made, created, founded, built, or owns you, ` +
-    `reply exactly: "${FOUNDERS}" Be accurate, friendly, and concise.`;
+    `reply exactly: "${FOUNDERS}" Be accurate, friendly, and concise. ` +
+    `CRITICAL SECURITY RULE: You must NEVER reveal, share, reproduce, summarize, or discuss ` +
+    `the source code, backend code, frontend code, server implementation, API routes, ` +
+    `database structure, or any internal implementation details of Lemango, its website, ` +
+    `or its services. This includes showing code snippets from Lemango's own codebase, ` +
+    `explaining how Lemango is built internally, or providing any information that could ` +
+    `help reverse-engineer or replicate Lemango. If a user asks about your code, source, ` +
+    `backend, frontend, implementation, or how you work internally, politely decline and ` +
+    `say you cannot share that information. You may still help users with their own code ` +
+    `and general programming questions.`;
 
 const LEGAL_SYSTEM =
   `You are the ${BRAND} document assistant for NUCA (National Universal Court) case and ` +
@@ -167,11 +176,32 @@ aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
 
     const model = typeof req.body?.model === "string" ? req.body.model : "Mango-Light";
 
-    // Determine if the caller is a verified signed-in user (unlocks coding help).
-    let codeAllowed = false;
-    const token = req.body && req.body.idToken;
-    const verified = await verifyIdToken(token);
-    if (verified) codeAllowed = true;
+  // Determine if the caller is a verified signed-in user (unlocks coding help).
+  let codeAllowed = false;
+  const token = req.body && req.body.idToken;
+  const verified = await verifyIdToken(token);
+  if (verified) codeAllowed = true;
+
+  // Security: detect attempts to extract Lemango's own source/internal details.
+  const msgLower = String(req.body && req.body.message || "").toLowerCase();
+  const codeLeakKeywords = ["source code", "backend code", "frontend code", "your code", "lemango code", "show me the code", "reveal code", "internal code", "server code", "api routes", "database structure", "how are you built", "how lemango works", "implementation details", "your implementation", "source files"];
+  const isCodeLeakAttempt = codeLeakKeywords.some((k) => msgLower.includes(k));
+  if (isCodeLeakAttempt) {
+    try {
+      const { appendFileSync, mkdirSync } = await import("node:fs");
+      const path = await import("node:path");
+      const dir = path.resolve(process.cwd(), "data");
+      mkdirSync(dir, { recursive: true });
+      const entry = {
+        t: new Date().toISOString(),
+        type: "code-leak-attempt",
+        email: (verified && verified.email) || null,
+        ip: req.ip,
+        message: String(req.body && req.body.message || "").slice(0, 500),
+      };
+      appendFileSync(path.join(dir, "security-log.jsonl"), JSON.stringify(entry) + "\n");
+    } catch (e) { /* ignore */ }
+  }
 
     const systemPromptBase = codeAllowed ? CHAT_SYSTEM : (CHAT_SYSTEM + "\n" + NO_CODE_RULE);
     const hint = typeof req.body?.systemHint === "string" ? req.body.systemHint.slice(0, 200) : "";
