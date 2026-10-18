@@ -1940,6 +1940,11 @@ async function* streamChat(messages, options) {
     }),
     signal: options && options.signal,
   });
+  const ct = res.headers.get("content-type") || "";
+  if (ct.indexOf("application/json") === -1) {
+    const text = await res.text().catch(function () { return ""; });
+    throw new Error("Lemango AI error: server returned non-JSON (" + res.status + ")");
+  }
   if (!res.ok) {
     const text = await res.text().catch(function () { return ""; });
     throw new Error("Lemango AI error (" + res.status + "): " + text.slice(0, 200));

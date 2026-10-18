@@ -223,11 +223,13 @@
                   body: JSON.stringify(body),
                   signal: controller.signal
               });
-              var ct = res.headers.get("content-type") || "";
-              if (ct.indexOf("application/json") === -1) throw new Error("backend-unavailable");
-              var data = await res.json();
-              if (!res.ok || (data && data.ok === false)) throw new Error((data && data.error) || "backend-error");
-              return data;
+                var ct = res.headers.get("content-type") || "";
+                if (ct.indexOf("application/json") === -1) throw new Error("backend-unavailable");
+                var data;
+                try { data = await res.json(); } catch (e) { throw new Error("backend-unavailable"); }
+                if (!data || typeof data !== "object") throw new Error("backend-unavailable");
+                if (!res.ok || data.ok === false) throw new Error((data && data.error) || "backend-error");
+                return data;
           } finally {
               clearTimeout(timer);
           }
@@ -247,7 +249,7 @@
             if (res.ok) {
                 var data = await res.json();
                 var text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-                if (text && String(text).trim()) { clearTimeout(timer); return String(text).trim(); }
+                if (text && String(text).trim() && !/^\s*<!doctype|^\s*<html/i.test(String(text))) { clearTimeout(timer); return String(text).trim(); }
             }
         } catch (e) { /* try the simpler endpoint below */ } finally {
             clearTimeout(timer);
