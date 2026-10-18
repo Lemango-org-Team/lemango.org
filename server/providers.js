@@ -143,11 +143,19 @@ export async function generateReply(messages, modelName, opts = {}) {
   const options = { temperature: opts.temperature ?? 0.7, maxTokens: opts.maxTokens || 2000, reasoning: opts.reasoning };
   let lastError;
   for (const provider of chain) {
-    try {
-      return await callProvider(provider, messages, options);
-    } catch (err) {
-      lastError = err;
-      console.warn(`[ai] provider '${provider}' failed: ${err.message}`);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        return await callProvider(provider, messages, options);
+      } catch (err) {
+        lastError = err;
+        const msg = String(err && err.message || "");
+        const retryable = /429|5\d\d|fetch failed|aborted|timeout/i.test(msg);
+        if (!retryable || attempt === 1) {
+          console.warn(`[ai] provider '${provider}' failed: ${err.message}`);
+          break;
+        }
+        await new Promise((r) => setTimeout(r, 600));
+      }
     }
   }
   throw lastError || new Error("All AI providers failed.");
