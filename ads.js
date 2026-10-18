@@ -30,6 +30,14 @@
       script.async = true;
       script.crossOrigin = "anonymous";
       script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(adsenseClient)}`;
+      script.onerror = function () {
+        // Ad blocker or network block — hide the ad slot gracefully
+        document.querySelectorAll(".ad-slot").forEach((slot) => {
+          const mount = slot.querySelector(".ad-mount");
+          if (mount) mount.textContent = "";
+          slot.style.display = "none";
+        });
+      };
       document.head.appendChild(script);
     }
   }
