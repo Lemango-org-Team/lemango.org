@@ -53,6 +53,7 @@
       ins.style.display = "block";
       ins.setAttribute("data-ad-client", adsenseClient);
       ins.setAttribute("data-ad-slot", unit);
+      ins.setAttribute("data-ad-format", "auto");
       ins.setAttribute("data-full-width-responsive", "true");
       mount.textContent = "";
       mount.dataset.filled = "true";
