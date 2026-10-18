@@ -266,6 +266,7 @@ async function sendMessage(text,displayUser=true){
     if(!text.trim())return;
     sending=true;updateSendState();updateRegenVisibility();
     if(displayUser)addMessage(text,"user");
+    if(window.addToken) window.addToken(Math.max(1, Math.ceil(text.length/4)));
     messageInput.value="";autoResizeInput();showTyping();
     try{
         const historyPayload=history.filter(m=>m&&m.t).map(m=>({role:m&&m.r==="user"?"user":"assistant",content:String(m.t)}));
@@ -280,6 +281,7 @@ async function sendMessage(text,displayUser=true){
         }
         removeTyping();
         const reply=(result&&result.text)?result.text:(typeof result==="string"?result:"");
+        if(window.addToken && reply) window.addToken(Math.max(1, Math.ceil(reply.length/4)));
         addMessage(reply||"I couldn't generate a response. Please try again.","bot",result&&result.reasoning);
     } catch(err){
         removeTyping();

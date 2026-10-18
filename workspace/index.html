@@ -822,13 +822,13 @@
         <span>AI Assistant</span>
       </div>
       <div class="ai-actions">
-        <select class="ai-provider-select" id="aiProviderSelect">
-          <option value="openai">OpenAI</option>
-          <option value="anthropic">Anthropic</option>
-          <option value="gemini">Gemini</option>
-          <option value="openrouter">OpenRouter</option>
-          <option value="groq">Groq</option>
-          <option value="bigpickle">Big Pickle</option>
+        <select class="ai-model-select" id="lemangoModelSelect" title="Lemango AI model">
+          <option value="Mango-Light">Mango-Light</option>
+          <option value="Mango-Flash">Mango-Flash</option>
+          <option value="Mango-Core" selected>Mango-Core</option>
+          <option value="Mango-Pro">Mango-Pro</option>
+          <option value="Mango-Ultra">Mango-Ultra</option>
+          <option value="auto">Auto</option>
         </select>
         <button class="icon-btn-sm" id="newChatBtn" title="New chat">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15h6"/></svg>
@@ -1935,7 +1935,7 @@ async function* streamChat(messages, options) {
     credentials: "include",
     body: JSON.stringify({
       message: last ? last.content : "",
-      model: "Mango-Core",
+      model: (function () { var s = document.getElementById('lemangoModelSelect'); var v = s ? s.value : 'Mango-Core'; if (v !== 'auto') return v; var t = (last ? last.content : "").toLowerCase(); if (/code|function|debug|error|script|program/i.test(t)) return 'Mango-Ultra'; if (t.length < 60) return 'Mango-Light'; if (t.length < 200) return 'Mango-Core'; return 'Mango-Pro'; })(),
       history: hist,
     }),
     signal: options && options.signal,
