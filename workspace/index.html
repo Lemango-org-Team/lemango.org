@@ -1937,6 +1937,7 @@ async function* streamChat(messages, options) {
       message: last ? last.content : "",
       model: (function () { var s = document.getElementById('lemangoModelSelect'); var v = s ? s.value : 'Mango-Core'; if (v !== 'auto') return v; var t = (last ? last.content : "").toLowerCase(); if (/code|function|debug|error|script|program/i.test(t)) return 'Mango-Ultra'; if (t.length < 60) return 'Mango-Light'; if (t.length < 200) return 'Mango-Core'; return 'Mango-Pro'; })(),
       history: hist,
+      context: buildSystemPrompt(),
     }),
     signal: options && options.signal,
   });
