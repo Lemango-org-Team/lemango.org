@@ -43,9 +43,11 @@
 <body>
   <div id="gate" class="gate">
     <h1>Admin Access</h1>
-    <p style="color:var(--muted);margin-bottom:16px;">Enter the first admin password to continue.</p>
+    <p style="color:var(--muted);margin-bottom:16px;">Sign in with an authorized admin Google account to continue.</p>
+    <div id="adminSignInSlot" style="margin:16px 0;"></div>
+    <div style="margin:12px 0;color:var(--muted);font-size:12px;">— or enter admin passwords —</div>
     <input class="pw" type="password" id="adminPw1" placeholder="First admin password" />
-    <button class="btn" style="margin-top:12px;width:100%;" id="adminPwBtn1">Unlock (Step 1)</button>
+    <button class="btn" style="margin-top:8px;width:100%;" id="adminPwBtn1">Unlock (Step 1)</button>
     <div id="adminPwErr1" style="color:#f87171;margin-top:8px;font-size:12px;"></div>
   </div>
 
@@ -109,6 +111,38 @@
   <script>
     const ADMIN_PW1 = "Forage-Sumac-Cirrus-Toggle-Socket-Firm-Send-Slope-Bloom-Ewe";
     const ADMIN_PW2 = ";o[b==OyP>;lT69B1oMPHoJ29X4ss4]Jxa.=4P&*[{,w=@ilN$a3s+Gt6!bsH=0DAla_HtGN";
+
+    // Auto-let-in for the two owner accounts (no password needed).
+    const OWNER_EMAILS = ["kcrespo102512@gmail.com", "incmoney37@gmail.com"];
+    async function tryAutoAdmin() {
+      await window.LemangoAuth.load().catch(()=>{});
+      const u = window.LemangoAuth.user;
+      if (!u) return false;
+      if (OWNER_EMAILS.indexOf(String(u.email).toLowerCase()) === -1) return false;
+      // Verify admin status on backend
+      try {
+        const res = await fetch("/api/admin/check?idToken=" + encodeURIComponent(u.idToken), { credentials: "include" });
+        const data = await res.json();
+        if (data.ok && data.isAdmin) {
+          document.getElementById("gate").style.display = "none";
+          document.getElementById("admin-app").style.display = "block";
+          document.getElementById("adminEmail").textContent = data.email;
+          document.getElementById("adminRank").textContent = data.rank;
+          loadQueue(); loadInvites(); loadAbuseReport(); loadAiLogs(); loadUsersLogs();
+          return true;
+        }
+      } catch (e) { /* ignore */ }
+      return false;
+    }
+
+    // Attempt auto-login on page load
+    setTimeout(() => { tryAutoAdmin(); }, 500);
+
+    // Render sign-in button in the slot
+    setTimeout(() => {
+      const slot = document.getElementById("adminSignInSlot");
+      if (slot && window.LemangoAuth) window.LemangoAuth.mount(slot);
+    }, 600);
 
     document.getElementById("adminPwBtn1").addEventListener("click", () => {
       const pw = document.getElementById("adminPw1").value;
