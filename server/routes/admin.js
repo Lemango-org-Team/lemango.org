@@ -191,3 +191,82 @@ adminRouter.post("/reject", async (req, res) => {
   await queueStore.write(queue);
   res.json({ ok: true, entry });
 });
+
+// Abuse detection: same IP, multiple users, direct-to-AI patterns.
+adminRouter.get("/abuse-report", async (req, res) => {
+  const u = await currentUser(req);
+  if (!u || !u.admin) return res.status(403).json({ ok: false, error: "Admin only" });
+  try {
+    const { readFileSync } = await import("node:fs");
+    const pathMod = await import("node:path");
+    const dir = pathMod.resolve(process.cwd(), "data");
+    const readLines = (file) => {
+      try { return readFileSync(pathMod.join(dir, file), "utf8").trim().split("\n").filter(Boolean).map((l) => JSON.parse(l)); }
+      catch { return []; }
+    };
+    const usage = readLines("ai-usage.jsonl");
+    const users = readLines("users-log.jsonl");
+    const security = readLines("security-log.jsonl");
+
+    // Group AI usage by IP
+    const byIp = {};
+    for (const e of usage) {
+      const ip = e.ip || "unknown";
+      if (!byIp[ip]) byIp[ip] = [];
+      byIp[ip].push(e);
+    }
+    const suspiciousIps = Object.entries(byIp)
+      .filter(([ip, arr]) => {
+        const uniqueEmails = new Set(arr.map((e) => e.email).filter(Boolean));
+        return uniqueEmails.size >= 3 || arr.length >= 20;
+      })
+      .map(([ip, arr]) => ({
+        ip,
+        requestCount: arr.length,
+        uniqueUsers: new Set(arr.map((e) => e.email).filter(Boolean)).size,
+        emails: [...new Set(arr.map((e) => e.email).filter(Boolean))],
+      }));
+
+    res.json({
+      ok: true,
+      totalAiRequests: usage.length,
+      totalSignups: users.filter((u) => u.type === "signup").length,
+      totalLogins: users.filter((u) => u.type === "login").length,
+      securityEvents: security.length,
+      suspiciousIps,
+      codeLeakAttempts: security.filter((s) => s.type === "code-leak-attempt").length,
+    });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// GET /api/admin/ai-logs
+adminRouter.get("/ai-logs", async (req, res) => {
+  const u = await currentUser(req);
+  if (!u || !u.admin) return res.status(403).json({ ok: false, error: "Admin only" });
+  try {
+    const { readFileSync } = await import("node:fs");
+    const pathMod = await import("node:path");
+    const dir = pathMod.resolve(process.cwd(), "data");
+    const lines = readFileSync(pathMod.join(dir, "ai-usage.jsonl"), "utf8").trim().split("\n").filter(Boolean).map((l) => JSON.parse(l));
+    res.json({ ok: true, logs: lines.slice(-200).reverse() });
+  } catch {
+    res.json({ ok: true, logs: [] });
+  }
+});
+
+// GET /api/admin/users-log
+adminRouter.get("/users-log", async (req, res) => {
+  const u = await currentUser(req);
+  if (!u || !u.admin) return res.status(403).json({ ok: false, error: "Admin only" });
+  try {
+    const { readFileSync } = await import("node:fs");
+    const pathMod = await import("node:path");
+    const dir = pathMod.resolve(process.cwd(), "data");
+    const lines = readFileSync(pathMod.join(dir, "users-log.jsonl"), "utf8").trim().split("\n").filter(Boolean).map((l) => JSON.parse(l));
+    res.json({ ok: true, logs: lines.slice(-200).reverse() });
+  } catch {
+    res.json({ ok: true, logs: [] });
+  }
+});

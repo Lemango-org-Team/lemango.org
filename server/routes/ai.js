@@ -182,6 +182,23 @@ aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
   const verified = await verifyIdToken(token);
   if (verified) codeAllowed = true;
 
+  // Log AI usage for admin tracking.
+  try {
+    const { appendFileSync, mkdirSync } = await import("node:fs");
+    const pathMod = await import("node:path");
+    const dir = pathMod.resolve(process.cwd(), "data");
+    mkdirSync(dir, { recursive: true });
+    const entry = {
+      t: new Date().toISOString(),
+      email: (verified && verified.email) || null,
+      ip: req.ip,
+      model: model,
+      message: String(req.body && req.body.message || "").slice(0, 200),
+      codeAllowed: codeAllowed,
+    };
+    appendFileSync(pathMod.join(dir, "ai-usage.jsonl"), JSON.stringify(entry) + "\n");
+  } catch (e) { /* ignore */ }
+
   // Security: detect attempts to extract Lemango's own source/internal details.
   const msgLower = String(req.body && req.body.message || "").toLowerCase();
   const codeLeakKeywords = ["source code", "backend code", "frontend code", "your code", "lemango code", "show me the code", "reveal code", "internal code", "server code", "api routes", "database structure", "how are you built", "how lemango works", "implementation details", "your implementation", "source files"];
