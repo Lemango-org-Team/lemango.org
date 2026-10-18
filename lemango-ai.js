@@ -74,7 +74,19 @@
 
     /* ---- Beta daily question limit (per browser, per day) ---- */
     // Signed-in users get a higher daily limit as a perk.
-    var UNLIMITED_EMAILS = ["kcrespo102512@gmail.com"];
+    var UNLIMITED_EMAILS = ["kcrespo102512@gmail.com", "incmoney37@gmail.com"];
+    var AGENTS_EMAILS = ["kcrespo102512@gmail.com", "incmoney37@gmail.com"];
+
+    function hasAgents() {
+        try {
+            var raw = localStorage.getItem("lemango_user");
+            if (raw) {
+                var u = JSON.parse(raw);
+                if (u && u.email && AGENTS_EMAILS.indexOf(String(u.email).toLowerCase()) !== -1) return true;
+            }
+        } catch (e) { /* ignore */ }
+        return false;
+    }
 
     function isUnlimited() {
         try {
@@ -278,13 +290,13 @@
         try {
             var data = await viaBackendRaw(
                 "/api/ai/chat",
-                { message: opts.message, model: opts.model, history: opts.history, idToken: getIdToken(), signedIn: isSignedIn(), systemHint: modelHint(opts.model) }
+                { message: opts.message, model: opts.model, history: opts.history, idToken: getIdToken(), signedIn: isSignedIn(), systemHint: opts.systemHint || modelHint(opts.model) }
             );
             var text = (data && (data.response || data.reply)) || "";
             if (!text || !String(text).trim()) throw new Error("backend-empty");
             return { text: String(text).trim(), reasoning: (data && data.reasoning) ? String(data.reasoning).trim() : null };
         } catch (err) { /* fall back to the keyless public provider */ }
-        var hint = modelHint(opts.model);
+        var hint = opts.systemHint || modelHint(opts.model);
         var sys = systemPrompt() + (hint ? ("\n" + hint) : "");
         return { text: await viaPublic(buildMessages(opts.history, opts.message, sys), opts.model), reasoning: null };
     }
@@ -328,6 +340,8 @@
         MODELS: MODELS,
         DAILY_LIMIT: dailyLimit(),
         dailyLimit: dailyLimit,
+        isUnlimited: isUnlimited,
+        hasAgents: hasAgents,
         limitInfo: limitInfo,
         chat: chat,
         document: document,

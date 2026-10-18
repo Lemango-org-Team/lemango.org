@@ -107,7 +107,7 @@ aiRouter.post("/log", (req, res) => {
 });
 
 // --- Per-IP daily cap to prevent abuse (resets at midnight UTC) ---
-const UNLIMITED_EMAILS = ["kcrespo102512@gmail.com"];
+const UNLIMITED_EMAILS = ["kcrespo102512@gmail.com", "incmoney37@gmail.com"];
 const aiDailyHits = new Map();
 async function aiDailyLimit(req, res, next) {
   // Unlimited for the owner account (verified via Google ID token).
