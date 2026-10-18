@@ -43,10 +43,18 @@
 <body>
   <div id="gate" class="gate">
     <h1>Admin Access</h1>
-    <p style="color:var(--muted);margin-bottom:16px;">Enter the admin password to continue.</p>
-    <input class="pw" type="password" id="adminPw" placeholder="Admin password" />
-    <button class="btn" style="margin-top:12px;width:100%;" id="adminPwBtn">Unlock</button>
-    <div id="adminPwErr" style="color:#f87171;margin-top:8px;font-size:12px;"></div>
+    <p style="color:var(--muted);margin-bottom:16px;">Enter the first admin password to continue.</p>
+    <input class="pw" type="password" id="adminPw1" placeholder="First admin password" />
+    <button class="btn" style="margin-top:12px;width:100%;" id="adminPwBtn1">Unlock (Step 1)</button>
+    <div id="adminPwErr1" style="color:#f87171;margin-top:8px;font-size:12px;"></div>
+  </div>
+
+  <div id="gate2" class="gate" style="display:none;">
+    <h1>Admin Access — Step 2</h1>
+    <p style="color:var(--muted);margin-bottom:16px;">Enter the second admin password to continue.</p>
+    <input class="pw" type="password" id="adminPw2" placeholder="Second admin password" />
+    <button class="btn" style="margin-top:12px;width:100%;" id="adminPwBtn2">Unlock (Step 2)</button>
+    <div id="adminPwErr2" style="color:#f87171;margin-top:8px;font-size:12px;"></div>
   </div>
 
   <div id="admin-app" style="display:none;">
@@ -84,23 +92,35 @@
   </div>
 
   <script>
-    const ADMIN_PW = "Forage-Sumac-Cirrus-Toggle-Socket-Firm-Send-Slope-Bloom-Ewe";
+    const ADMIN_PW1 = "Forage-Sumac-Cirrus-Toggle-Socket-Firm-Send-Slope-Bloom-Ewe";
+    const ADMIN_PW2 = ";o[b==OyP>;lT69B1oMPHoJ29X4ss4]Jxa.=4P&*[{,w=@ilN$a3s+Gt6!bsH=0DAla_HtGN";
 
-    document.getElementById("adminPwBtn").addEventListener("click", async () => {
-      const pw = document.getElementById("adminPw").value;
-      const err = document.getElementById("adminPwErr");
-      if (pw !== ADMIN_PW) { err.textContent = "Incorrect password."; return; }
+    document.getElementById("adminPwBtn1").addEventListener("click", () => {
+      const pw = document.getElementById("adminPw1").value;
+      const err = document.getElementById("adminPwErr1");
+      if (pw !== ADMIN_PW1) { err.textContent = "Incorrect password."; return; }
+      err.textContent = "";
+      document.getElementById("gate").style.display = "none";
+      document.getElementById("gate2").style.display = "block";
+    });
+
+    document.getElementById("adminPw1").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("adminPwBtn1").click();
+    });
+
+    document.getElementById("adminPwBtn2").addEventListener("click", async () => {
+      const pw = document.getElementById("adminPw2").value;
+      const err = document.getElementById("adminPwErr2");
+      if (pw !== ADMIN_PW2) { err.textContent = "Incorrect second password."; return; }
       err.textContent = "";
       // Now verify the signed-in user is an admin
       await window.LemangoAuth.load().catch(()=>{});
       const authUser = window.LemangoAuth.user;
       if (!authUser) {
-        // Need to sign in first
         const slot = document.createElement("div");
         slot.style.marginTop = "16px";
-        document.getElementById("gate").appendChild(slot);
+        document.getElementById("gate2").appendChild(slot);
         window.LemangoAuth.mount(slot);
-        // wait for sign-in
         document.addEventListener("lm:auth", async (e) => {
           if (e.detail.user) {
             await checkAdmin(e.detail.user);
@@ -109,6 +129,10 @@
         return;
       }
       await checkAdmin(authUser);
+    });
+
+    document.getElementById("adminPw2").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("adminPwBtn2").click();
     });
 
     async function checkAdmin(user) {
