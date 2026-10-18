@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex" />
+<meta name="lemango-api-base" content="https://lemango-org.onrender.com" />
+<script src="/api-base.js"></script>
 <title>Forge — AI-Native Code Workspace</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -1337,21 +1339,10 @@ function captureSettingsFromUI() {
 function updateAIStatus() {
   const status = document.getElementById('aiStatus');
   const text = document.getElementById('aiStatusText');
-  const provider = state.settings.provider;
-  const key = getApiKey(provider);
-  if (key) {
-    status.classList.add('ready');
-    text.textContent = PROVIDER_LABELS[provider] + ' ready';
-    const sp = document.getElementById('statusProvider');
-    sp.textContent = PROVIDER_LABELS[provider] + ': ' + getModel(provider);
-    sp.classList.add('mint');
-  } else {
-    status.classList.remove('ready');
-    text.textContent = PROVIDER_LABELS[provider] + ' needs key';
-    const sp = document.getElementById('statusProvider');
-    sp.textContent = 'No AI key';
-    sp.classList.remove('mint');
-  }
+  status.classList.add('ready');
+  text.textContent = 'Lemango AI ready';
+  const sp = document.getElementById('statusProvider');
+  if (sp) { sp.textContent = 'Lemango AI'; sp.classList.add('mint'); }
 }
 
 function setProvider(provider) {
@@ -1933,19 +1924,27 @@ function renderSearchResults(query) {
 // AI STREAMING
 // ============================================================
 async function* streamChat(messages, options) {
-  const provider = state.settings.provider;
-  const apiKey = getApiKey(provider);
-  if (!apiKey) throw new Error('No API key set for ' + PROVIDER_LABELS[provider] + '. Open Settings to add one.');
-  const model = getModel(provider);
-  if (!model) throw new Error('No model set for ' + PROVIDER_LABELS[provider] + '. Open Settings and pick a model.');
-
-  if (provider === 'openai' || provider === 'openrouter' || provider === 'groq' || provider === 'bigpickle') {
-    yield* streamOpenAICompatible(provider, messages, options);
-  } else if (provider === 'anthropic') {
-    yield* streamAnthropic(messages, options);
-  } else if (provider === 'gemini') {
-    yield* streamGemini(messages, options);
+  // Use Lemango AI backend (no user API keys required).
+  const base = (window.LEMANGO_API_BASE || "").replace(/\/+$/, "");
+  const url = (base || "") + "/api/ai/chat";
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      message: (messages && messages.length ? messages[messages.length - 1].content : ""),
+      model: "Mango-Core",
+      history: (messages || []).slice(0, -1).map(function (m) { return { role: m.role, content: m.content }; }),
+    }),
+    signal: options && options.signal,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(function () { return ""; });
+    throw new Error("Lemango AI error (" + res.status + "): " + text.slice(0, 200));
   }
+  const data = await res.json();
+  const reply = (data && (data.response || data.reply)) || "";
+  if (reply) yield reply;
 }
 
 async function* streamOpenAICompatible(provider, messages, options) {
@@ -2179,7 +2178,7 @@ async function sendAIMessage(text) {
       assistantMsg.content += '\n\n**Error:** ' + err.message;
       const errEl = document.createElement('div');
       errEl.className = 'ai-msg-error';
-      errEl.innerHTML = '<strong>Request failed:</strong> ' + escapeHtml(err.message) + '<br><button onclick="document.getElementById(\'openSettings\').click()">Open settings</button>';
+      errEl.innerHTML = '<strong>Request failed:</strong> ' + escapeHtml(err.message);
       msgEl.appendChild(errEl);
     }
     updateAIMessageContent(msgEl, assistantMsg.content, true);
