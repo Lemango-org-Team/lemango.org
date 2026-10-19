@@ -87,7 +87,7 @@
     <div class="card">
       <p style="margin:0 0 8px;"><strong>Lamda LaunchPad</strong> — A start page with Google sign-in, persistent backgrounds, music, notes, weather, and seasonal themes.</p>
       <p style="margin:0 0 12px;font-size:13px;color:var(--muted);">Hosted in a separate, protected area. Sign in with an authorized Google account to access.</p>
-      <a id="paidLink" href="https://lemango-org.onrender.com/paid" target="_blank" rel="noopener noreferrer" class="inline" style="font-weight:700;">Open Lamda LaunchPad →</a>
+      <a id="paidLink" href="/paid" target="_blank" rel="noopener noreferrer" class="inline" style="font-weight:700;">Open Lamda LaunchPad →</a>
       <script>
         (function () {
           try {
@@ -96,7 +96,7 @@
               var u = JSON.parse(raw);
               if (u && u.idToken) {
                 var a = document.getElementById("paidLink");
-                if (a) a.href = "https://lemango-org.onrender.com/paid?idToken=" + encodeURIComponent(u.idToken);
+                if (a) a.href = "/paid?idToken=" + encodeURIComponent(u.idToken);
               }
             }
           } catch (e) {}
