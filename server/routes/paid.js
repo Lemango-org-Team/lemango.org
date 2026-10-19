@@ -37,7 +37,10 @@ async function fetchFile(relPath) {
   const cached = cache.get(relPath);
   if (cached && Date.now() - cached.ts < CACHE_TTL_MS) return cached;
   const url = REPO_RAW + "/" + relPath.split("/").map(encodeURIComponent).join("/");
-  const res = await fetch(url);
+  const headers = {};
+  const token = process.env.GITHUB_TOKEN || process.env.PAID_REPO_TOKEN;
+  if (token) headers.Authorization = "Bearer " + token;
+  const res = await fetch(url, { headers });
   if (!res.ok) throw new Error("not found");
   const buf = Buffer.from(await res.arrayBuffer());
   const entry = { body: buf, type: contentType(relPath), ts: Date.now() };
