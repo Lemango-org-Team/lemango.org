@@ -130,7 +130,9 @@
             });
             window.google.accounts.id.renderButton(slot, {
               theme: "outline", size: "large", text: "signin_with",
-              shape: "rectangular", logo_alignment: "left", width: 280
+              shape: "rectangular", logo_alignment: "left",
+              // Never wider than the card it sits in, or it overflows on 320px phones
+              width: Math.max(200, Math.min(280, (window.innerWidth || 320) - 56))
             });
           }).catch(function (e) { console.warn(e); });
         }

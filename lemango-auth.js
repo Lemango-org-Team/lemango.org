@@ -12,9 +12,14 @@
 (function () {
   const CLIENT_ID = "417747434436-j8ohlhkpo982m8uvum322d9mirg7n7gb.apps.googleusercontent.com";
   const USER_KEY = "lemango_user";
+  // Below this width the official Google button (fixed 220px) no longer fits
+  // inside the site headers and pushes the whole page into horizontal scroll.
+  // Narrow screens get a compact "Sign in" link to /auth instead.
+  const COMPACT_MAX = 960;
   const LemangoAuth = {
     user: null,
     _scriptPromise: null,
+    _compactQuery: null,
     load() {
       if (window.google && window.google.accounts) return Promise.resolve();
       if (this._scriptPromise) return this._scriptPromise;
@@ -40,8 +45,25 @@
         const raw = localStorage.getItem(USER_KEY);
         if (raw) this.user = JSON.parse(raw);
       } catch { this.user = null; }
+      this._watchCompact();
       document.querySelectorAll("[data-auth-widget]").forEach((el) => this.mount(el));
       document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: this.user } }));
+    },
+    _isCompact() {
+      return window.matchMedia("(max-width: " + COMPACT_MAX + "px)").matches;
+    },
+    _watchCompact() {
+      if (this._compactQuery) return;
+      this._compactQuery = window.matchMedia("(max-width: " + COMPACT_MAX + "px)");
+      const onChange = () => {
+        this._remountAll();
+        document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: this.user } }));
+      };
+      if (this._compactQuery.addEventListener) this._compactQuery.addEventListener("change", onChange);
+      else if (this._compactQuery.addListener) this._compactQuery.addListener(onChange);
+    },
+    _remountAll() {
+      document.querySelectorAll("[data-auth-widget]").forEach((el) => this.mount(el));
     },
     mount(container) {
       if (!container) return;
@@ -92,8 +114,23 @@
       const wrap = document.createElement("div");
       wrap.className = "lm-auth-signin-wrap";
       wrap.style.display = "inline-block";
-      this._renderGoogleButton(wrap, container);
+      if (this._isCompact()) {
+        wrap.appendChild(this._buildCompactSignIn());
+      } else {
+        this._renderGoogleButton(wrap, container);
+      }
       return wrap;
+    },
+    // Narrow screens: a small link to the dedicated sign-in page instead of the
+    // 220px Google button, which cannot shrink and overflows mobile headers.
+    _buildCompactSignIn() {
+      const a = document.createElement("a");
+      a.href = "/auth?next=" + encodeURIComponent(location.pathname + location.search);
+      a.className = "lm-auth-signin lm-auth-signin-compact";
+      a.textContent = "Sign in";
+      a.setAttribute("aria-label", "Sign in with Google");
+      a.style.cssText = "background:#ffffff;color:#1e2b22;border:1.5px solid #c8cfc5;border-radius:6px;padding:6px 12px;font-weight:700;font-size:12px;text-decoration:none;display:inline-block;white-space:nowrap;line-height:1.4;";
+      return a;
     },
     async _renderGoogleButton(wrap, container) {
       try {
@@ -172,7 +209,8 @@
 
   const style = document.createElement("style");
   style.textContent = `
-    .lm-auth-signin-wrap { display:inline-block; }
+    .lm-auth-signin-wrap { display:inline-block; max-width:100%; }
+    .lm-auth-signin-compact { max-width:100%; }
     .lm-auth-chip { position:relative;display:inline-flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border:1px solid rgba(0,0,0,.10);border-radius:999px;background:rgba(255,255,255,.6);font-family:inherit;font-size:12px;font-weight:600;color:inherit; }
     .lm-auth-avatar { width:28px;height:28px;border-radius:50%;background:#005c2d;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0; }
     .lm-auth-avatar img { width:28px;height:28px;border-radius:50%;object-fit:cover; }

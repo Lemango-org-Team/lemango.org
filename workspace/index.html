@@ -668,8 +668,20 @@
     #app.no-ai { grid-template-columns: 240px 1fr 0 !important; }
   }
   @media (max-width: 900px) {
-    #app { grid-template-columns: 1fr !important; grid-template-rows: 48px minmax(0, 1fr) 200px 26px !important; grid-template-areas: "topbar" "editor" "terminal" "statusbar" !important; }
+    #app { grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: 48px minmax(0, 1fr) 200px 26px !important; grid-template-areas: "topbar" "editor" "terminal" "statusbar" !important; }
     .sidebar, .ai-panel { display: none; }
+    /* Grid items default to min-width:auto, so the topbar's min-content width
+       (~801px) used to blow the 1fr track out past the viewport and clip every
+       button on the right. */
+    .topbar { min-width: 0; gap: 8px; padding: 0 10px; }
+    .cmd-trigger { flex: 0 1 auto; min-width: 0; max-width: 260px; }
+    .cmd-trigger span, .cmd-trigger kbd { display: none; }
+    .ai-status { display: none; }
+  }
+  @media (max-width: 560px) {
+    .topbar .topbar-divider { display: none; }
+    .cmd-trigger { display: none; }
+    .topbar > a[href="/ai"] { font-size: 11px; padding: 4px 6px; }
   }
 </style>
 </head>

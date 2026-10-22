@@ -718,6 +718,13 @@ a:focus-visible, button:focus-visible {
   .hero { gap: 32px; min-height: 520px; }
   .section-heading { align-items: start; }
   .about { grid-template-columns: 64px 1fr; }
+
+  /* Tighten the desktop nav so it still fits between 721px and 960px.
+     Above 960px the Google sign-in button is the full 220px wide; below it
+     the widget renders as a compact "Sign in" link instead. */
+  .site-nav { gap: 16px; }
+  .site-nav a { font-size: 12px; }
+  .nav-cta { padding: 8px 12px; }
 }
 
 @media (max-width: 720px) {
@@ -730,6 +737,9 @@ a:focus-visible, button:focus-visible {
   .nav-hamburger { display: flex; }
   .nav-overlay { display: block; }
   .nav-overlay.is-open { display: block; }
+
+  /* Sign-in lives in the drawer on phones (the desktop nav is hidden) */
+  .nav-drawer-account { margin-top: 18px; }
 
   .hero { grid-template-columns: 1fr; gap: 32px; padding: 48px 0 56px; }
   .hero-copy { padding: 0; }

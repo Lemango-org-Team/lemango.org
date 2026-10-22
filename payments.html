@@ -47,6 +47,13 @@
     .brand b { color: var(--green); }
     nav a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600; margin-left: 18px; }
     nav a:hover { color: var(--green-dark); }
+    /* Narrow phones: the nav links + dark-mode toggle no longer fit beside the logo */
+    @media (max-width: 420px) {
+      .bar { flex-wrap: wrap; row-gap: 6px; }
+      nav { display: flex; flex-wrap: wrap; }
+      nav a { margin-left: 0; margin-right: 14px; font-size: 13px; }
+      #lm-theme-toggle { margin-left: 0 !important; }
+    }
     main { padding: 48px 0 24px; }
     .eyebrow { color: var(--green-dark); font-weight: 800; letter-spacing: .14em; font-size: 12px; text-transform: uppercase; margin: 0 0 10px; }
     h1 { font-family: var(--serif); font-size: 42px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -.5px; }
