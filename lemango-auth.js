@@ -101,7 +101,6 @@
       out.textContent = "Sign out";
       out.style.background = "transparent";
       out.style.border = "none";
-      out.style.color = "#8c1605";
       out.style.fontWeight = "600";
       out.style.cursor = "pointer";
       out.style.fontSize = "12px";
