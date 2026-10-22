@@ -1041,6 +1041,60 @@ body.dark .code-block { background: #171717; }
     .model-dropdown { left: 12px; right: 12px; }
 }
 
+/* ---- Mobile header (phones): the desktop header packs a 220px Google button
+   plus four 44px buttons into one flex row, which is ~458px wide and forces
+   the whole document to scroll sideways on a 320-390px screen. ---- */
+@media (max-width: 600px) {
+    html { overflow-x: hidden; }
+
+    .header {
+        flex-wrap: wrap;
+        gap: 8px;
+        row-gap: 8px;
+    }
+
+    .header-left { min-width: 0; flex: 0 1 auto; }
+    .header-info { min-width: 0; }
+    .header-info h1 {
+        font-size: 15px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .header-actions {
+        min-width: 0;
+        flex: 0 1 auto;
+        margin-left: auto;
+        gap: 2px;
+        overflow: hidden;
+    }
+
+    /* Icon-only action buttons */
+    .header-actions .clear-btn {
+        min-width: 34px;
+        width: 34px;
+        height: 34px;
+        padding: 0 !important;
+        justify-content: center;
+        flex: 0 0 auto;
+    }
+    .header-actions .clear-btn > span { display: none; }
+
+    /* Drop the JSON export on phones - the widest, least-used control */
+    #lm-export-log-btn { display: none; }
+
+    /* Compact sign-in control replaces the 220px Google button */
+    .header-actions [data-auth-widget] { min-width: 0; }
+    .header-actions .lm-auth-signin-wrap { max-width: 100%; }
+}
+
+@media (max-width: 380px) {
+    .header { padding: 10px 8px; }
+    .header-info h1 { font-size: 13px; }
+    .header-actions .clear-btn { min-width: 30px; width: 30px; height: 30px; }
+}
+
 @media (min-width: 601px) and (max-width: 1024px) {
     .starter-chips { grid-template-columns: repeat(2, 1fr); }
 }
