@@ -1307,16 +1307,24 @@ function getModel(provider) {
 
 function applySettingsToUI() {
   ['openai','anthropic','gemini','openrouter','groq','bigpickle'].forEach(p => {
-    document.getElementById(p + 'Key').value = state.settings[p + 'Key'] || '';
-    document.getElementById(p + 'Model').value = state.settings[p + 'Model'] || '';
-    document.getElementById('badge-' + p).style.display = state.settings.provider === p ? '' : 'none';
+    // Elements can be absent (the provider select was removed from the markup),
+    // and an unguarded lookup here used to abort the whole function — leaving
+    // the status stuck on "No AI configured" and the theme list empty.
+    const keyEl = document.getElementById(p + 'Key');
+    const modelEl = document.getElementById(p + 'Model');
+    const badgeEl = document.getElementById('badge-' + p);
+    if (keyEl) keyEl.value = state.settings[p + 'Key'] || '';
+    if (modelEl) modelEl.value = state.settings[p + 'Model'] || '';
+    if (badgeEl) badgeEl.style.display = state.settings.provider === p ? '' : 'none';
   });
-  document.getElementById('bigpickleBaseUrl').value = state.settings.bigpickleBaseUrl || '';
+  const bpUrl = document.getElementById('bigpickleBaseUrl');
+  if (bpUrl) bpUrl.value = state.settings.bigpickleBaseUrl || '';
   populateModelSelects();
   document.querySelectorAll('.provider-card').forEach(card => {
     card.classList.toggle('active', card.dataset.provider === state.settings.provider);
   });
-  document.getElementById('aiProviderSelect').value = state.settings.provider;
+  const provSel = document.getElementById('aiProviderSelect');
+  if (provSel) provSel.value = state.settings.provider;
   applyTheme();
   populateThemeSelect();
   updateAIStatus();
@@ -3207,7 +3215,8 @@ function bindEvents() {
 
   document.getElementById('newChatBtn').addEventListener('click', newChat);
 
-  document.getElementById('aiProviderSelect').addEventListener('change', function(e) {
+  const providerSelect = document.getElementById('aiProviderSelect');
+  if (providerSelect) providerSelect.addEventListener('change', function(e) {
     setProvider(e.target.value);
   });
 
@@ -3216,7 +3225,8 @@ function bindEvents() {
       if (!select.value || select.value === '__custom__') return;
       const p = select.id.replace('ModelSelect', '');
       state.settings[p + 'Model'] = select.value;
-      document.getElementById(p + 'Model').value = select.value;
+      const modelInput = document.getElementById(p + 'Model');
+      if (modelInput) modelInput.value = select.value;
       saveMeta();
       updateAIStatus();
       showToast('Model: ' + select.value, 'success');
