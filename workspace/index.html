@@ -6,6 +6,7 @@
 <meta name="robots" content="noindex" />
 <meta name="lemango-api-base" content="https://lemango-org.onrender.com" />
 <script src="/api-base.js"></script>
+<script src="/lemango-auth.js" defer></script>
 <title>Forge — AI-Native Code Workspace</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -256,6 +257,17 @@
   .ai-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
   .ai-status.ready .dot { background: var(--mint); box-shadow: 0 0 6px var(--mint-glow); }
   .ai-status.ready { color: var(--mint); }
+  /* ---------- AUTH (Sign in with Google) ---------- */
+  .topbar-auth { display: flex; align-items: center; flex-shrink: 0; }
+  .topbar-auth:empty { display: none; }
+  .topbar-auth .lm-auth-chip {
+    background: var(--bg-2); border-color: var(--border-2); color: var(--fg);
+  }
+  .topbar-auth .lm-auth-signout { color: #fca5a5; }
+  .topbar-auth .lm-auth-name { max-width: 90px; }
+  /* Below 900px the AI panel is hidden, so nothing in FORGE can demand a
+     sign-in. Dropping the control keeps the already-tight phone toolbar clean. */
+  @media (max-width: 900px) { .topbar-auth { display: none; } }
   .icon-btn {
     width: 32px; height: 32px; display: grid; place-items: center;
     background: transparent; border: 1px solid transparent; border-radius: 8px;
@@ -708,6 +720,10 @@
       <span class="dot"></span>
       <span id="aiStatusText">No AI configured</span>
     </div>
+    <!-- Sign in with Google. FORGE's AI refuses coding help until the visitor is
+         signed in, so the control has to live somewhere visible. Forced compact
+         (64px) because this toolbar is already full of icon buttons. -->
+    <div class="topbar-auth" data-auth-widget data-auth-compact></div>
     <button class="icon-btn" id="toggleSidebar" title="Toggle sidebar (Ctrl+B)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
     </button>
@@ -861,7 +877,7 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/></svg>
         </div>
         <h3>Your AI coding partner</h3>
-        <p>Configure your API key in settings, then ask anything. The AI sees your current file and can apply code changes directly.</p>
+        <p>Lemango AI is built in — no API key needed. <strong>Sign in with Google</strong> (top right) to unlock coding help. The AI sees your current file and can apply code changes directly.</p>
         <div class="ai-welcome-tips">
           <div class="ai-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span>Open a file and use quick actions</span></div>
           <div class="ai-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg><span>Type @ to attach files as context</span></div>
@@ -1941,12 +1957,26 @@ async function* streamChat(messages, options) {
   const url = (base || "") + "/api/ai/chat";
   const last = (messages && messages.length) ? messages[messages.length - 1] : null;
   const hist = (messages || []).slice(0, -1).filter(function (m) { return m && (m.role === "user" || m.role === "assistant"); }).map(function (m) { return { role: m.role, content: m.content }; });
+  // The API only unlocks coding help for a caller with a verified Google ID
+  // token; without one it prepends NO_CODE_RULE and replies "sign in with
+  // Google". FORGE never sent it, so even signed-in users were refused.
+  let idToken = "";
+  try {
+    idToken = (window.LemangoAuth && window.LemangoAuth.user && window.LemangoAuth.user.idToken) || "";
+  } catch (e) { /* ignore */ }
+  if (!idToken) {
+    try {
+      const saved = JSON.parse(localStorage.getItem("lemango_user") || "null");
+      if (saved && saved.idToken) idToken = saved.idToken;
+    } catch (e) { /* ignore */ }
+  }
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify({
       message: last ? last.content : "",
+      idToken: idToken,
       model: (function () { var s = document.getElementById('lemangoModelSelect'); var v = s ? s.value : 'Mango-Core'; if (v !== 'auto') return v; var t = (last ? last.content : "").toLowerCase(); if (/code|function|debug|error|script|program/i.test(t)) return 'Mango-Ultra'; if (t.length < 60) return 'Mango-Light'; if (t.length < 200) return 'Mango-Core'; return 'Mango-Pro'; })(),
       history: hist,
       context: buildSystemPrompt(),
