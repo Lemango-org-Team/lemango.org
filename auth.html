@@ -100,14 +100,38 @@
       el.textContent = msgs[err] || "An unexpected error occurred.";
       el.hidden = false;
     }
+
+    // Where to send the user after a successful sign-in. The mobile headers
+    // link here with ?next=/ai (etc.) because the official Google button is
+    // too wide to fit on a phone.
+    const rawNext = params.get("next") || "";
+    window.__lmNext = (rawNext.startsWith("/") && !rawNext.startsWith("//")) ? rawNext : "";
   </script>
   <script src="lemango-auth.js" defer></script>
   <script src="cookie-consent.js" defer></script>
   <script src="dark-mode.js" defer></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
+      var next = window.__lmNext || "";
+      var slot = document.getElementById("googleSlot");
+
+      // Already signed in: offer to go straight back where the user came from.
+      if (next && slot) {
+        var stored = null;
+        try { stored = JSON.parse(localStorage.getItem("lemango_user") || "null"); } catch (e) {}
+        if (stored) {
+          slot.innerHTML = "";
+          var cont = document.createElement("a");
+          cont.href = next;
+          cont.textContent = "Continue";
+          cont.className = "btn btn-primary";
+          cont.style.cssText = "display:inline-block;background:#005c2d;color:#fff;padding:12px 22px;border-radius:8px;font-weight:700;text-decoration:none;";
+          slot.appendChild(cont);
+          return;
+        }
+      }
+
       if (window.LemangoAuth) {
-        var slot = document.getElementById("googleSlot");
         if (slot) {
           // Render Google's official button (clickable repeatedly, even after dismissing)
           window.LemangoAuth.load().then(function () {
@@ -125,6 +149,8 @@
                 slot.innerHTML = "";
                 slot.appendChild(window.LemangoAuth._buildUserChip(window.LemangoAuth.user));
                 document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: window.LemangoAuth.user } }));
+                // Send the user back to the page that sent them here.
+                if (window.__lmNext) location.assign(window.__lmNext);
               },
               cancel_on_tap_outside: false
             });
