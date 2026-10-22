@@ -127,6 +127,17 @@
           cont.className = "btn btn-primary";
           cont.style.cssText = "display:inline-block;background:#005c2d;color:#fff;padding:12px 22px;border-radius:8px;font-weight:700;text-decoration:none;";
           slot.appendChild(cont);
+
+          var alt = document.createElement("button");
+          alt.type = "button";
+          alt.textContent = "Use a different account";
+          alt.style.cssText = "display:block;margin:12px auto 0;background:none;border:none;color:#005c2d;font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline;";
+          alt.addEventListener("click", function () {
+            try { localStorage.removeItem("lemango_user"); } catch (e) {}
+            if (window.LemangoAuth) window.LemangoAuth.user = null;
+            location.reload();
+          });
+          slot.appendChild(alt);
           return;
         }
       }
