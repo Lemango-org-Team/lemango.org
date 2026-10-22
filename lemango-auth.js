@@ -114,7 +114,9 @@
       const wrap = document.createElement("div");
       wrap.className = "lm-auth-signin-wrap";
       wrap.style.display = "inline-block";
-      if (this._isCompact()) {
+      // `data-auth-compact` forces the small link even on wide screens. Used by
+      // tool UIs whose toolbars are already crowded and cannot fit 220px.
+      if (this._isCompact() || (container && container.hasAttribute("data-auth-compact"))) {
         wrap.appendChild(this._buildCompactSignIn());
       } else {
         this._renderGoogleButton(wrap, container);
