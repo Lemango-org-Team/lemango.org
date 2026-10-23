@@ -71,16 +71,17 @@ async function isAllowed(req, res) {
 
 paidRouter.get("/", async (req, res) => {
   if (!(await isAllowed(req, res))) return res.status(403).send("Access denied. Paid product — sign in with an authorized account.");
-  try {
-    const entry = await fetchFile("index.html");
-    let html = entry.body.toString("utf8");
-    // Inject right-click disable + a back link before </body>
-    const inject = `<script>document.addEventListener('contextmenu',function(e){e.preventDefault();});document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&['c','u','s'].includes(e.key.toLowerCase()))e.preventDefault();});</script><div style="position:fixed;bottom:8px;left:8px;z-index:9999;"><a href="https://lemango.org/payments" style="color:#94a3b8;font-size:11px;text-decoration:none;">← Lemango</a></div>`;
-    html = html.replace("</body>", inject + "</body>");
-    res.type("text/html; charset=utf-8").send(html);
-  } catch (e) {
-    res.status(404).send("Not found.");
-  }
+   try {
+     const entry = await fetchFile("index.html");
+     let html = entry.body.toString("utf8");
+     const inject = `<script>document.addEventListener('contextmenu',function(e){e.preventDefault();});document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&['c','u','s'].includes(e.key.toLowerCase()))e.preventDefault();});</script><div style="position:fixed;bottom:8px;left:8px;z-index:9999;"><a href="https://lemango.org/payments" style="color:#94a3b8;font-size:11px;text-decoration:none;">← Lemango</a></div>`;
+     html = html.replace("</body>", inject + "</body>");
+     res.type("text/html; charset=utf-8").send(html);
+   } catch (e) {
+     // Remote paid product unavailable — serve a local placeholder so owners aren't 404'd.
+     const fallback = `<!doctype html><html><head><meta charset="utf-8"><title>Lamda LaunchPad</title></head><body style="font-family:sans-serif;background:#0f172a;color:#e2e8f0;display:grid;place-items:center;min-height:100vh;"><div style="text-align:center;max-width:480px;padding:24px;"><h1>Lamda LaunchPad</h1><p>Paid product is being prepared. You have access as an owner.</p><a href="https://lemango.org/payments" style="color:#94a3b8;">← Back to Lemango</a></div></body></html>`;
+     res.type("text/html; charset=utf-8").send(fallback);
+   }
 });
 
 paidRouter.get("/*", async (req, res) => {
