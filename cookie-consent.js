@@ -28,7 +28,7 @@
   banner.setAttribute("role", "dialog");
   banner.setAttribute("aria-label", "Cookie consent");
   banner.innerHTML = `
-    <p>We use cookies and similar technologies for analytics and advertising. See our <a href="/privacy">Privacy Policy</a>.</p>
+    <p>We use cookies and similar technologies for analytics and advertising. See our <a href="/privacy.html">Privacy Policy</a>.</p>
     <button type="button" class="decline">Decline</button>
     <button type="button" class="accept">Accept</button>
   `;

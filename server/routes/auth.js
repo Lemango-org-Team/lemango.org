@@ -146,7 +146,7 @@ authRouter.get("/google/callback", async (req, res) => {
 
   if (error) {
     console.warn("[auth] Google returned error:", error);
-    return res.redirect("/auth?error=access_denied");
+    return res.redirect("/auth.html?error=access_denied");
   }
 
   // Verify CSRF state
@@ -154,11 +154,11 @@ authRouter.get("/google/callback", async (req, res) => {
   res.clearCookie("lm_oauth_state", { path: "/" });
 
   if (!storedState || storedState !== state) {
-    return res.redirect("/auth?error=invalid_state");
+    return res.redirect("/auth.html?error=invalid_state");
   }
 
   if (!code) {
-    return res.redirect("/auth?error=no_code");
+    return res.redirect("/auth.html?error=no_code");
   }
 
   try {
@@ -179,7 +179,7 @@ authRouter.get("/google/callback", async (req, res) => {
     res.redirect(next);
   } catch (err) {
     console.error("[auth] callback error:", err);
-    res.redirect("/auth?error=server_error");
+    res.redirect("/auth.html?error=server_error");
   }
 });
 

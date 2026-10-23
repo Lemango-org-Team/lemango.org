@@ -46,7 +46,7 @@
 
     _buildSignInBtn() {
       const a = document.createElement("a");
-      a.href = "/auth?next=" + encodeURIComponent(location.pathname + location.search);
+      a.href = "/auth.html?next=" + encodeURIComponent(location.pathname + location.search);
       a.className = "lm-auth-signin";
       a.textContent = "Sign in";
       a.style.background = "#ffffff";
