@@ -98,12 +98,11 @@
       <script>
         (function () {
           try {
-            var a = document.getElementById("paidLink");
-            var raw = localStorage.getItem("lemango_user");
-            var u = raw ? JSON.parse(raw) : null;
-            if (a && u && u.idToken) {
-              a.href = "/paid?idToken=" + encodeURIComponent(u.idToken);
-            }
+           var a = document.getElementById("paidLink");
+           var raw = localStorage.getItem("lemango_user");
+           var u = raw ? JSON.parse(raw) : null;
+           var pb = window.LEMANGO_API_BASE || "";
+           if (a) a.href = pb + "/paid" + (u && u.idToken ? "?idToken=" + encodeURIComponent(u.idToken) : "");
           } catch (e) {}
         })();
       </script>

@@ -335,7 +335,8 @@
           var btn = document.getElementById("paidProductBtn");
           if (btn && u && u.email && OWNERS.indexOf(String(u.email).toLowerCase()) !== -1) {
             btn.textContent = "Open Lamda LaunchPad →";
-            btn.href = u.idToken ? "/paid?idToken=" + encodeURIComponent(u.idToken) : "/paid";
+            var pb = window.LEMANGO_API_BASE || "";
+            btn.href = pb + (u.idToken ? "/paid?idToken=" + encodeURIComponent(u.idToken) : "/paid");
             btn.target = "_blank";
             btn.rel = "noopener noreferrer";
           }
