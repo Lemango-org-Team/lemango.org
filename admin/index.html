@@ -45,18 +45,6 @@
     <h1>Admin Access</h1>
     <p style="color:var(--muted);margin-bottom:16px;">Sign in with an authorized admin Google account to continue.</p>
     <div id="adminSignInSlot" style="margin:16px 0;"></div>
-    <div style="margin:12px 0;color:var(--muted);font-size:12px;">— or enter admin passwords —</div>
-    <input class="pw" type="password" id="adminPw1" placeholder="First admin password" />
-    <button class="btn" style="margin-top:8px;width:100%;" id="adminPwBtn1">Unlock (Step 1)</button>
-    <div id="adminPwErr1" style="color:#f87171;margin-top:8px;font-size:12px;"></div>
-  </div>
-
-  <div id="gate2" class="gate" style="display:none;">
-    <h1>Admin Access — Step 2</h1>
-    <p style="color:var(--muted);margin-bottom:16px;">Enter the second admin password to continue.</p>
-    <input class="pw" type="password" id="adminPw2" placeholder="Second admin password" />
-    <button class="btn" style="margin-top:12px;width:100%;" id="adminPwBtn2">Unlock (Step 2)</button>
-    <div id="adminPwErr2" style="color:#f87171;margin-top:8px;font-size:12px;"></div>
   </div>
 
   <div id="admin-app" style="display:none;">
@@ -109,29 +97,16 @@
   </div>
 
   <script>
-    const ADMIN_PW1 = "Forage-Sumac-Cirrus-Toggle-Socket-Firm-Send-Slope-Bloom-Ewe";
-    const ADMIN_PW2 = ";o[b==OyP>;lT69B1oMPHoJ29X4ss4]Jxa.=4P&*[{,w=@ilN$a3s+Gt6!bsH=0DAla_HtGN";
-
-    // Auto-let-in for the two owner accounts (no password needed).
-    const OWNER_EMAILS = ["kcrespo102512@gmail.com", "incmoney37@gmail.com"];
-    async function tryAutoAdmin() {
+    async function tryAdmin() {
       await window.LemangoAuth.load().catch(()=>{});
       const u = window.LemangoAuth.user;
-      // Clear stale sessions (no idToken) so user re-signs in cleanly
-      if (u && !u.idToken) {
-        try { localStorage.removeItem("lemango_user"); } catch {}
-        window.LemangoAuth.user = null;
-      }
-      const u2 = window.LemangoAuth.user;
-      if (!u2 || !u2.idToken) {
+      if (!u || !u.idToken) {
         const slot = document.getElementById("adminSignInSlot");
         if (slot && window.LemangoAuth) window.LemangoAuth.mount(slot);
         return false;
       }
-      if (OWNER_EMAILS.indexOf(String(u2.email).toLowerCase()) === -1) return false;
-      // Verify admin status on backend
       try {
-        const res = await fetch("/api/admin/check?idToken=" + encodeURIComponent(u2.idToken), { credentials: "include" });
+        const res = await fetch("/api/admin/check?idToken=" + encodeURIComponent(u.idToken), { credentials: "include" });
         const data = await res.json();
         if (data.ok && data.isAdmin) {
           document.getElementById("gate").style.display = "none";
@@ -141,86 +116,19 @@
           loadQueue(); loadInvites(); loadAbuseReport(); loadAiLogs(); loadUsersLogs();
           return true;
         }
+        const gate = document.getElementById("gate");
+        gate.innerHTML = "<h1>Admin Access</h1><p style='color:var(--muted);margin-top:12px;'>This account is not an admin.</p>";
       } catch (e) { /* ignore */ }
       return false;
     }
 
-    // Attempt auto-login on page load
-    setTimeout(() => { tryAutoAdmin(); }, 500);
-
-    // Render sign-in button in the slot
+    setTimeout(() => { tryAdmin(); }, 500);
     setTimeout(() => {
       const slot = document.getElementById("adminSignInSlot");
       if (slot && window.LemangoAuth) window.LemangoAuth.mount(slot);
     }, 600);
 
-    document.getElementById("adminPwBtn1").addEventListener("click", () => {
-      const pw = document.getElementById("adminPw1").value;
-      const err = document.getElementById("adminPwErr1");
-      if (pw !== ADMIN_PW1) { err.textContent = "Incorrect password."; return; }
-      err.textContent = "";
-      document.getElementById("gate").style.display = "none";
-      document.getElementById("gate2").style.display = "block";
-    });
-
-    document.getElementById("adminPw1").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") document.getElementById("adminPwBtn1").click();
-    });
-
-    document.getElementById("adminPwBtn2").addEventListener("click", async () => {
-      const pw = document.getElementById("adminPw2").value;
-      const err = document.getElementById("adminPwErr2");
-      if (pw !== ADMIN_PW2) { err.textContent = "Incorrect second password."; return; }
-      err.textContent = "";
-      // Now verify the signed-in user is an admin
-      await window.LemangoAuth.load().catch(()=>{});
-      const authUser = window.LemangoAuth.user;
-      if (!authUser) {
-        const slot = document.createElement("div");
-        slot.style.marginTop = "16px";
-        document.getElementById("gate2").appendChild(slot);
-        window.LemangoAuth.mount(slot);
-        document.addEventListener("lm:auth", async (e) => {
-          if (e.detail.user) {
-            await checkAdmin(e.detail.user);
-          }
-        }, { once: true });
-        return;
-      }
-      await checkAdmin(authUser);
-    });
-
-    document.getElementById("adminPw2").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") document.getElementById("adminPwBtn2").click();
-    });
-
-    async function checkAdmin(user) {
-      try {
-        const res = await fetch("/api/admin/check?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
-        const data = await res.json();
-        if (!data.ok || !data.isAdmin) {
-          document.getElementById("adminPwErr").textContent = "Your account is not an admin.";
-          return;
-        }
-        document.getElementById("gate").style.display = "none";
-        document.getElementById("admin-app").style.display = "block";
-        document.getElementById("adminEmail").textContent = data.email;
-        document.getElementById("adminRank").textContent = data.rank;
-        loadQueue();
-        loadInvites();
-        loadAbuseReport();
-        loadAiLogs();
-        loadUsersLogs();
-      } catch (e) {
-        document.getElementById("adminPwErr").textContent = "Error: " + e.message;
-      }
-    }
-
-    // Enter key on password
-    document.getElementById("adminPw").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") document.getElementById("adminPwBtn").click();
-    });
-
+    function esc(v){return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");}
     async function loadQueue() {
       const user = window.LemangoAuth.user;
       if (!user) return;
@@ -236,8 +144,8 @@
           const scoreClass = q.safetyScore >= 90 ? "high" : q.safetyScore >= 70 ? "mid" : "low";
           return `<div class="row">
             <div>
-              <div style="font-weight:600;">${q.email}</div>
-              <div style="font-size:11px;color:var(--muted);">${q.name || ""} · Safety: <span class="score ${scoreClass}">${q.safetyScore}</span> · TOS: ${q.tosAccepted ? "✓" : "✗"} · <span class="badge ${q.status}">${q.status}</span></div>
+              <div style="font-weight:600;">${esc(q.email)}</div>
+              <div style="font-size:11px;color:var(--muted);">${esc(q.name || "")} · Safety: <span class="score ${scoreClass}">${q.safetyScore}</span> · TOS: ${q.tosAccepted ? "✓" : "✗"} · <span class="badge ${q.status}">${esc(q.status)}</span></div>
             </div>
             <div style="display:flex;gap:6px;">
               ${q.status === "pending" ? `
@@ -264,8 +172,8 @@
         });
         const data = await res.json();
         if (data.ok) { alert("Approved!"); loadQueue(); }
-        else { alert(data.error || "Failed"); if (data.score < 90) {} }
-      } catch (e) { alert("Error: " + e.message); }
+        else { alert(esc(data.error) || "Failed"); if (data.score < 90) {} }
+      } catch (e) { alert("Error: " + esc(e.message)); }
     }
 
     async function rejectUser(token) {
@@ -279,8 +187,8 @@
         });
         const data = await res.json();
         if (data.ok) { alert("Rejected."); loadQueue(); }
-        else { alert(data.error || "Failed"); }
-      } catch (e) { alert("Error: " + e.message); }
+        else { alert(esc(data.error) || "Failed"); }
+      } catch (e) { alert("Error: " + esc(e.message)); }
     }
 
     document.getElementById("createInviteBtn").addEventListener("click", async () => {
@@ -307,10 +215,10 @@
           document.getElementById("inviteResult").innerHTML = `<div style="margin-top:8px;padding:8px;background:#0f172a;border-radius:6px;word-break:break-all;"><strong>Invite link:</strong> <a href="${data.inviteUrl}" target="_blank" style="color:#34d399;">${data.inviteUrl}</a><br><button class="btn" style="margin-top:6px;" onclick="navigator.clipboard.writeText('${data.inviteUrl}')">Copy</button></div>`;
           loadInvites();
         } else {
-          document.getElementById("inviteResult").textContent = (data.error || "Failed") + (data.code ? " (" + data.code + ")" : "");
+          document.getElementById("inviteResult").textContent = (esc(data.error) || "Failed") + (data.code ? " (" + data.code + ")" : "");
         }
       } catch (e) {
-        document.getElementById("inviteResult").textContent = "Error: " + e.message;
+        document.getElementById("inviteResult").textContent = "Error: " + esc(e.message);
       }
     });
 
@@ -322,7 +230,7 @@
         const data = await res.json();
         if (data.ok) {
           document.getElementById("invitesList").innerHTML = data.invites.map((inv) =>
-            `<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--line);">${inv.email} — ${inv.used ? "used" : "active"} — by ${inv.createdBy}</div>`
+            `<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--line);">${esc(inv.email)} — ${inv.used ? "used" : "active"} — by ${esc(inv.createdBy)}</div>`
           ).join("") || "<div style='color:var(--muted);font-size:12px;'>No invites.</div>";
         }
       } catch (e) { /* ignore */ }
@@ -347,12 +255,12 @@
             ${data.suspiciousIps && data.suspiciousIps.length ? `
               <div style="margin-top:12px;">
                 <strong style="color:#f87171;">Suspicious IPs (3+ users or 20+ requests):</strong>
-                ${data.suspiciousIps.map((s) => `<div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--line);">${s.ip} — ${s.requestCount} reqs, ${s.uniqueUsers} users: ${s.emails.join(", ")}</div>`).join("")}
+                ${data.suspiciousIps.map((s) => `<div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--line);">${esc(s.ip)} — ${s.requestCount} reqs, ${s.uniqueUsers} users: ${s.emails.map(esc).join(", ")}</div>`).join("")}
               </div>
             ` : "<div style='margin-top:8px;color:var(--muted);font-size:12px;'>No suspicious IPs detected.</div>"}
           `;
         } else {
-          el.innerHTML = "<div style='color:#f87171;'>" + (data.error || "Failed") + "</div>";
+          el.innerHTML = "<div style='color:#f87171;'>" + (esc(data.error) || "Failed") + "</div>";
         }
       } catch (e) {
         document.getElementById("abuseReport").innerHTML = "<div style='color:#f87171;'>Error: " + e.message + "</div>";
@@ -368,7 +276,7 @@
         const el = document.getElementById("aiLogs");
         if (data.ok) {
           el.innerHTML = (data.logs || []).map((l) =>
-            `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05);">${l.t} | ${l.email || "anon"} | ${l.ip} | ${l.model} | ${String(l.message).slice(0,60)}</div>`
+            `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05);">${esc(l.t)} | ${esc(l.email || "anon")} | ${esc(l.ip)} | ${esc(l.model)} | ${esc(String(l.message).slice(0,60))}</div>`
           ).join("") || "<div style='color:var(--muted);'>No logs.</div>";
         }
       } catch (e) { /* ignore */ }
@@ -383,7 +291,7 @@
         const el = document.getElementById("usersLogs");
         if (data.ok) {
           el.innerHTML = (data.logs || []).map((l) =>
-            `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05);">${l.t} | ${l.type} | ${l.email} | ${l.ip}</div>`
+            `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05);">${esc(l.t)} | ${esc(l.type)} | ${esc(l.email)} | ${esc(l.ip)}</div>`
           ).join("") || "<div style='color:var(--muted);'>No logs.</div>";
         }
       } catch (e) { /* ignore */ }

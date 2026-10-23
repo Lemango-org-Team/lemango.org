@@ -48,18 +48,29 @@ async function fetchFile(relPath) {
   return entry;
 }
 
-async function isAllowed(req) {
-  const token = req.query?.idToken || req.body?.idToken || req.headers["x-id-token"] || req.cookies?.lm_sid && null;
-  // Prefer idToken (Google) for allowlist check.
-  const idt = req.query?.idToken || req.headers["x-id-token"];
+async function isAllowed(req, res) {
+  // Cookie-based paid session (set after a successful idToken check), so that
+  // sub-resource requests (css/js/images) are authenticated automatically.
+  const cookieEmail = req.cookies?.lm_paid;
+  if (cookieEmail && ALLOWED_PAID_EMAILS.includes(String(cookieEmail).toLowerCase())) return true;
+  const idt = req.query?.idToken || req.body?.idToken || req.headers["x-id-token"];
   const verified = idt ? await verifyIdToken(idt) : null;
-  if (verified && ALLOWED_PAID_EMAILS.includes(String(verified.email).toLowerCase())) return true;
-  // Fallback: session cookie user (if backend auth is used)
+  if (verified && ALLOWED_PAID_EMAILS.includes(String(verified.email).toLowerCase())) {
+    if (res) {
+      res.cookie("lm_paid", String(verified.email).toLowerCase(), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+    }
+    return true;
+  }
   return false;
 }
 
 paidRouter.get("/", async (req, res) => {
-  if (!(await isAllowed(req))) return res.status(403).send("Access denied. Paid product — sign in with an authorized account.");
+  if (!(await isAllowed(req, res))) return res.status(403).send("Access denied. Paid product — sign in with an authorized account.");
   try {
     const entry = await fetchFile("index.html");
     let html = entry.body.toString("utf8");
@@ -73,7 +84,7 @@ paidRouter.get("/", async (req, res) => {
 });
 
 paidRouter.get("/*", async (req, res) => {
-  if (!(await isAllowed(req))) return res.status(403).send("Access denied.");
+  if (!(await isAllowed(req, res))) return res.status(403).send("Access denied.");
   const rel = req.params[0] || "";
   if (!rel || rel.endsWith("/")) {
     // redirect to index
