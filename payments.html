@@ -101,11 +101,13 @@
             var raw = localStorage.getItem("lemango_user");
             if (raw) {
               var u = JSON.parse(raw);
+              var a = document.getElementById("paidLink");
+              var base = (window.LEMANGO_API_BASE || "").replace(/\/+$/, "");
               if (u && u.idToken) {
-                var a = document.getElementById("paidLink");
-                if (a) a.href = "/paid?idToken=" + encodeURIComponent(u.idToken);
+                if (a) a.href = (base || "") + "/paid?idToken=" + encodeURIComponent(u.idToken);
+              } else {
+                if (a) a.href = (base || "") + "/paid";
               }
-            }
           } catch (e) {}
         })();
       </script>
