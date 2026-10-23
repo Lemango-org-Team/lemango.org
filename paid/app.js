@@ -455,7 +455,7 @@ $("clearPlaylist").onclick=()=>{
 };
 
 $("resetButton").onclick=()=>{
-  if(confirm("Reset all [redacted] Start Page settings and local data?")){
+  if(confirm("Reset all Lambda LaunchPad settings and local data?")){
     localStorage.clear();
     indexedDB.deleteDatabase("[redacted]_media");
     location.reload();
