@@ -73,7 +73,7 @@ function messages_last(list) {
   return list.length ? list[list.length - 1] : null;
 }
 
-aiRouter.get("/status.html", (_req, res) => {
+aiRouter.get("/status", (_req, res) => {
   res.json({ ok: true, configured: aiConfigured(), provider: BRAND, models: catalogForClient() });
 });
 
