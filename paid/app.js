@@ -8,6 +8,8 @@ const DEFAULT_APPS=[
 {name:"ChatGPT",url:"https://chatgpt.com",icon:"✦",logo:"https://cdn.simpleicons.org/openai/ffffff"},
 {name:"Reddit",url:"https://www.reddit.com",icon:"👽",logo:"https://cdn.simpleicons.org/reddit/ff4500"}];
 
+const LEMANGO_GOOGLE_CLIENT_ID="417747434436-j8ohlhkpo982m8uvum322d9mirg7n7gb.apps.googleusercontent.com";
+
 const state={
  apps:JSON.parse(localStorage.getItem("k_apps")||"null")||DEFAULT_APPS,
  notes:localStorage.getItem("k_notes")||"",
@@ -16,7 +18,7 @@ const state={
  weatherCity:localStorage.getItem("k_weather")||"",
  backgroundMode:localStorage.getItem("k_bgmode")||"dark",
  backgroundUrl:localStorage.getItem("k_bgurl")||"",
- googleClientId:localStorage.getItem("k_google_client")||"",
+ googleClientId:LEMANGO_GOOGLE_CLIENT_ID,
  dropboxAppKey:localStorage.getItem("k_dropbox_key")||"",
  profile:JSON.parse(localStorage.getItem("k_profile")||"null"),
  playlist:JSON.parse(localStorage.getItem("k_playlist")||"[]"),
@@ -139,7 +141,6 @@ function nav(panel){
 }
 
 function loadSettings(){
-  $("googleClientId").value=state.googleClientId;
   $("dropboxAppKey").value=state.dropboxAppKey;
   $("searchEngine").value=state.searchEngine;
   $("weatherCity").value=state.weatherCity;
@@ -291,24 +292,21 @@ function prevSong(){
   playSong(state.currentSong);
 }
 
-// Google OAuth Handler
+// Google OAuth Handler — uses the shared Lemango client ID.
 function initGoogleSignIn(){
-  if(!state.googleClientId){
-    alert("Add your Google OAuth Client ID in Settings first.\n\nGet it from: https://console.cloud.google.com/\n1. Create project\n2. Enable Google+ API\n3. Create OAuth 2.0 Web Client\n4. Add authorized redirect URI");
-    return;
-  }
-  
-  // Initialize Google Sign-In
+  if(!(window.google&&google.accounts&&google.accounts.id))return false;
+  const mount=$("googleSignInButton");
+  if(!mount)return false;
   google.accounts.id.initialize({
-    client_id:state.googleClientId,
+    client_id:LEMANGO_GOOGLE_CLIENT_ID,
     callback:handleGoogleSignIn
   });
-  
-  google.accounts.id.renderButton($("googleSignInButton"),{
+  google.accounts.id.renderButton(mount,{
     theme:"filled_blue",
     size:"large",
     text:"signin_with"
   });
+  return true;
 }
 
 function handleGoogleSignIn(response){
@@ -362,7 +360,6 @@ $("notes").oninput=()=>{
 };
 
 $("saveSettings").onclick=()=>{
-  state.googleClientId=$("googleClientId").value.trim();
   state.dropboxAppKey=$("dropboxAppKey").value.trim();
   state.searchEngine=$("searchEngine").value;
   state.weatherCity=$("weatherCity").value.trim();
@@ -370,8 +367,6 @@ $("saveSettings").onclick=()=>{
   loadWeather();
   alert("Settings saved.");
 };
-
-$("googleSignIn").onclick=initGoogleSignIn;
 
 $("googleSignOut").onclick=()=>{
   state.profile=null;
@@ -386,7 +381,7 @@ $("dropboxConnectSettings").onclick=()=>{
   alert("Dropbox App Key saved. Use the Connect button in My Files to begin OAuth.");
 };
 
-$("driveButton").onclick=()=>alert("Google Drive requires OAuth authorization and a Google Cloud project/client ID. Add it in Settings, then connect.");
+$("driveButton").onclick=()=>alert("Google Drive browsing isn't available yet.");
 $("dropboxButton").onclick=()=>alert("Dropbox requires an OAuth app key. Add it in Settings, then connect.");
 $("refreshFiles").onclick=()=>alert("Connect a cloud provider to populate this list.");
 
@@ -477,8 +472,11 @@ async function initialize(){
   loadWeather();
   
   // Initialize Google Sign-In if script is loaded
-  if(typeof google !== 'undefined'){
-    initGoogleSignIn();
+  if(!initGoogleSignIn()){
+    let tries=0;
+    const timer=setInterval(()=>{
+      if(initGoogleSignIn()||++tries>40)clearInterval(timer);
+    },250);
   }
   
   setInterval(clock,1000);
