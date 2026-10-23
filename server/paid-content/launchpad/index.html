@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111827">
+<title>Kmoon Start Page</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body data-season="winter">
+<div id="backgroundLayer">
+  <div id="backgroundOverlay"></div>
+  <video id="backgroundVideo" muted loop playsinline></video>
+  <img id="backgroundImage" alt="">
+</div>
+<div class="background-glow glow-one"></div><div class="background-glow glow-two"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="profile-card">
+    <div class="avatar" id="profileAvatar">K</div>
+    <div class="profile-info">
+      <strong id="profileName">Guest</strong>
+      <span id="profileEmail">Connect Google</span>
+    </div>
+    <button class="profile-menu" id="profileButton">⋮</button>
+  </div>
+  <nav>
+    <button class="nav-item active" data-panel="home"><span>⌂</span><b>Home</b></button>
+    <button class="nav-item" data-panel="files"><span>▣</span><b>My Files</b></button>
+    <button class="nav-item" data-panel="music"><span>♫</span><b>Music</b></button>
+    <button class="nav-item" data-panel="backgrounds"><span>◈</span><b>Background</b></button>
+    <button class="nav-item" data-panel="settings"><span>⚙</span><b>Settings</b></button>
+  </nav>
+  <div class="sidebar-bottom">
+    <button class="collapse-button" id="collapseSidebar">‹</button>
+  </div>
+</aside>
+
+<main class="page">
+  <header class="topbar">
+    <button class="mobile-menu" id="mobileMenu">☰</button>
+    <div class="brand"><div class="brand-icon">K</div><div><div class="brand-name">Kmoon</div><div class="brand-subtitle" id="seasonLabel">Winter mode</div></div></div>
+    <div class="top-actions"><button class="icon-button" id="themeButton">◐</button><button class="icon-button" id="settingsButton">⚙</button></div>
+  </header>
+
+  <section id="homePanel" class="panel-view">
+    <section class="hero">
+      <div class="greeting" id="greeting">Good afternoon</div>
+      <div class="clock" id="clock">12:00</div>
+      <div class="date" id="date"></div>
+      <form class="search-box" id="searchForm">
+        <span class="search-icon">⌕</span><input id="searchInput" autocomplete="off" autofocus placeholder="Search Google or type a URL"><button>↵</button>
+      </form>
+    </section>
+    <section class="apps-section">
+      <div class="section-heading"><div><h2>Your apps</h2><p>Drag tiles to rearrange them</p></div><button class="add-button" id="addAppButton">＋ Add App</button></div>
+      <div class="apps-grid" id="appsGrid"></div>
+    </section>
+    <section class="widgets">
+      <article class="widget"><div class="widget-title">📝 Quick Notes</div><textarea id="notes" placeholder="Write something..."></textarea></article>
+      <article class="widget"><div class="widget-title">🌤 Weather</div><div class="weather-main"><div class="weather-icon" id="weatherIcon">—</div><div><div class="weather-temp" id="weatherTemp">--°</div><div class="weather-text" id="weatherText">Add your location in settings</div></div></div><div class="weather-location" id="weatherLocation">Local weather</div></article>
+      <article class="widget"><div class="widget-title">⚡ Quick Tools</div><div class="tool-buttons"><button onclick="location.href='https://www.google.com'">Google</button><button onclick="location.href='https://www.youtube.com'">YouTube</button><button onclick="location.href='https://github.com'">GitHub</button><button onclick="location.href='https://discord.com'">Discord</button></div></article>
+    </section>
+  </section>
+
+  <section id="filesPanel" class="panel-view hidden">
+    <div class="page-heading"><h1>My Files</h1><p>Connect cloud storage to browse your files.</p></div>
+    <div class="connection-grid">
+      <div class="connection-card"><div class="service-logo google-drive">△</div><div><h3>Google Drive</h3><p id="driveStatus">Not connected</p></div><button class="primary-button small" id="driveButton">Connect</button></div>
+      <div class="connection-card"><div class="service-logo dropbox">◇</div><div><h3>Dropbox</h3><p id="dropboxStatus">Not connected</p></div><button class="primary-button small" id="dropboxButton">Connect</button></div>
+    </div>
+    <div class="file-toolbar"><input id="fileSearch" placeholder="Search connected files..."><button class="add-button" id="refreshFiles">↻ Refresh</button></div>
+    <div id="fileList" class="file-list"><div class="empty-state">Connect Google Drive or Dropbox in Settings to display your cloud files here.</div></div>
+  </section>
+
+  <section id="musicPanel" class="panel-view hidden">
+    <div class="page-heading"><h1>Music</h1><p>Your browser-local music library and playlists.</p></div>
+    <div class="music-layout">
+      <div class="music-library widget"><div class="widget-title">Add Music</div><input type="file" id="musicFile" accept="audio/*" multiple><div class="url-row"><input id="musicUrl" placeholder="https://example.com/song.mp3"><button class="primary-button small" id="addMusicUrl">Add URL</button></div></div>
+      <div class="playlist widget"><div class="playlist-header"><div><div class="widget-title">Playlist</div><span id="playlistCount">0 songs</span></div><button class="add-button" id="clearPlaylist">Clear</button></div><div id="playlistItems"></div></div>
+    </div>
+    <div class="player widget"><div class="now-playing"><span id="nowPlayingIcon">♫</span><div><b id="nowPlaying">Nothing playing</b><small id="nowPlayingSource">Choose a song below</small></div></div><div class="player-controls"><button id="prevSong">⏮</button><button id="playSong">▶</button><button id="nextSong">⏭</button></div><audio id="audioPlayer" controls></audio></div>
+  </section>
+
+  <section id="backgroundsPanel" class="panel-view hidden">
+    <div class="page-heading"><h1>Background</h1><p>Build your own animated start-page backdrop.</p></div>
+    <div class="background-settings">
+      <div class="widget"><div class="widget-title">Theme</div><label>Seasonal Theme</label><select id="seasonSelect"><option value="auto">Auto — real seasons</option><option value="spring">Spring</option><option value="summer">Summer</option><option value="autumn">Autumn</option><option value="winter">Winter</option></select><label>Mode</label><div class="mode-buttons"><button data-mode="dark">Dark</button><button data-mode="light">Light</button><button data-mode="custom">Custom</button></div></div>
+      <div class="widget"><div class="widget-title">Custom Background</div><label>Image / GIF</label><input type="file" id="backgroundFile" accept="image/*,.gif"><label>Video</label><input type="file" id="backgroundVideoFile" accept="video/*"><label>Or use an image/video URL</label><input id="backgroundUrl" placeholder="https://..."><button class="primary-button" id="applyBackgroundUrl">Use URL</button><button class="danger-button" id="clearBackground">Clear custom background</button></div>
+    </div>
+  </section>
+
+  <section id="settingsPanel" class="panel-view hidden">
+    <div class="page-heading"><h1>Settings</h1><p>Accounts, search, weather and cloud connections.</p></div>
+    <div class="settings-grid">
+      <div class="widget"><div class="widget-title">Google Account</div><p class="setting-help">Sign in with your Google account using official OAuth.</p><label>Google OAuth Client ID</label><input id="googleClientId" placeholder="Paste your Client ID from Google Cloud Console"><button class="primary-button" id="googleSignIn">Setup Google Sign-In</button><div id="googleSignInButton" style="margin-top:12px;"></div><button class="danger-button" id="googleSignOut">Sign out</button><p class="setting-help" style="margin-top:12px;font-size:12px;"><strong>Setup instructions:</strong><br>1. Go to https://console.cloud.google.com<br>2. Create a new project<br>3. Enable "Google+ API"<br>4. Create OAuth 2.0 Web Client credentials<br>5. Add authorized JavaScript origin (your domain)<br>6. Copy the Client ID here</p></div>
+      <div class="widget"><div class="widget-title">Dropbox</div><input id="dropboxAppKey" placeholder="Dropbox App Key"><button class="primary-button" id="dropboxConnectSettings">Connect Dropbox</button></div>
+      <div class="widget"><div class="widget-title">Search & Weather</div><label>Search engine</label><select id="searchEngine"><option value="google">Google</option><option value="bing">Bing</option><option value="duckduckgo">DuckDuckGo</option></select><label>Weather location</label><input id="weatherCity" placeholder="Philadelphia"><button class="primary-button" id="saveSettings">Save Settings</button></div>
+      <div class="widget"><div class="widget-title">Data</div><p class="setting-help">Apps, notes, theme preferences and media are stored in this browser using IndexedDB and localStorage.</p><button class="danger-button" id="resetButton">Reset All Data</button></div>
+    </div>
+  </section>
+
+  <footer><span>Kmoon Start Page</span><span>•</span><span id="footerSeason">Auto seasonal theme</span></footer>
+</main>
+
+<div class="modal-backdrop" id="appModal"><div class="modal"><button class="modal-close" data-close="appModal">×</button><h2>Add App</h2><p class="modal-subtitle">Create a shortcut.</p><label>Name</label><input id="appName" placeholder="Roblox"><label>Website URL</label><input id="appUrl" placeholder="https://www.example.com"><label>Logo URL (optional)</label><input id="appLogo" placeholder="https://cdn.simpleicons.org/..."><label>Emoji fallback</label><input id="appIcon" maxlength="4" value="🌐"><button class="primary-button" id="saveApp">Add App</button></div></div>
+
+<script src="app.js"></script>
+</body>
+</html>

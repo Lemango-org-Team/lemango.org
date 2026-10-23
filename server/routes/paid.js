@@ -1,9 +1,12 @@
 /**
  * server/routes/paid.js
- * Serves paid products from the Paided repo (single source of truth) behind
- * auth + allowlist. Files are fetched from GitHub raw and cached in memory.
+ * Serves paid products behind auth + allowlist. Files are loaded from the
+ * bundled local product directory first, then fall back to the Paided repo.
  */
 import { Router } from "express";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import { verifyIdToken } from "./ai.js";
 
 export const paidRouter = Router();
@@ -12,6 +15,9 @@ const ALLOWED_PAID_EMAILS = ["kcrespo102512@gmail.com", "incmoney37@gmail.com"];
 const REPO_RAW = "https://raw.githubusercontent.com/kcrespo1025/Paided/main";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const cache = new Map(); // path -> { body: Buffer, type: string, ts: number }
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const LOCAL_DIR = path.resolve(__dirname, "..", "paid-content", "launchpad");
 
 const TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -33,9 +39,24 @@ function contentType(p) {
   return (i >= 0 && TYPES[p.slice(i).toLowerCase()]) || "application/octet-stream";
 }
 
+async function fetchLocal(relPath) {
+  const rel = path.normalize(relPath).replace(/^(\.\.[/\\])+/, "").replace(/^[/\\]+/, "");
+  const full = path.join(LOCAL_DIR, rel);
+  if (full !== LOCAL_DIR && !full.startsWith(LOCAL_DIR + path.sep)) throw new Error("not found");
+  const buf = await readFile(full);
+  return { body: buf, type: contentType(relPath), ts: Date.now() };
+}
+
 async function fetchFile(relPath) {
   const cached = cache.get(relPath);
   if (cached && Date.now() - cached.ts < CACHE_TTL_MS) return cached;
+  try {
+    const local = await fetchLocal(relPath);
+    cache.set(relPath, local);
+    return local;
+  } catch {
+    // fall through to the remote repo
+  }
   const url = REPO_RAW + "/" + relPath.split("/").map(encodeURIComponent).join("/");
   const headers = {};
   const token = process.env.GITHUB_TOKEN || process.env.PAID_REPO_TOKEN;
