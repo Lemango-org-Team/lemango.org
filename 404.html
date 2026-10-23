@@ -19,6 +19,8 @@
 </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="lemango-api-base" content="https://lemango-org.onrender.com">
+  <script src="/api-base.js"></script>
   <meta name="theme-color" content="#fffaf0">
   <title>Page not found — Lemango</title>
   <meta name="robots" content="noindex">
@@ -73,6 +75,15 @@
       <a class="btn btn-ghost" href="/fastpay.html">FastPay Studio</a>
     </div>
   </main>
+  <script>
+    (function () {
+      var path = location.pathname.replace(/\/$/, "");
+      var page = path.split("/").pop();
+      var pages = { ai:1, court:1, fastpay:1, payments:1, faq:1, privacy:1, terms:1, security:1, status:1, changelog:1, auth:1, "payment-complete":1 };
+      if (pages[page]) { location.replace(path + ".html" + location.search + location.hash); return; }
+      if (page === "paid" && window.LEMANGO_API_BASE) { location.replace(window.LEMANGO_API_BASE + "/paid" + location.search + location.hash); }
+    })();
+  </script>
   <script src="cookie-consent.js" defer></script>
   <script src="dark-mode.js" defer></script>
   <script src="admin-button.js" defer></script>
