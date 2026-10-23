@@ -59,8 +59,8 @@ async function isAllowed(req, res) {
     if (res) {
       res.cookie("lm_paid", String(verified.email).toLowerCase(), {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: true,
+        sameSite: "none",
         maxAge: 24 * 60 * 60 * 1000,
       });
     }
