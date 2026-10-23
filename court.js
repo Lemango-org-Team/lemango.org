@@ -31,13 +31,7 @@ const App = (() => {
   }
 
   function login() {
-    const u = document.getElementById("username").value.trim().toLowerCase();
-    const p = document.getElementById("password").value;
-    if ((u === "admin" && p === "admin") || (u === "citizen" && p === "citizen") || (u === "guest" && p === "")) {
-      document.getElementById("login-screen").style.display = "none";
-    } else {
-      document.getElementById("login-error").classList.remove("hidden");
-    }
+    document.getElementById("login-screen").style.display = "none";
   }
 
   const pages = [
