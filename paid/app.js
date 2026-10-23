@@ -19,7 +19,7 @@ const state={
  backgroundMode:localStorage.getItem("k_bgmode")||"dark",
  backgroundUrl:localStorage.getItem("k_bgurl")||"",
  googleClientId:LEMANGO_GOOGLE_CLIENT_ID,
- dropboxAppKey:localStorage.getItem("k_dropbox_key")||"",
+  dropboxAppKey:localStorage.getItem("k_dropbox_key")||"z4m5gj9qpx2nf4w",
  profile:JSON.parse(localStorage.getItem("k_profile")||"null"),
  playlist:JSON.parse(localStorage.getItem("k_playlist")||"[]"),
  backgroundFile:null,
