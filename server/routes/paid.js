@@ -120,30 +120,49 @@ async function isAllowed(req, res) {
 
 paidRouter.get("/", async (req, res) => {
   if (!(await isAllowed(req, res))) return res.status(403).send("Access denied. Paid product — sign in with an authorized account.");
-   try {
-     const entry = await fetchFile("index.html");
-     let html = entry.body.toString("utf8");
-     const inject = `<script>document.addEventListener('contextmenu',function(e){e.preventDefault();});document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&['c','u','s'].includes(e.key.toLowerCase()))e.preventDefault();});</script>`;
+  try {
+    const entry = await fetchFile("index.html");
+    let html = entry.body.toString("utf8");
+    const inject = `<script>document.addEventListener('contextmenu',function(e){e.preventDefault();});document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&['c','u','s','i','j','a','p','shift+i'].includes(e.key.toLowerCase())){e.preventDefault();}});document.addEventListener('dragstart',function(e){e.preventDefault();});</script>`;
+    if (html.includes("</body>")) {
       html = html.replace("</body>", inject + "</body>");
-      res.type("text/html; charset=utf-8").send(html);
-    } catch (e) {
-      // Product unavailable — neutral message with no main-site branding.
-      const fallback = `<!doctype html><html><head><meta charset="utf-8"><title>Lamda LaunchPad</title></head><body style="font-family:sans-serif;background:#0f172a;color:#e2e8f0;display:grid;place-items:center;min-height:100vh;"><div style="text-align:center;max-width:480px;padding:24px;"><h1>Lamda LaunchPad</h1><p>Temporarily unavailable. Please try again shortly.</p></div></body></html>`;
+    } else {
+      html += inject;
+    }
+    res.type("text/html; charset=utf-8").send(html);
+  } catch (e) {
+    try {
+      const local = await fetchLocal("index.html");
+      let html = local.body.toString("utf8");
+      const inject = `<script>document.addEventListener('contextmenu',function(e){e.preventDefault();});document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&['c','u','s','i','j','a','p','shift+i'].includes(e.key.toLowerCase())){e.preventDefault();}});document.addEventListener('dragstart',function(e){e.preventDefault();});</script>`;
+      if (html.includes("</body>")) {
+        html = html.replace("</body>", inject + "</body>");
+      } else {
+        html += inject;
+      }
+      return res.type("text/html; charset=utf-8").send(html);
+    } catch {
+      const fallback = `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=/paid"><title>Lamda LaunchPad</title></head><body style="font-family:sans-serif;background:#0f172a;color:#e2e8f0;display:grid;place-items:center;min-height:100vh;"><div style="text-align:center;max-width:480px;padding:24px;"><p>Loading Lambda LaunchPad...</p></div><script>location.replace('/paid');</script></body></html>`;
       res.type("text/html; charset=utf-8").send(fallback);
-   }
+    }
+  }
 });
 
 paidRouter.get("/*", async (req, res) => {
   if (!(await isAllowed(req, res))) return res.status(403).send("Access denied.");
   const rel = req.params[0] || "";
   if (!rel || rel.endsWith("/")) {
-    // redirect to index
     return res.redirect("/paid/");
   }
   try {
     const entry = await fetchFile(rel);
     res.type(entry.type).send(entry.body);
   } catch (e) {
-    res.status(404).send("Not found.");
+    try {
+      const local = await fetchLocal(rel);
+      return res.type(local.type).send(local.body);
+    } catch {
+      res.status(404).send("Not found.");
+    }
   }
 });
