@@ -455,7 +455,7 @@ $("clearPlaylist").onclick=()=>{
 };
 
 $("resetButton").onclick=()=>{
-  if(confirm("Reset all Kmoon Start Page settings and local data?")){
+  if(confirm("Reset all Lambda LaunchPad settings and local data?")){
     localStorage.clear();
     indexedDB.deleteDatabase("kmoon_media");
     location.reload();
