@@ -11,10 +11,13 @@
     body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; }
     .box { text-align: center; max-width: 440px; padding: 24px; }
     a { color: #94a3b8; }
+    .spinner { width: 22px; height: 22px; margin: 0 auto 12px; border: 3px solid #334155; border-top-color: #ff9d3a; border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
   <div class="box">
+    <div class="spinner" id="spin"></div>
     <h1>Lamda LaunchPad</h1>
     <p id="msg">Checking access…</p>
     <p><a href="/payments">← Back to Lemango</a></p>
@@ -22,15 +25,41 @@
   <script>
     (function () {
       var base = (window.LEMANGO_API_BASE || "").replace(/\/+$/, "");
+      var msg = document.getElementById("msg");
+      var spin = document.getElementById("spin");
+      function fail(text) { if (spin) spin.remove(); msg.innerHTML = text; }
       var u = null;
       try { u = JSON.parse(localStorage.getItem("lemango_user") || "null"); } catch (e) {}
-      if (u && u.idToken) {
-        location.replace((base || "") + "/paid?idToken=" + encodeURIComponent(u.idToken));
-      } else {
-        document.getElementById("msg").innerHTML =
-          'This is a <strong>paid product</strong>. ' +
-          '<a href="/auth?next=%2Fpaid">Sign in</a> with an authorized account to open it.';
+
+      if (!u || !u.idToken) {
+        fail('This is a <strong>paid product</strong>. <a href="/auth?next=%2Fpaid">Sign in</a> with an authorized account to open it.');
+        return;
       }
+
+      fetch((base || "") + "/paid?idToken=" + encodeURIComponent(u.idToken), { credentials: "include" })
+        .then(function (res) {
+          return res.text().then(function (text) { return { ok: res.ok, status: res.status, text: text }; });
+        })
+        .then(function (result) {
+          if (!result.ok) {
+            if (result.status === 403) {
+              fail('Access denied. This is a <strong>paid product</strong> — your account does not own it. <a href="/payments">Buy access</a>.');
+            } else {
+              fail('The paid product is temporarily unavailable. Please try again shortly.');
+            }
+            return;
+          }
+          var html = result.text;
+          var baseTag = '<base href="' + (base || "") + '/paid/">';
+          if (/<head[^>]*>/i.test(html)) html = html.replace(/<head[^>]*>/i, function (m) { return m + baseTag; });
+          else html = baseTag + html;
+          document.open();
+          document.write(html);
+          document.close();
+        })
+        .catch(function () {
+          fail('Could not reach the paid product. Please try again shortly.');
+        });
     })();
   </script>
 </body>
