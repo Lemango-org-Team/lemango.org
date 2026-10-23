@@ -1,4 +1,4 @@
-const CACHE = "lemango-v1";
+const CACHE = "lemango-v2";
 const ASSETS = ["/", "/index.html", "/style.css", "/app.js", "/manifest.json"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).catch(() => {}));
@@ -10,5 +10,27 @@ self.addEventListener("activate", (e) => {
 });
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
-  e.respondWith(caches.match(e.request).then((r) => r || fetch(e.request).catch(() => caches.match("/"))));
+  const isDoc = e.request.mode === "navigate" || /\.html?$/i.test(new URL(e.request.url).pathname) || new URL(e.request.url).pathname === "/";
+  if (isDoc) {
+    // Network-first for pages so new content (and new sections) always appears.
+    e.respondWith(
+      fetch(e.request).then((r) => {
+        const copy = r.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+        return r;
+      }).catch(() => caches.match(e.request).then((r) => r || caches.match("/")))
+    );
+    return;
+  }
+  // Cache-first for static assets, with background refresh.
+  e.respondWith(
+    caches.match(e.request).then((cached) => {
+      const network = fetch(e.request).then((r) => {
+        const copy = r.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+        return r;
+      }).catch(() => cached);
+      return cached || network;
+    })
+  );
 });
