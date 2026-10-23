@@ -43,7 +43,7 @@
       const user = window.LemangoAuth && window.LemangoAuth.user;
       if (!user) {
         // Prompt login
-        location.replace("/auth?next=" + encodeURIComponent("/invite?token=" + token));
+        location.replace("/auth.html?next=" + encodeURIComponent("/invite?token=" + token));
         return;
       }
 
@@ -58,7 +58,7 @@
         const data = await res.json();
         if (!res.ok) {
           if (data.wrongUser) { location.replace("/404"); return; }
-          if (data.needLogin) { location.replace("/auth?next=" + encodeURIComponent("/invite?token=" + token)); return; }
+          if (data.needLogin) { location.replace("/auth.html?next=" + encodeURIComponent("/invite?token=" + token)); return; }
           overlay.innerHTML = `<div style="font-size:18px;font-weight:700;color:#f87171;">Access denied</div><div style="font-size:13px;color:#94a3b8;margin-top:8px;">${data.error || "Invalid invite"}</div>`;
           return;
         }
@@ -71,7 +71,7 @@
           </div>
           <div id="tos-block" style="margin-top:16px;max-width:400px;text-align:center;">
             <label style="font-size:12px;color:#cbd5e1;display:flex;align-items:center;gap:8px;justify-content:center;">
-              <input type="checkbox" id="tosCheck"> I accept the <a href="/terms" target="_blank" style="color:#34d399;">Terms</a> and <a href="/privacy" target="_blank" style="color:#34d399;">Privacy Policy</a>
+              <input type="checkbox" id="tosCheck"> I accept the <a href="/terms.html" target="_blank" style="color:#34d399;">Terms</a> and <a href="/privacy.html" target="_blank" style="color:#34d399;">Privacy Policy</a>
             </label>
             <button id="acceptTosBtn" style="margin-top:10px;padding:8px 16px;background:#007a33;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer;">Accept & Continue</button>
           </div>

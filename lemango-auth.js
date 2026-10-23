@@ -126,7 +126,7 @@
     // 220px Google button, which cannot shrink and overflows mobile headers.
     _buildCompactSignIn() {
       const a = document.createElement("a");
-      a.href = "/auth?next=" + encodeURIComponent(location.pathname + location.search);
+      a.href = "/auth.html?next=" + encodeURIComponent(location.pathname + location.search);
       a.className = "lm-auth-signin lm-auth-signin-compact";
       a.textContent = "Sign in";
       a.setAttribute("aria-label", "Sign in with Google");

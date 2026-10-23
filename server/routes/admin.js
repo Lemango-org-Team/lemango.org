@@ -131,7 +131,7 @@ adminRouter.post("/verify-invite", async (req, res) => {
   res.json({ ok: true, status: "queued", safety });
 });
 
-adminRouter.get("/status", async (req, res) => {
+adminRouter.get("/status.html", async (req, res) => {
   const token = String(req.query.token || "").trim();
   const u = await currentUser(req);
   if (!token) return res.status(400).json({ ok: false, error: "token required" });
