@@ -1,4 +1,4 @@
-const CACHE = "lemango-v3";
+const CACHE = "lemango-v4";
 const ASSETS = ["/", "/index.html", "/style.css", "/app.js", "/manifest.json"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).catch(() => {}));
@@ -14,7 +14,7 @@ self.addEventListener("fetch", (e) => {
   if (isDoc) {
     // Network-first for pages so new content (and new sections) always appears.
     e.respondWith(
-      fetch(e.request).then((r) => {
+      fetch(e.request, { cache: "no-store" }).then((r) => {
         const copy = r.clone();
         caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
         return r;
