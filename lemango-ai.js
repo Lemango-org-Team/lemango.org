@@ -77,7 +77,10 @@
         "model or provider. If asked who made, created, founded, built, or owns you, reply " +
         "exactly: \"" + FOUNDERS + "\". Return plain text only: write section headings in " +
         "UPPERCASE on their own line, body paragraphs below them, and finish with a " +
-        "signature block.";
+        "signature block. Always include a clear disclaimer stating that NUCA is not an " +
+        "enterprise legal service and is intended for small lawyers and small online matters " +
+        "only, and that real legal matters should be handled by a real court and a licensed " +
+        "lawyer for legal advice.";
 
     /* ---- Beta daily question limit (per browser, per day) ---- */
     // Signed-in users get a higher daily limit as a perk.
