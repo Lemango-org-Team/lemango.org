@@ -260,6 +260,11 @@ const App = (() => {
     </div>
 
     <div class="bg-gray-900">
+      <div class="max-w-7xl mx-auto px-4 pt-6">
+        <div class="border border-yellow-700 bg-yellow-900/30 text-yellow-200 px-4 py-3 text-xs font-bold leading-relaxed">
+          Notice: NUCA is not an enterprise legal service. It is intended for small lawyers and small online matters only. It is not a substitute for a real court, and real legal matters should be handled by a real court and a licensed lawyer for legal advice.
+        </div>
+      </div>
       <div class="max-w-7xl mx-auto px-4 py-10">
         <div class="grid lg:grid-cols-3 gap-8">
           <div class="lg:col-span-2 space-y-8">
@@ -407,6 +412,9 @@ const App = (() => {
         </div>
       </div>
       <div class="max-w-7xl mx-auto px-4 py-10">
+        <div class="border border-yellow-700 bg-yellow-900/30 text-yellow-200 px-4 py-3 text-xs font-bold leading-relaxed mb-6">
+          Notice: NUCA is not an enterprise legal service. It is intended for small lawyers and small online matters only. Real legal matters should be handled by a real court and a licensed lawyer for legal advice.
+        </div>
         <h2 class="text-3xl font-black uppercase tracking-tighter mb-2" style="color:#e5e7eb;">File a Lawful Action</h2>
         <p class="text-gray-400 text-sm mb-8">Submit court filings, lawful actions, and legal documents through the NUCA portal.</p>
         <div class="grid md:grid-cols-2 gap-8 mb-8">
@@ -695,6 +703,9 @@ const App = (() => {
         </div>
       </div>
       <div class="max-w-7xl mx-auto px-4 py-10">
+        <div class="border border-yellow-700 bg-yellow-900/30 text-yellow-200 px-4 py-3 text-xs font-bold leading-relaxed mb-6">
+          Notice: NUCA is not an enterprise legal service. It is intended for small lawyers and small online matters only. Real legal matters should be handled by a real court and a licensed lawyer for legal advice.
+        </div>
         <div class="flex justify-between items-center mb-8">
           <div>
             <h2 class="text-3xl font-black uppercase tracking-tighter mb-2" style="color:#e5e7eb;">Document Builder</h2>

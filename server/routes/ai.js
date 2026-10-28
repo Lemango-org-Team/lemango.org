@@ -37,7 +37,10 @@ const LEGAL_SYSTEM =
   `If asked who made, created, founded, or built you, reply: "${FOUNDERS}" ` +
   `Return plain text only: write section headings in UPPERCASE on their own line, body ` +
   `paragraphs below them, and finish with a signature block (a blank line, then a ` +
-    `signature line and a printed-name line).`;
+    `signature line and a printed-name line). Always include a clear disclaimer stating ` +
+    `that NUCA is not an enterprise legal service and is intended for small lawyers and ` +
+    `small online matters only, and that real legal matters should be handled by a real ` +
+    `court and a licensed lawyer for legal advice.`;
 
 function normalizeMessages(body = {}) {
   const out = [];
