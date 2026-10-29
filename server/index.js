@@ -26,7 +26,8 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
   .split(",").map((s) => s.trim()).filter(Boolean);
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  const ok = !origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin) || allowedOrigins.includes("*");
+  // Default-deny: if no allowlist is configured, only same-origin (no Origin header) requests are allowed.
+  const ok = !origin || (allowedOrigins.length > 0 && (allowedOrigins.includes(origin) || allowedOrigins.includes("*")));
   if (ok && origin) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
@@ -90,7 +91,7 @@ app.use("/api/admin", rateLimit({ windowMs: 60_000, max: 60 }), adminRouter);
 app.use("/paid", paidRouter);
 app.use("/api/newsletter", rateLimit({ windowMs: 60_000, max: 10 }), newsletterRouter);
 app.use("/api/ai", rateLimit({ windowMs: 60_000, max: 60 }), aiRouter);
-app.use("/api/court", courtRouter);
+app.use("/api/court", rateLimit({ windowMs: 60_000, max: 60 }), courtRouter);
 
 // --- Clean URL redirects: strip .html extension ---
 app.get("/:page.html", (req, res) => {

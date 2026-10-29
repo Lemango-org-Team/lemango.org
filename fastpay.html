@@ -20,19 +20,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f766e">
-  <title>FastPay Agreement &amp; Receipt Studio — Lemango</title>
+  <title>FastPay Agreement &amp; Receipt Studio ï¿½ Lemango</title>
   <meta name="description" content="Create a signed FastPay service agreement and receipt in seconds. Fill in the parties, add your e-signature, and export a clean PDF.">
   <link rel="canonical" href="https://lemango.org/fastpay">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://lemango.org/fastpay">
-  <meta property="og:title" content="FastPay Agreement &amp; Receipt Studio — Lemango">
+  <meta property="og:title" content="FastPay Agreement &amp; Receipt Studio ï¿½ Lemango">
   <meta property="og:description" content="Build a signed service agreement and receipt in seconds and export a clean PDF.">
   <meta property="og:image" content="https://lemango.org/assets/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="FastPay Agreement &amp; Receipt Studio">
-  <meta name="twitter:description" content="Build a signed service agreement and receipt, then export a clean PDF — in your browser.">
+  <meta name="twitter:description" content="Build a signed service agreement and receipt, then export a clean PDF ï¿½ in your browser.">
   <meta name="twitter:image" content="https://lemango.org/assets/og-image.png">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/lemango-touch-icon.png">
@@ -391,7 +391,7 @@
       Lemango
     </a>
     <div class="topbar-right">
-      <span style="font-size:12px; opacity:.75;">FastPay Studio · early preview</span>
+      <span style="font-size:12px; opacity:.75;">FastPay Studio ï¿½ early preview</span>
       <div class="topbar-account" id="accountArea" data-auth-widget></div>
     </div>
   </header>
@@ -399,7 +399,7 @@
   <main id="main" class="app" aria-label="FastPay Agreement and Receipt Studio">
     <div class="app-head">
       <h1>FastPay Agreement &amp; Receipt Studio</h1>
-      <p>Fill in the deal, sign it, and export a clean one-page PDF — no account, no server.</p>
+      <p>Fill in the deal, sign it, and export a clean one-page PDF ï¿½ no account, no server.</p>
 
       <ol class="stepper" id="stepper">
         <li data-step-indicator="1" class="active"><span class="num">1</span><span class="label">Parties</span></li>
@@ -514,7 +514,7 @@
         <div class="pay-box" id="payBox">
           <div class="pay-box-head">
             <strong>Payment</strong>
-            <span class="pay-badge">Demo — no real charge</span>
+            <span class="pay-badge">Demo ï¿½ no real charge</span>
           </div>
           <p class="pay-note"><strong>Payments are not available yet.</strong> This is a simulated payment area for demonstration only. No card is charged, no data leaves your browser, and nothing is stored. Real payments are coming soon.</p>
           <div class="pay-fields">
@@ -542,7 +542,7 @@
     </div>
   </main>
 
-  <p class="foot">Built by <a href="/">Lemango</a> · FastPay Studio keeps everything in your browser.</p>
+  <p class="foot">Built by <a href="/">Lemango</a> ï¿½ FastPay Studio keeps everything in your browser.</p>
 
   <aside class="promo-slot" data-ad-slot="fastpay-bottom" data-ad-unit="1088217277"
          aria-label="Advertisement"
@@ -551,7 +551,7 @@
     <div class="promo-mount"></div>
   </aside>
 
-  <script src="ads.js" defer></script>
+
   <script src="lemango-auth.js" defer></script>
 
 
@@ -668,7 +668,7 @@
      *
      * !! SECURITY !!  Only a PUBLIC OAuth *Client ID* belongs in this file.
      * NEVER put a client secret (starts with "GOCSPX-") here or anywhere in
-     * this repo — this page is downloaded by every visitor, so a secret would
+     * this repo ï¿½ this page is downloaded by every visitor, so a secret would
      * be public. Client secrets must stay on a server.
      *
      * To enable:
@@ -729,7 +729,7 @@
           b.addEventListener("click", function () {
             if (statusEl) {
               statusEl.className = "signin-row-note warn";
-              statusEl.textContent = "Google Sign-In isn't configured yet — add your OAuth Client ID in GoogleSignInModule.clientId (see the code comments).";
+              statusEl.textContent = "Google Sign-In isn't configured yet ï¿½ add your OAuth Client ID in GoogleSignInModule.clientId (see the code comments).";
             }
           });
           slot.appendChild(b);
@@ -759,7 +759,7 @@
     };
 
     /* ---------------------------------------------------------------------
-     * FastPay logo — drawn as a very faint watermark in the exported PDF.
+     * FastPay logo ï¿½ drawn as a very faint watermark in the exported PDF.
      * ------------------------------------------------------------------- */
     var fastpayLogo = null; // HTMLImageElement once loaded
     function loadFastPayLogo() {
@@ -848,7 +848,7 @@
     }
 
     function formatLongDate(iso) {
-      if (!iso) return "—";
+      if (!iso) return "ï¿½";
       var parts = iso.split("-");
       if (parts.length !== 3) return iso;
       var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
@@ -922,7 +922,7 @@
           if (canGState) doc.setGState(new doc.GState({ opacity: 0.06 }));
           doc.addImage(fastpayLogo, "PNG", wmX, wmY, wmW, wmH);
           if (canGState) doc.setGState(new doc.GState({ opacity: 1 }));
-        } catch (e) { /* watermark is optional — never block export */ }
+        } catch (e) { /* watermark is optional ï¿½ never block export */ }
       }
 
       // ---- Header band ----
@@ -937,7 +937,7 @@
 
       function row(label, value) {
         text(label, M, y, { size: 10, bold: true, color: MUTED });
-        var lines = wrap(value || "—", contentW - 150, 10);
+        var lines = wrap(value || "ï¿½", contentW - 150, 10);
         text(lines, M + 150, y, { size: 10, color: INK });
         y += Math.max(16, lines.length * 14) + 6;
       }
@@ -952,7 +952,7 @@
       var parties = [
         ["Seller", data.sellerName + (data.sellerEmail ? "  <" + data.sellerEmail + ">" : "")],
         ["Buyer", data.buyerName + (data.buyerEmail ? "  <" + data.buyerEmail + ">" : "")],
-        ["Business", data.businessName || "—"]
+        ["Business", data.businessName || "ï¿½"]
       ];
       parties.forEach(function (p) { row(p[0], p[1]); });
 
@@ -970,7 +970,7 @@
 
       // Service description block
       text("Scope of services", M, y, { size: 10, bold: true, color: MUTED }); y += 15;
-      var descLines = wrap(data.serviceDescription || "—", contentW, 10);
+      var descLines = wrap(data.serviceDescription || "ï¿½", contentW, 10);
       doc.setTextColor.apply(doc, INK);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
@@ -1003,8 +1003,8 @@
       doc.setLineWidth(1);
       doc.line(M, y, M + 240, y);
       y += 14;
-      text(data.signerName || "—", M, y, { size: 10, bold: true, color: INK });
-      text("Signed: " + formatLongDate(data.signDate) + "  ·  Generated: " + data.generatedAt.toLocaleString(),
+      text(data.signerName || "ï¿½", M, y, { size: 10, bold: true, color: INK });
+      text("Signed: " + formatLongDate(data.signDate) + "  ï¿½  Generated: " + data.generatedAt.toLocaleString(),
            M + 240, y, { size: 8, color: MUTED });
 
       // ---- Legal footer ----
@@ -1024,7 +1024,7 @@
       doc.setFontSize(7.6);
       doc.text(legalLines, M, footerY + 14);
 
-      text(data.agreementId + "  ·  Page 1 of 1", W - M, H - 26, { size: 7.6, color: MUTED, align: "right" });
+      text(data.agreementId + "  ï¿½  Page 1 of 1", W - M, H - 26, { size: 7.6, color: MUTED, align: "right" });
 
       return doc;
     }
@@ -1046,7 +1046,7 @@
       var btn = $("#btnExport");
       btn.disabled = true;
       var original = btn.textContent;
-      btn.textContent = "Preparing…";
+      btn.textContent = "Preparingï¿½";
 
       try {
         var status = await checkPaymentStatus(data);
@@ -1180,13 +1180,13 @@
       function row(k, v) {
         return '<div class="row" style="display:flex; gap:12px; padding:9px 0; border-bottom:1px solid #f1f5f9;">' +
                '<div style="flex:0 0 150px; color:#64748b; font-size:12px; font-weight:600;">' + k + '</div>' +
-               '<div style="color:#0f172a; font-size:13px; word-break:break-word;">' + (v || "—") + '</div></div>';
+               '<div style="color:#0f172a; font-size:13px; word-break:break-word;">' + (v || "ï¿½") + '</div></div>';
       }
 
       var html = '';
       html += '<div class="pv-head"><strong>' + escapeHtml(d.sellerName || "Seller") + ' &amp; ' +
               escapeHtml(d.buyerName || "Buyer") + '</strong><br>' +
-              '<span>Agreement ' + d.agreementId + ' · ' + d.generatedAt.toLocaleString() + '</span></div>';
+              '<span>Agreement ' + d.agreementId + ' ï¿½ ' + d.generatedAt.toLocaleString() + '</span></div>';
       html += '<div style="padding:6px 18px 18px;">';
       html += row("Business", escapeHtml(d.businessName));
       html += row("Seller", escapeHtml(d.sellerName) + (d.sellerEmail ? ' &lt;' + escapeHtml(d.sellerEmail) + '&gt;' : ''));
@@ -1196,11 +1196,11 @@
       html += row("Due date", escapeHtml(formatLongDate(d.dueDate)));
       html += row("Late fee", d.lateFeeEnabled && d.lateFeeText ? escapeHtml(d.lateFeeText) : "None");
       html += row("Payment", '<span class="pay-status ' + (paid.paid ? "paid" : "unpaid") + '">' +
-                    (paid.paid ? "Paid (demo)" : "Demo — not charged") + '</span>');
+                    (paid.paid ? "Paid (demo)" : "Demo ï¿½ not charged") + '</span>');
       if (d.signatureDataUrl) {
         html += '<div style="padding:12px 0 0;"><div style="color:#64748b; font-size:12px; font-weight:600; margin-bottom:6px;">Signature</div>' +
                 '<img src="' + d.signatureDataUrl + '" alt="Signature"><div style="color:#334155; font-size:12px; margin-top:6px;">' +
-                escapeHtml(d.signerName) + ' · ' + escapeHtml(formatLongDate(d.signDate)) + '</div></div>';
+                escapeHtml(d.signerName) + ' ï¿½ ' + escapeHtml(formatLongDate(d.signDate)) + '</div></div>';
       }
       html += '</div>';
       preview.innerHTML = html;
@@ -1274,17 +1274,17 @@
       };
       GoogleSignInModule.renderInto($("#googleSlot"), $("#googleStatus"));
 
-      // Demo payment area (fake gateway — no real charge)
+      // Demo payment area (fake gateway ï¿½ no real charge)
       var payBtn = $("#btnPayDemo");
       if (payBtn) {
         payBtn.addEventListener("click", function () {
           var status = $("#payStatus");
           payBtn.disabled = true;
-          if (status) { status.className = "pay-status-line busy"; status.textContent = "Processing demo payment…"; }
+          if (status) { status.className = "pay-status-line busy"; status.textContent = "Processing demo paymentï¿½"; }
           PaymentGatewayModule.simulatePayment(getFormData()).then(function () {
             if (status) {
               status.className = "pay-status-line ok";
-              status.textContent = "Demo payment approved — no real charge. Ref FP-DEMO-" + Math.floor(1000 + Math.random() * 9000) + ".";
+              status.textContent = "Demo payment approved ï¿½ no real charge. Ref FP-DEMO-" + Math.floor(1000 + Math.random() * 9000) + ".";
             }
             if (currentStep === 4) renderPreview();
           }).catch(function () {

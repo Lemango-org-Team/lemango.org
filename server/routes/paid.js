@@ -123,7 +123,7 @@ paidRouter.get("/", async (req, res) => {
   try {
     const entry = await fetchFile("index.html");
     let html = entry.body.toString("utf8");
-    const inject = `<script>document.addEventListener('contextmenu',function(e){e.preventDefault();});document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&['c','u','s','i','j','a','p','shift+i'].includes(e.key.toLowerCase())){e.preventDefault();}});document.addEventListener('dragstart',function(e){e.preventDefault();});</script>`;
+    const inject = "";
     if (html.includes("</body>")) {
       html = html.replace("</body>", inject + "</body>");
     } else {
@@ -134,7 +134,7 @@ paidRouter.get("/", async (req, res) => {
     try {
       const local = await fetchLocal("index.html");
       let html = local.body.toString("utf8");
-      const inject = `<script>document.addEventListener('contextmenu',function(e){e.preventDefault();});document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&['c','u','s','i','j','a','p','shift+i'].includes(e.key.toLowerCase())){e.preventDefault();}});document.addEventListener('dragstart',function(e){e.preventDefault();});</script>`;
+      const inject = "";
       if (html.includes("</body>")) {
         html = html.replace("</body>", inject + "</body>");
       } else {
