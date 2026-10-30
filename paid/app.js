@@ -326,14 +326,12 @@ function handleGoogleSignIn(response){
         email:payload.email,
         picture:payload.picture
       };
-      saveState();
-      renderProfile();
+      save();
+      profileRender();
     }catch(e){
       console.error("Error decoding JWT:",e);
       alert("Sign-in failed");
     }
-  }
-}
   }
 }
 
