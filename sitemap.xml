@@ -6,52 +6,52 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://lemango.org/ai</loc>
+    <loc>https://lemango.org/ai/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://lemango.org/court</loc>
+    <loc>https://lemango.org/court/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://lemango.org/fastpay</loc>
+    <loc>https://lemango.org/fastpay/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://lemango.org/privacy</loc>
+    <loc>https://lemango.org/privacy/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://lemango.org/terms</loc>
+    <loc>https://lemango.org/terms/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://lemango.org/security</loc>
+    <loc>https://lemango.org/security/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://lemango.org/payments</loc>
+    <loc>https://lemango.org/payments/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://lemango.org/faq</loc>
+    <loc>https://lemango.org/faq/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://lemango.org/changelog</loc>
+    <loc>https://lemango.org/changelog/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://lemango.org/status</loc>
+    <loc>https://lemango.org/status/</loc>
     <changefreq>daily</changefreq>
     <priority>0.4</priority>
   </url>
