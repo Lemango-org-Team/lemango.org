@@ -70,17 +70,17 @@
     <h1>This page took a wrong turn.</h1>
     <p>The page you're looking for doesn't exist or may have moved. Try one of the tools below.</p>
     <div class="actions">
-      <a class="btn btn-primary" href="/ai.html">Try Lemango AI</a>
-      <a class="btn btn-primary" href="/court.html">Open Case Manager</a>
-      <a class="btn btn-ghost" href="/fastpay.html">FastPay Studio</a>
+      <a class="btn btn-primary" href="/ai/">Try Lemango AI</a>
+      <a class="btn btn-primary" href="/court/">Open Case Manager</a>
+      <a class="btn btn-ghost" href="/fastpay/">FastPay Studio</a>
     </div>
   </main>
   <script>
     (function () {
       var path = location.pathname.replace(/\/$/, "");
       var page = path.split("/").pop();
-      var pages = { ai:1, court:1, fastpay:1, payments:1, faq:1, privacy:1, terms:1, security:1, status:1, changelog:1, auth:1, "payment-complete":1 };
-      if (pages[page]) { location.replace(path + ".html" + location.search + location.hash); return; }
+      var pages = { ai:1, court:1, fastpay:1, payments:1, faq:1, privacy:1, terms:1, security:1, status:1, changelog:1, auth:1, "payment-complete":1, "business-ideas":1 };
+      if (pages[page]) { location.replace(path + "/" + window.location.search + window.location.hash); return; }
       if (page === "paid" && window.LEMANGO_API_BASE) { location.replace(window.LEMANGO_API_BASE + "/paid" + location.search + location.hash); }
     })();
   </script>

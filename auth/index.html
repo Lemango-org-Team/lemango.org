@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2231892231966691"
+     crossorigin="anonymous"></script>
+  <meta name="google-adsense-account" content="ca-pub-2231892231966691">
+  <meta name="lemango-api-base" content="https://lemango-org.onrender.com"><!-- set to your backend URL, e.g. https://lemango-api.onrender.com -->
+  <script src="/api-base.js"></script>
+  <link rel="stylesheet" href="/a11y.css">
+  <link rel="manifest" href="/manifest.json">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-THFCXR1KLW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-THFCXR1KLW');
+</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Sign in — Lemango</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/lemango-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/auth.css">
+</head>
+<body>
+  <a class="lm-skip" href="#main">Skip to main content</a>
+
+  <!-- Matches site-header exactly -->
+  <header class="site-header">
+    <div class="nav-wrap">
+      <a class="brand" href="/" aria-label="Lemango home">
+        <img class="brand-mark" src="/assets/lemango-flag.webp" alt="">
+        <span class="brand-name">le<span>mango</span></span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/#products">Products</a>
+        <a href="/ai/">Lemango AI</a>
+        <a href="/court/">Case Manager</a>
+        <a href="/fastpay/">FastPay</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="auth-main">
+
+
+
+    <!-- Card -->
+    <div class="auth-card">
+
+      <!-- Lemango flag accent bar (matches product cards) -->
+      <div class="auth-card-bar"></div>
+
+      <div class="auth-card-body">
+        <p class="eyebrow"><span class="eyebrow-dot"></span> Lemango accounts</p>
+        <h1>Sign in to Lemango</h1>
+        <p class="auth-sub">Use your Google account to sign in or create an account. No password needed.</p>
+
+        <div class="auth-error" id="auth-error" aria-live="polite" hidden></div>
+
+        <!-- Working Google sign-in -->
+        <div id="googleSlot" style="margin: 16px 0;"></div>
+        <p class="auth-terms">
+          By signing in you agree to Lemango's
+          <a href="/terms/">Terms of Service</a> and
+          <a href="/privacy/">Privacy Policy</a>.
+        </p>
+
+        <p class="auth-terms">
+          By signing in you agree to Lemango's
+          <a href="/terms/">Terms of Service</a> and
+          <a href="/privacy/">Privacy Policy</a>.
+        </p>
+      </div>
+
+      <div class="auth-card-footer">
+        <a href="/">← Back to Lemango</a>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const err = params.get("error");
+    const msgs = {
+      access_denied: "You declined the sign-in request.",
+      invalid_state:  "Sign-in session expired. Please try again.",
+      no_code:        "Something went wrong with Google. Please try again.",
+      server_error:   "A server error occurred. Please try again in a moment.",
+    };
+    if (err) {
+      const el = document.getElementById("auth-error");
+      el.textContent = msgs[err] || "An unexpected error occurred.";
+      el.hidden = false;
+    }
+
+    // Where to send the user after a successful sign-in. The mobile headers
+    // link here with ?next=/ai (etc.) because the official Google button is
+    // too wide to fit on a phone.
+    const rawNext = params.get("next") || "";
+    window.__lmNext = (rawNext.startsWith("/") && !rawNext.startsWith("//")) ? rawNext : "";
+  </script>
+  <script src="/lemango-auth.js" defer></script>
+  <script src="/cookie-consent.js" defer></script>
+  <script src="/dark-mode.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var next = window.__lmNext || "";
+      var slot = document.getElementById("googleSlot");
+
+      // Already signed in: offer to go straight back where the user came from.
+      if (next && slot) {
+        var stored = null;
+        try { stored = JSON.parse(localStorage.getItem("lemango_user") || "null"); } catch (e) {}
+        if (stored) {
+          slot.innerHTML = "";
+          var cont = document.createElement("a");
+          cont.href = next;
+          cont.textContent = "Continue";
+          cont.className = "btn btn-primary";
+          cont.style.cssText = "display:inline-block;background:#005c2d;color:#fff;padding:12px 22px;border-radius:8px;font-weight:700;text-decoration:none;";
+          slot.appendChild(cont);
+
+          var alt = document.createElement("button");
+          alt.type = "button";
+          alt.textContent = "Use a different account";
+          alt.style.cssText = "display:block;margin:12px auto 0;background:none;border:none;color:#005c2d;font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline;";
+          alt.addEventListener("click", function () {
+            try { localStorage.removeItem("lemango_user"); } catch (e) {}
+            if (window.LemangoAuth) window.LemangoAuth.user = null;
+            location.reload();
+          });
+          slot.appendChild(alt);
+          return;
+        }
+      }
+
+      if (window.LemangoAuth) {
+        if (slot) {
+          // Render Google's official button (clickable repeatedly, even after dismissing)
+          window.LemangoAuth.load().then(function () {
+            window.google.accounts.id.initialize({
+              client_id: "417747434436-j8ohlhkpo982m8uvum322d9mirg7n7gb.apps.googleusercontent.com",
+              callback: function (resp) {
+                var u = window.LemangoAuth.decodeCredential(resp.credential);
+                if (!u) return;
+                window.LemangoAuth.user = {
+                  googleId: u.sub, email: u.email, name: u.name,
+                  given_name: u.given_name || "", picture: u.picture || "", avatar: u.picture || "",
+                  idToken: resp.credential
+                };
+                try { localStorage.setItem("lemango_user", JSON.stringify(window.LemangoAuth.user)); } catch {}
+                slot.innerHTML = "";
+                slot.appendChild(window.LemangoAuth._buildUserChip(window.LemangoAuth.user));
+                document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: window.LemangoAuth.user } }));
+                // Send the user back to the page that sent them here.
+                if (window.__lmNext) location.assign(window.__lmNext);
+              },
+              cancel_on_tap_outside: false
+            });
+            window.google.accounts.id.renderButton(slot, {
+              theme: "outline", size: "large", text: "signin_with",
+              shape: "rectangular", logo_alignment: "left",
+              // Never wider than the card it sits in, or it overflows on 320px phones
+              width: Math.max(200, Math.min(280, (window.innerWidth || 320) - 56))
+            });
+          }).catch(function (e) { console.warn(e); });
+        }
+      }
+    });
+  </script>
+  <script src="/admin-button.js" defer></script>
+</body>
+</html>
