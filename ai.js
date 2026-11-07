@@ -20,7 +20,6 @@ const toastEl       = document.getElementById("toast");
 
 const SESSION_KEY = "lemango_sessions";
 const ACTIVE_KEY  = "lemango_active_session";
-const THEME_KEY   = "lemango_theme";
 
 const botName = document.querySelector(".header-info h1")?.textContent.trim() || "Lemango AI";
 
@@ -344,8 +343,6 @@ function isNearBottom(){return chatContainer.scrollHeight-chatContainer.scrollTo
 function updateScrollPill(){scrollDownBtn.classList.toggle("visible",history.length>0&&!isNearBottom())}
 function scrollToBottom(sm){chatContainer.scrollTo({top:chatContainer.scrollHeight,behavior:sm?"smooth":"auto"})}
 function autoResizeInput(){messageInput.style.height="auto";messageInput.style.height=Math.min(messageInput.scrollHeight,160)+"px"}
-function applyTheme(t){document.body.classList.toggle("dark",t==="dark");try{localStorage.setItem(THEME_KEY,t)}catch{}}
-function toggleTheme(){applyTheme(document.body.classList.contains("dark")?"light":"dark")}
 
 /* ============================================================
    Events
@@ -384,7 +381,6 @@ document.addEventListener("click",e=>{if(!modelDropdown.contains(e.target)&&!mod
    ============================================================ */
 
 (function init(){
-    applyTheme("dark");
     rebuildChat();autoResizeInput();updateSendState();updateRegenVisibility();
     modelLabel.textContent=currentModel;fetchModels();
     // Agents mode toggle (only for allowlisted accounts)
