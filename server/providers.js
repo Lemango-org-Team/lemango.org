@@ -158,7 +158,7 @@ export async function generateReply(messages, modelName, opts = {}) {
   const chain = chainFor(modelName);
   if (!chain.length) throw new Error("No AI provider is available.");
 
-  const options = { temperature: opts.temperature ?? 0.7, maxTokens: opts.maxTokens || 2000, reasoning: opts.reasoning };
+  const options = { temperature: opts.temperature ?? 0.7, maxTokens: opts.maxTokens || 8000, reasoning: opts.reasoning };
   let lastError;
   for (const provider of chain) {
     for (let attempt = 0; attempt < 2; attempt++) {
