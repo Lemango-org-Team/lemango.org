@@ -1366,10 +1366,13 @@ function populateModelSelects() {
 
 function captureSettingsFromUI() {
   ['openai','anthropic','gemini','openrouter','groq','bigpickle'].forEach(p => {
-    state.settings[p + 'Key'] = document.getElementById(p + 'Key').value.trim();
-    state.settings[p + 'Model'] = document.getElementById(p + 'Model').value.trim();
+    const keyEl = document.getElementById(p + 'Key');
+    const modelEl = document.getElementById(p + 'Model');
+    if (keyEl) state.settings[p + 'Key'] = keyEl.value.trim();
+    if (modelEl) state.settings[p + 'Model'] = modelEl.value.trim();
   });
-  state.settings.bigpickleBaseUrl = document.getElementById('bigpickleBaseUrl').value.trim();
+  const bpUrl = document.getElementById('bigpickleBaseUrl');
+  if (bpUrl) state.settings.bigpickleBaseUrl = bpUrl.value.trim();
 }
 
 function updateAIStatus() {
@@ -1978,31 +1981,129 @@ async function* streamChat(messages, options) {
       if (saved && saved.idToken) idToken = saved.idToken;
     } catch (e) { /* ignore */ }
   }
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({
-      message: last ? last.content : "",
-      idToken: idToken,
-      model: (function () { var s = document.getElementById('lemangoModelSelect'); var v = s ? s.value : 'Mango-Core'; if (v !== 'auto') return v; var t = (last ? last.content : "").toLowerCase(); if (/code|function|debug|error|script|program/i.test(t)) return 'Mango-Ultra'; if (t.length < 60) return 'Mango-Light'; if (t.length < 200) return 'Mango-Core'; return 'Mango-Pro'; })(),
-      history: hist,
-      context: buildSystemPrompt(),
-    }),
-    signal: options && options.signal,
-  });
-  const ct = res.headers.get("content-type") || "";
-  if (ct.indexOf("application/json") === -1) {
-    const text = await res.text().catch(function () { return ""; });
-    throw new Error("Lemango AI error: server returned non-JSON (" + res.status + ")");
+
+  // Helper: current model value
+  function getForgeModel() {
+    var s = document.getElementById('lemangoModelSelect');
+    var v = s ? s.value : 'Mango-Core';
+    if (v !== 'auto') return v;
+    var t = (last ? last.content : "").toLowerCase();
+    if (/code|function|debug|error|script|program/i.test(t)) return 'Mango-Ultra';
+    if (t.length < 60) return 'Mango-Light';
+    if (t.length < 200) return 'Mango-Core';
+    return 'Mango-Pro';
   }
-  if (!res.ok) {
-    const text = await res.text().catch(function () { return ""; });
-    throw new Error("Lemango AI error (" + res.status + "): " + text.slice(0, 200));
+
+  // ---- Try Lemango backend ----
+  let backendSucceeded = false;
+  try {
+    const backendCtrl = new AbortController();
+    if (options && options.signal) {
+      options.signal.addEventListener("abort", function() { backendCtrl.abort(); }, { once: true });
+    }
+    const backendTimer = setTimeout(function() { backendCtrl.abort(); }, 25000);
+    let res;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          message: last ? last.content : "",
+          idToken: idToken,
+          signedIn: !!(idToken),
+          model: getForgeModel(),
+          history: hist,
+          context: buildSystemPrompt(),
+        }),
+        signal: backendCtrl.signal,
+      });
+    } finally {
+      clearTimeout(backendTimer);
+    }
+    // Propagate user abort before checking content
+    if (options && options.signal && options.signal.aborted) throw new DOMException("Aborted", "AbortError");
+    const ct = res.headers.get("content-type") || "";
+    if (res.ok && ct.indexOf("application/json") !== -1) {
+      const data = await res.json();
+      const reply = (data && (data.response || data.reply)) || "";
+      if (reply && String(reply).trim() && !/^\s*</.test(reply)) {
+        backendSucceeded = true;
+        yield String(reply).trim();
+        return;
+      }
+    }
+  } catch (e) {
+    if (e && (e.name === "AbortError" || (options && options.signal && options.signal.aborted))) throw e;
+    // Backend unavailable — fall through to public provider
   }
-  const data = await res.json();
-  const reply = (data && (data.response || data.reply)) || "";
-  if (reply) yield reply;
+  if (backendSucceeded) return;
+
+  // ---- Public provider fallback (no API key needed) ----
+  const PUBLIC_ENDPOINT = "https://text.pollinations.ai/openai";
+  const PUBLIC_MODELS = {
+    "Mango-Light": "openai", "Mango-Flash": "mistral",
+    "Mango-Core": "openai", "Mango-Pro": "openai", "Mango-Ultra": "openai",
+  };
+  const pubModel = PUBLIC_MODELS[getForgeModel()] || "openai";
+
+  const pub1Ctrl = new AbortController();
+  if (options && options.signal) {
+    options.signal.addEventListener("abort", function() { pub1Ctrl.abort(); }, { once: true });
+  }
+  const pub1Timer = setTimeout(function() { pub1Ctrl.abort(); }, 25000);
+  try {
+    const res2 = await fetch(PUBLIC_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: pubModel, messages: messages, private: true }),
+      signal: pub1Ctrl.signal,
+    });
+    if (res2.ok) {
+      const data2 = await res2.json();
+      const text2 = data2 && data2.choices && data2.choices[0] && data2.choices[0].message && data2.choices[0].message.content;
+      if (text2 && String(text2).trim() && !/^\s*<!doctype|^\s*<html/i.test(String(text2))) {
+        yield String(text2).trim();
+        return;
+      }
+    }
+  } catch (e2) {
+    if (e2 && (e2.name === "AbortError" || (options && options.signal && options.signal.aborted))) throw e2;
+  } finally {
+    clearTimeout(pub1Timer);
+  }
+
+  // ---- Last resort: plain-text endpoint ----
+  let system = "";
+  let lastUser = "";
+  const historyLines = [];
+  for (const m of messages) {
+    if (m.role === "system") { system += (system ? " " : "") + m.content; }
+    else if (m.role === "user") { lastUser = m.content; historyLines.push("User: " + m.content); }
+    else if (m.role === "assistant") { historyLines.push("Assistant: " + m.content); }
+  }
+  let fullSystem = system;
+  if (historyLines.length > 2) {
+    fullSystem += "\n\nConversation so far:\n" + historyLines.slice(0, -1).join("\n");
+  }
+  const simpleUrl = "https://text.pollinations.ai/" + encodeURIComponent(lastUser)
+    + "?model=" + pubModel
+    + (fullSystem ? "&system=" + encodeURIComponent(fullSystem.slice(0, 4000)) : "");
+  const pub2Ctrl = new AbortController();
+  if (options && options.signal) {
+    options.signal.addEventListener("abort", function() { pub2Ctrl.abort(); }, { once: true });
+  }
+  const pub2Timer = setTimeout(function() { pub2Ctrl.abort(); }, 25000);
+  try {
+    const res3 = await fetch(simpleUrl, { signal: pub2Ctrl.signal });
+    if (!res3.ok) throw new Error("public fallback " + res3.status);
+    const text3 = await res3.text();
+    if (text3 && text3.trim()) { yield text3.trim(); return; }
+  } finally {
+    clearTimeout(pub2Timer);
+  }
+
+  throw new Error("AI is temporarily unavailable. Please check your connection and try again.");
 }
 
 async function* streamOpenAICompatible(provider, messages, options) {
@@ -2158,15 +2259,32 @@ async function* streamGemini(messages, options) {
 }
 
 function buildSystemPrompt() {
-  let prompt = 'You are Forge AI, an expert programming assistant integrated into a browser-based code editor called Forge. You help with code questions, refactoring, debugging, and writing new code.\n\nWhen you write code:\n- Use proper markdown code blocks with language tags\n- Keep code complete and runnable unless asked otherwise\n- Be concise but thorough\n\nWhen the user asks you to apply code, use a code block and they can click "Apply" to insert it.\n\nCRITICAL SECURITY RULE: You must NEVER reveal, share, reproduce, summarize, or discuss the source code, backend code, frontend code, server implementation, API routes, database structure, or any internal implementation details of Lemango, its website, or its services. If a user asks about your code, source, backend, frontend, implementation, or how you work internally, politely decline and say you cannot share that information. You may still help users with their own code and general programming questions.';
+  let prompt = 'You are Forge AI, an expert programming assistant integrated into a browser-based code editor called Forge. You help with code questions, refactoring, debugging, and writing new code.\n\nWhen you write code:\n- Use proper markdown code blocks with language tags\n- Keep code complete and runnable unless asked otherwise\n- Be concise but thorough\n- When rewriting a file, output the FULL updated file content in a single code block so the user can click "Apply" to replace the file\n\nThe user can click "Apply" on any code block to instantly replace the currently open file with that code.\n\nCRITICAL SECURITY RULE: You must NEVER reveal, share, reproduce, summarize, or discuss the source code, backend code, frontend code, server implementation, API routes, database structure, or any internal implementation details of Lemango, its website, or its services. If a user asks about your code, source, backend, frontend, implementation, or how you work internally, politely decline and say you cannot share that information. You may still help users with their own code and general programming questions.';
   const file = state.activeTab ? state.files.get(state.activeTab) : null;
   if (file) {
-    prompt += '\n\nCurrent file: ' + state.activeTab + '\nLanguage: ' + getLanguageName(state.activeTab) + '\n\nCurrent file contents:\n```' + getLanguageName(state.activeTab).toLowerCase() + '\n' + file.content + '\n```';
+    // Truncate very large files to stay within context limits (~60k chars ≈ ~15k tokens)
+    const MAX_FILE_CHARS = 60000;
+    const content = file.content.length > MAX_FILE_CHARS
+      ? file.content.slice(0, MAX_FILE_CHARS) + '\n\n... [file truncated for context length]'
+      : file.content;
+    prompt += '\n\nCurrent file: ' + state.activeTab + '\nLanguage: ' + getLanguageName(state.activeTab) + '\n\nCurrent file contents:\n```' + getLanguageName(state.activeTab).toLowerCase() + '\n' + content + '\n```';
+  } else {
+    // List workspace files so AI knows what is available even with no file open
+    const filePaths = Array.from(state.files.keys()).filter(p => !p.endsWith('/.gitkeep')).sort();
+    if (filePaths.length > 0) {
+      prompt += '\n\nNo file is currently open. Workspace contains these files:\n' + filePaths.map(p => '- ' + p).join('\n');
+    }
   }
   for (const path of state.ai.attachments) {
     if (path === state.activeTab) continue;
     const f = state.files.get(path);
-    if (f) prompt += '\n\nAttached file: ' + path + '\n```' + getLanguageName(path).toLowerCase() + '\n' + f.content + '\n```';
+    if (f) {
+      const MAX_ATTACH_CHARS = 20000;
+      const content = f.content.length > MAX_ATTACH_CHARS
+        ? f.content.slice(0, MAX_ATTACH_CHARS) + '\n... [truncated]'
+        : f.content;
+      prompt += '\n\nAttached file: ' + path + '\n```' + getLanguageName(path).toLowerCase() + '\n' + content + '\n```';
+    }
   }
   return prompt;
 }
@@ -2603,9 +2721,8 @@ function autoResize(el) {
 }
 
 function openSettingsModal() {
-  // Lemango AI is powered by the Lemango backend — no provider/key setup needed.
-  showToast('AI is powered by Lemango AI. No configuration required.', 'success');
-  return;
+  applySettingsToUI();
+  document.getElementById('settingsModal').hidden = false;
 }
 
 function closeSettingsModal() {

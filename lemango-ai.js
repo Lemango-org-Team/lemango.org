@@ -274,13 +274,27 @@
         var timer = setTimeout(function () { controller.abort(); }, 25000);
         var system = "";
         var lastUser = "";
+        // Build a condensed prompt that includes conversation history so context isn't lost.
+        var historyLines = [];
         for (var i = 0; i < messages.length; i++) {
             var m = messages[i];
-            if (m.role === "system") system += (system ? " " : "") + m.content;
-            else if (m.role === "user") lastUser = m.content;
+            if (m.role === "system") {
+                system += (system ? " " : "") + m.content;
+            } else if (m.role === "user") {
+                lastUser = m.content;
+                historyLines.push("User: " + m.content);
+            } else if (m.role === "assistant") {
+                historyLines.push("Assistant: " + m.content);
+            }
+        }
+        // Include prior turns in the system context so the assistant has conversation history.
+        var fullSystem = system;
+        if (historyLines.length > 2) {
+            var priorTurns = historyLines.slice(0, -1).join("\n");
+            fullSystem += "\n\nConversation so far:\n" + priorTurns;
         }
         var url = "https://text.pollinations.ai/" + encodeURIComponent(lastUser) + "?model=" + pubModel;
-        if (system) url += "&system=" + encodeURIComponent(system);
+        if (fullSystem) url += "&system=" + encodeURIComponent(fullSystem);
         try {
             var res = await fetch(url, { signal: controller.signal });
             if (!res.ok) throw new Error("public " + res.status);
@@ -295,10 +309,11 @@
     async function chat(opts) {
         opts = opts || {};
         var counts = opts.count !== false;
+        // Check limit BEFORE incrementing — only record after a successful response.
         if (counts && !isUnlimited()) {
             if (limitInfo().remaining <= 0) throw limitReached();
-            recordUse();
         }
+        var counted = false;
         try {
             var data = await viaBackendRaw(
                 "/api/ai/chat",
@@ -306,12 +321,15 @@
             );
             var text = (data && (data.response || data.reply)) || "";
             if (!text || !String(text).trim()) throw new Error("backend-empty");
+            if (counts && !isUnlimited()) { recordUse(); counted = true; }
             return { text: String(text).trim(), reasoning: (data && data.reasoning) ? String(data.reasoning).trim() : null };
         } catch (err) { /* fall back to the keyless public provider */ }
         var hint = opts.systemHint || modelHint(opts.model);
         var sys = systemPrompt() + (hint ? ("\n" + hint) : "");
         if (opts.context) sys += "\n\n" + String(opts.context).slice(0, 8000);
-        return { text: await viaPublic(buildMessages(opts.history, opts.message, sys), opts.model), reasoning: null };
+        var publicText = await viaPublic(buildMessages(opts.history, opts.message, sys), opts.model);
+        if (counts && !isUnlimited() && !counted) { recordUse(); }
+        return { text: publicText, reasoning: null };
     }
 
     async function document(opts) {
