@@ -5,7 +5,7 @@
 // one that answers wins. Pollinations is keyless so everything works out of
 // the box, while optional API keys unlock faster / stronger providers.
 
-const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 45000);
+const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 120000);
 
 export const BRAND = "Lemango AI";
 
