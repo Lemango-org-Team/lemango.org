@@ -2003,7 +2003,7 @@ async function* streamChat(messages, options) {
     if (options && options.signal) {
       options.signal.addEventListener("abort", function() { backendCtrl.abort(); }, { once: true });
     }
-    const backendTimer = setTimeout(function() { backendCtrl.abort(); }, 25000);
+    const backendTimer = setTimeout(function() { backendCtrl.abort(); }, 90000);
     let res;
     try {
       res = await fetch(url, {
@@ -2053,7 +2053,7 @@ async function* streamChat(messages, options) {
   if (options && options.signal) {
     options.signal.addEventListener("abort", function() { pub1Ctrl.abort(); }, { once: true });
   }
-  const pub1Timer = setTimeout(function() { pub1Ctrl.abort(); }, 25000);
+  const pub1Timer = setTimeout(function() { pub1Ctrl.abort(); }, 60000);
   try {
     const res2 = await fetch(PUBLIC_ENDPOINT, {
       method: "POST",
@@ -2095,7 +2095,7 @@ async function* streamChat(messages, options) {
   if (options && options.signal) {
     options.signal.addEventListener("abort", function() { pub2Ctrl.abort(); }, { once: true });
   }
-  const pub2Timer = setTimeout(function() { pub2Ctrl.abort(); }, 25000);
+  const pub2Timer = setTimeout(function() { pub2Ctrl.abort(); }, 60000);
   try {
     const res3 = await fetch(simpleUrl, { signal: pub2Ctrl.signal });
     if (!res3.ok) throw new Error("public fallback " + res3.status);
@@ -2327,6 +2327,14 @@ async function sendAIMessage(text) {
   thinking.innerHTML = '<div class="ai-thinking-dots"><span></span><span></span><span></span></div><span>Thinking...</span>';
   msgEl.querySelector('.ai-msg-content').appendChild(thinking);
 
+  // Show a "still working" hint after 15s so users don't think it's frozen on big requests
+  const slowTimer = setTimeout(function() {
+    if (state.ai.streaming && thinking.parentNode) {
+      var hint = thinking.querySelector('span');
+      if (hint) hint.textContent = 'Working on it... (large request)';
+    }
+  }, 15000);
+
   state.ai.streaming = true;
   state.ai.abortController = new AbortController();
   updateSendButton();
@@ -2361,6 +2369,7 @@ async function sendAIMessage(text) {
     state.ai.streaming = false;
     state.ai.abortController = null;
     updateSendButton();
+    clearTimeout(slowTimer);
   }
 }
 
