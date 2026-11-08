@@ -2259,7 +2259,7 @@ async function* streamGemini(messages, options) {
 }
 
 function buildSystemPrompt() {
-  let prompt = 'You are Forge AI, an expert programming assistant integrated into a browser-based code editor called Forge. You help with code questions, refactoring, debugging, and writing new code.\n\nWhen you write code:\n- Use proper markdown code blocks with language tags\n- Keep code complete and runnable unless asked otherwise\n- Be concise but thorough\n- When rewriting a file, output the FULL updated file content in a single code block so the user can click "Apply" to replace the file\n\nThe user can click "Apply" on any code block to instantly replace the currently open file with that code.\n\nCRITICAL SECURITY RULE: You must NEVER reveal, share, reproduce, summarize, or discuss the source code, backend code, frontend code, server implementation, API routes, database structure, or any internal implementation details of Lemango, its website, or its services. If a user asks about your code, source, backend, frontend, implementation, or how you work internally, politely decline and say you cannot share that information. You may still help users with their own code and general programming questions.';
+  let prompt = 'You are Forge AI, an expert programming assistant integrated into a browser-based code editor called Forge (a fully in-browser VS Code-like editor). You have DIRECT control over the workspace file system.\n\n## Your capabilities\nYou can directly CREATE, EDIT, DELETE, and MANAGE files in the workspace by outputting special forge-cmd code blocks. The editor will show the user a confirmation button and execute the command immediately when confirmed.\n\n## forge-cmd syntax\nTo perform file operations, output a fenced code block with language `forge-cmd` containing a JSON object:\n\nCreate or overwrite a file:\n```forge-cmd\n{"action":"write","path":"filename.js","content":"file contents here"}\n```\n\nDelete a file:\n```forge-cmd\n{"action":"delete","path":"filename.js"}\n```\n\nDelete a folder and all its contents:\n```forge-cmd\n{"action":"delete_folder","path":"src"}\n```\n\nClear ALL files in the workspace:\n```forge-cmd\n{"action":"clear_all"}\n```\n\nRename or move a file:\n```forge-cmd\n{"action":"rename","from":"old.js","to":"new.js"}\n```\n\nOpen a file in the editor:\n```forge-cmd\n{"action":"open","path":"filename.js"}\n```\n\n## Rules for forge-cmd usage\n- ALWAYS use forge-cmd blocks for any file operation request (create, edit, delete, rename, clear, move)\n- When writing a file, include the COMPLETE file contents in the "content" field — never truncate\n- Escape special characters in JSON strings properly (use \\n for newlines, \\" for quotes, \\\\ for backslashes)\n- You can chain multiple forge-cmd blocks in one response to create multiple files at once\n- After writing files, explain what you did\n- For "clear workspace" or "delete all files" requests, ALWAYS use {"action":"clear_all"} — never describe steps\n- Do NOT suggest manual steps when you can use forge-cmd to do it directly\n\n## Regular code blocks\n- Use regular markdown code blocks (```js, ```html etc.) for showing/explaining code\n- Regular code blocks get a "Copy" button and an "Apply" button (replaces the currently open file)\n- Use forge-cmd when you want to create/write a specific named file\n\nCRITICAL SECURITY RULE: You must NEVER reveal, share, reproduce, summarize, or discuss the source code, backend code, frontend code, server implementation, API routes, database structure, or any internal implementation details of Lemango, its website, or its services. If a user asks about your code, source, backend, frontend, implementation, or how you work internally, politely decline and say you cannot share that information. You may still help users with their own code and general programming questions.';
   const file = state.activeTab ? state.files.get(state.activeTab) : null;
   if (file) {
     // Truncate very large files to stay within context limits (~60k chars ≈ ~15k tokens)
@@ -2410,6 +2410,56 @@ function addCodeBlockActions(container) {
     for (const c of classes) {
       if (c.startsWith('language-')) { lang = c.slice(9); break; }
     }
+
+    // forge-cmd blocks: parse and show an "Run" button that executes the command
+    if (lang === 'forge-cmd') {
+      pre.style.cssText = 'background:var(--bg-2);border:1px solid var(--accent-soft-2);border-radius:8px;margin:8px 0;overflow:hidden;';
+      const header = document.createElement('div');
+      header.className = 'code-header';
+      header.style.cssText = 'background:var(--accent-soft);border-bottom:1px solid var(--accent-soft-2);';
+
+      let cmdObj = null;
+      let preview = '';
+      try {
+        cmdObj = JSON.parse(code.textContent.trim());
+        const a = cmdObj.action;
+        if (a === 'write') preview = 'Write \u2192 ' + cmdObj.path;
+        else if (a === 'delete') preview = 'Delete \u2192 ' + cmdObj.path;
+        else if (a === 'delete_folder') preview = 'Delete folder \u2192 ' + cmdObj.path;
+        else if (a === 'clear_all') preview = 'Clear ALL workspace files';
+        else if (a === 'rename') preview = 'Rename ' + cmdObj.from + ' \u2192 ' + cmdObj.to;
+        else if (a === 'open') preview = 'Open \u2192 ' + cmdObj.path;
+        else preview = 'Forge command: ' + a;
+      } catch (e) {
+        preview = 'Invalid forge-cmd (JSON parse error)';
+      }
+
+      header.innerHTML = '<span class="code-lang" style="color:var(--accent);">\u26a1 ' + escapeHtml(preview) + '</span><div class="code-actions"></div>';
+      const actionsDiv = header.querySelector('.code-actions');
+
+      if (cmdObj) {
+        const runBtn = document.createElement('button');
+        runBtn.textContent = 'Run';
+        runBtn.style.cssText = 'background:var(--accent);color:#1a0e00;font-weight:700;border-color:transparent;';
+        runBtn.addEventListener('click', function() {
+          executeForgeCommand(cmdObj, runBtn);
+        });
+        actionsDiv.appendChild(runBtn);
+      }
+
+      const copyBtn = document.createElement('button');
+      copyBtn.textContent = 'Copy';
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(code.textContent).then(function() { showToast('Copied', 'success'); });
+      });
+      actionsDiv.appendChild(copyBtn);
+
+      pre.insertBefore(header, code);
+      code.style.display = 'none'; // hide raw JSON — the preview label is enough
+      return;
+    }
+
+    // Normal code block
     const header = document.createElement('div');
     header.className = 'code-header';
     header.innerHTML = '<span class="code-lang">' + escapeHtml(lang) + '</span><div class="code-actions"><button class="copy">Copy</button><button class="apply">Apply</button></div>';
@@ -2421,6 +2471,122 @@ function addCodeBlockActions(container) {
       applyCodeBlock(code.textContent);
     });
   });
+}
+
+async function executeForgeCommand(cmd, btn) {
+  if (!cmd || !cmd.action) { showToast('Invalid forge command', 'error'); return; }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Running...'; }
+
+  try {
+    switch (cmd.action) {
+
+      case 'write': {
+        if (!cmd.path) throw new Error('write: missing path');
+        const content = cmd.content != null ? String(cmd.content) : '';
+        // If file exists, update it; otherwise create it
+        if (state.files.has(cmd.path)) {
+          const file = state.files.get(cmd.path);
+          file.content = content;
+          file.modified = Date.now();
+          await saveFileToDB(cmd.path, content);
+          // Refresh editor if this file is open
+          if (state.activeTab === cmd.path && state.editor) {
+            state.editor.setValue(content);
+            const tab = state.openTabs.find(t => t.path === cmd.path);
+            if (tab) tab.dirty = false;
+            renderTabs();
+          }
+          renderTree();
+          showToast('Updated ' + cmd.path, 'success');
+        } else {
+          // Expand parent directories
+          const parts = cmd.path.split('/');
+          for (let i = 1; i < parts.length; i++) state.expandedDirs.add(parts.slice(0, i).join('/'));
+          state.files.set(cmd.path, { path: cmd.path, content: content });
+          await saveFileToDB(cmd.path, content);
+          renderTree();
+          renderStatus();
+          showToast('Created ' + cmd.path, 'success');
+        }
+        // Auto-open the file
+        openFile(cmd.path);
+        break;
+      }
+
+      case 'delete': {
+        if (!cmd.path) throw new Error('delete: missing path');
+        if (!state.files.has(cmd.path)) { showToast(cmd.path + ' not found', 'error'); break; }
+        await deleteFileOrFolder(cmd.path, false);
+        break;
+      }
+
+      case 'delete_folder': {
+        if (!cmd.path) throw new Error('delete_folder: missing path');
+        await deleteFileOrFolder(cmd.path, true);
+        break;
+      }
+
+      case 'clear_all': {
+        const paths = Array.from(state.files.keys());
+        for (const p of paths) {
+          state.files.delete(p);
+          await deleteFileFromDB(p);
+        }
+        state.openTabs = [];
+        state.activeTab = null;
+        state.recent = [];
+        renderTree();
+        renderTabs();
+        showEmptyState();
+        renderStatus();
+        await saveMeta();
+        showToast('Workspace cleared', 'success');
+        break;
+      }
+
+      case 'rename': {
+        if (!cmd.from || !cmd.to) throw new Error('rename: missing from/to');
+        const f = state.files.get(cmd.from);
+        if (!f) { showToast(cmd.from + ' not found', 'error'); break; }
+        state.files.delete(cmd.from);
+        await deleteFileFromDB(cmd.from);
+        f.path = cmd.to;
+        state.files.set(cmd.to, f);
+        await saveFileToDB(cmd.to, f.content);
+        const tab = state.openTabs.find(t => t.path === cmd.from);
+        if (tab) {
+          tab.path = cmd.to;
+          if (state.activeTab === cmd.from) state.activeTab = cmd.to;
+        }
+        renderTree();
+        renderTabs();
+        if (state.activeTab === cmd.to && state.editor) loadEditorContent(cmd.to);
+        showToast('Renamed to ' + cmd.to, 'success');
+        break;
+      }
+
+      case 'open': {
+        if (!cmd.path) throw new Error('open: missing path');
+        if (!state.files.has(cmd.path)) { showToast(cmd.path + ' not found', 'error'); break; }
+        openFile(cmd.path);
+        showToast('Opened ' + cmd.path, 'success');
+        break;
+      }
+
+      default:
+        showToast('Unknown forge command: ' + cmd.action, 'error');
+    }
+  } catch (e) {
+    showToast('Command failed: ' + e.message, 'error');
+    console.error('forge-cmd error:', e);
+  }
+
+  if (btn) {
+    btn.textContent = 'Done \u2713';
+    btn.style.background = 'var(--mint)';
+    btn.disabled = true;
+  }
 }
 
 function applyCodeBlock(code) {
