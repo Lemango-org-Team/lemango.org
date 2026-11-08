@@ -71,12 +71,6 @@
           <a href="/terms/">Terms of Service</a> and
           <a href="/privacy/">Privacy Policy</a>.
         </p>
-
-        <p class="auth-terms">
-          By signing in you agree to Lemango's
-          <a href="/terms/">Terms of Service</a> and
-          <a href="/privacy/">Privacy Policy</a>.
-        </p>
       </div>
 
       <div class="auth-card-footer">
@@ -111,68 +105,115 @@
   <script src="/cookie-consent.js" defer></script>
   <script src="/dark-mode.js" defer></script>
   <script>
+    // Mark this page so lemango-auth.js skips its own Google button rendering here.
+    // The inline script below is the sole owner of the sign-in flow on /auth/.
+    window.__lmAuthPageOwnsButton = true;
+
     document.addEventListener("DOMContentLoaded", function () {
       var next = window.__lmNext || "";
       var slot = document.getElementById("googleSlot");
+      if (!slot) return;
 
-      // Already signed in: offer to go straight back where the user came from.
-      if (next && slot) {
-        var stored = null;
-        try { stored = JSON.parse(localStorage.getItem("lemango_user") || "null"); } catch (e) {}
-        if (stored) {
-          slot.innerHTML = "";
+      // Helper: render the sign-in card showing who is signed in + "Continue" / "Use different account".
+      function showAlreadySignedIn(stored) {
+        slot.innerHTML = "";
+
+        var name = document.createElement("p");
+        name.style.cssText = "font-size:14px;font-weight:600;margin:0 0 8px;";
+        name.textContent = "Signed in as " + (stored.given_name || stored.name || stored.email);
+        slot.appendChild(name);
+
+        if (next) {
           var cont = document.createElement("a");
           cont.href = next;
           cont.textContent = "Continue";
           cont.className = "btn btn-primary";
           cont.style.cssText = "display:inline-block;background:#005c2d;color:#fff;padding:12px 22px;border-radius:8px;font-weight:700;text-decoration:none;";
           slot.appendChild(cont);
-
-          var alt = document.createElement("button");
-          alt.type = "button";
-          alt.textContent = "Use a different account";
-          alt.style.cssText = "display:block;margin:12px auto 0;background:none;border:none;color:#005c2d;font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline;";
-          alt.addEventListener("click", function () {
-            try { localStorage.removeItem("lemango_user"); } catch (e) {}
-            if (window.LemangoAuth) window.LemangoAuth.user = null;
-            location.reload();
-          });
-          slot.appendChild(alt);
-          return;
         }
+
+        var alt = document.createElement("button");
+        alt.type = "button";
+        alt.textContent = "Use a different account";
+        alt.style.cssText = "display:block;margin:12px auto 0;background:none;border:none;color:#005c2d;font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline;";
+        alt.addEventListener("click", function () {
+          try { localStorage.removeItem("lemango_user"); } catch (e) {}
+          if (window.LemangoAuth) { window.LemangoAuth.user = null; }
+          renderSignInButton();
+        });
+        slot.appendChild(alt);
       }
 
-      if (window.LemangoAuth) {
-        if (slot) {
-          // Render Google's official button (clickable repeatedly, even after dismissing)
-          window.LemangoAuth.load().then(function () {
-            window.google.accounts.id.initialize({
-              client_id: "417747434436-j8ohlhkpo982m8uvum322d9mirg7n7gb.apps.googleusercontent.com",
-              callback: function (resp) {
-                var u = window.LemangoAuth.decodeCredential(resp.credential);
-                if (!u) return;
-                window.LemangoAuth.user = {
-                  googleId: u.sub, email: u.email, name: u.name,
-                  given_name: u.given_name || "", picture: u.picture || "", avatar: u.picture || "",
-                  idToken: resp.credential
-                };
-                try { localStorage.setItem("lemango_user", JSON.stringify(window.LemangoAuth.user)); } catch {}
-                slot.innerHTML = "";
-                slot.appendChild(window.LemangoAuth._buildUserChip(window.LemangoAuth.user));
-                document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: window.LemangoAuth.user } }));
-                // Send the user back to the page that sent them here.
-                if (window.__lmNext) location.assign(window.__lmNext);
-              },
-              cancel_on_tap_outside: false
-            });
-            window.google.accounts.id.renderButton(slot, {
-              theme: "outline", size: "large", text: "signin_with",
-              shape: "rectangular", logo_alignment: "left",
-              // Never wider than the card it sits in, or it overflows on 320px phones
-              width: Math.max(200, Math.min(280, (window.innerWidth || 320) - 56))
-            });
-          }).catch(function (e) { console.warn(e); });
-        }
+      // Helper: load GIS and render the official Google button.
+      function renderSignInButton() {
+        slot.innerHTML = "";
+        var loader = window.LemangoAuth ? window.LemangoAuth.load() : loadGIS();
+        loader.then(function () {
+          window.google.accounts.id.initialize({
+            client_id: "417747434436-j8ohlhkpo982m8uvum322d9mirg7n7gb.apps.googleusercontent.com",
+            callback: function (resp) {
+              var decodeCredential = window.LemangoAuth
+                ? window.LemangoAuth.decodeCredential.bind(window.LemangoAuth)
+                : function (token) {
+                    try {
+                      var part = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+                      var json = decodeURIComponent(atob(part).split("").map(function (c) { return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2); }).join(""));
+                      return JSON.parse(json);
+                    } catch (e) { return null; }
+                  };
+              var u = decodeCredential(resp.credential);
+              if (!u) return;
+              var user = {
+                googleId: u.sub, email: u.email, name: u.name,
+                given_name: u.given_name || "", picture: u.picture || "", avatar: u.picture || "",
+                idToken: resp.credential
+              };
+              try { localStorage.setItem("lemango_user", JSON.stringify(user)); } catch (e) {}
+              // Keep window.LemangoAuth in sync so other widgets on this page update.
+              if (window.LemangoAuth) {
+                window.LemangoAuth.user = user;
+                document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: user } }));
+              }
+              showAlreadySignedIn(user);
+              // Redirect back to the page that sent the user here.
+              if (window.__lmNext) {
+                setTimeout(function () { location.assign(window.__lmNext); }, 300);
+              }
+            },
+            cancel_on_tap_outside: false
+          });
+          window.google.accounts.id.renderButton(slot, {
+            theme: "outline", size: "large", text: "signin_with",
+            shape: "rectangular", logo_alignment: "left",
+            width: Math.max(200, Math.min(280, (window.innerWidth || 320) - 56))
+          });
+        }).catch(function (e) {
+          console.warn("Google sign-in load failed:", e);
+          slot.innerHTML = '<p style="color:#8c1605;font-size:13px;">Could not load Google sign-in. Please refresh the page.</p>';
+        });
+      }
+
+      // Minimal GIS loader used when lemango-auth.js hasn't loaded yet.
+      function loadGIS() {
+        if (window.google && window.google.accounts) return Promise.resolve();
+        return new Promise(function (resolve, reject) {
+          var s = document.createElement("script");
+          s.src = "https://accounts.google.com/gsi/client";
+          s.async = true; s.defer = true;
+          s.onload = resolve;
+          s.onerror = function () { reject(new Error("Could not load Google Identity Services.")); };
+          document.head.appendChild(s);
+        });
+      }
+
+      // Check if already signed in.
+      var stored = null;
+      try { stored = JSON.parse(localStorage.getItem("lemango_user") || "null"); } catch (e) {}
+
+      if (stored && stored.email) {
+        showAlreadySignedIn(stored);
+      } else {
+        renderSignInButton();
       }
     });
   </script>

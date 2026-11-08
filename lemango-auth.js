@@ -45,6 +45,9 @@
         const raw = localStorage.getItem(USER_KEY);
         if (raw) this.user = JSON.parse(raw);
       } catch { this.user = null; }
+      // On /auth/ the inline sign-in script owns the Google button entirely.
+      // Skip mounting widgets there to prevent a double initialize() race.
+      if (window.__lmAuthPageOwnsButton) return;
       this._watchCompact();
       document.querySelectorAll("[data-auth-widget]").forEach((el) => this.mount(el));
       document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: this.user } }));

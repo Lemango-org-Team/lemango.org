@@ -399,4 +399,11 @@ document.addEventListener("click",e=>{if(!modelDropdown.contains(e.target)&&!mod
         showToast("Opening code workspace...");
     });
     }
+
+    // Re-mount auth widgets whenever sign-in state changes (e.g., user returns from /auth/).
+    document.addEventListener("lm:auth", () => {
+        if (window.LemangoAuth && typeof window.LemangoAuth._remountAll === "function") {
+            window.LemangoAuth._remountAll();
+        }
+    });
 })();
