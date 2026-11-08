@@ -237,7 +237,7 @@ aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
     const { text, reasoning } = await generateReply(
       [{ role: "system", content: systemPrompt }, ...messages],
       model,
-      { reasoning: { effort: "medium" } }
+      { maxTokens: 8000, reasoning: { effort: "medium" } }
     );
 
     res.json({ ok: true, configured: true, response: text, reply: text, reasoning: reasoning || null, model, provider: BRAND });
