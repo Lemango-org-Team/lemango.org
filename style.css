@@ -537,7 +537,7 @@ h2 {
 
 .product-ai   { background: #fefdf9; }
 .product-court { background: #f6f8ed; }
-.product-fastpay { grid-column: 1 / -1; background: #f0f7f4; }
+.product-fastpay { background: #f7fbf8; }
 
 .product-topline {
   position: relative;
@@ -793,3 +793,6 @@ a:focus-visible, button:focus-visible {
   .reveal { opacity: 1; transform: none; }
   .typing-dot { animation: none; }
 }
+
+.product-group-title { margin: 2rem 0 0.75rem; font-size: 1.1rem; font-weight: 700; color: #374151; }
+.product-group-title:first-child { margin-top: 0; }
