@@ -537,7 +537,7 @@ h2 {
 
 .product-ai   { background: #fefdf9; }
 .product-court { background: #f6f8ed; }
-.product-fastpay { background: #f7fbf8; }
+.product-fastpay { grid-column: auto; background: #f7fbf8; }
 
 .product-topline {
   position: relative;
