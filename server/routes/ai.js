@@ -7,12 +7,6 @@ export { aiConfigured, verifyIdToken };
 
 export const aiRouter = Router();
 
-const FOUNDERS =
-  `I was founded and primarily developed by [redacted], known online as [redacted], ` +
-  `who created the Lemangoes project, provided funding, and configured my core ` +
-  `infrastructure—including domain acquisition and Cloudflare security certification. ` +
-  `[redacted], known online as [redacted], also contributed as a co-creator to the project.`;
-
 const CANT_SAY = "I can't say anything about that.";
 const REFUSAL = "I can't share that information.";
 const BAD_WARNING = "⚠️ Warning: This request has been flagged as harmful or abusive. You have been reported to OmegaDIke Cybersecurity.\n\n![OmegaDIke Cybersecurity](/assets/OmegaDike.jpeg)";
@@ -39,10 +33,10 @@ function isVibeCodedQuestion(text) {
 }
 
 const LEAK_INDICATORS = [
-  "[redacted]", "[redacted]", "[redacted]12", "server/routes/ai.js", "providers.js",
+  "server/routes/ai.js", "providers.js",
   "MODEL_CATALOG", "aiDailyHits", "dailyUsage", "checkAndIncrementDaily", "verifyIdToken",
   "aiConfigured", "lemango-ai.js", "LemangoAI", "FOUNDERS", "AI_DISABLE_LIVE",
-  "AI_SYSTEM_PROMPT", "Lemango site", "[redacted local path]", "[redacted local path]",
+  "AI_SYSTEM_PROMPT", "Lemango site",
   "appendFileSync", "generateReply", "GROQ_API_KEY", "OPENROUTER_API_KEY", "GEMINI_API_KEY"
 ];
 function containsLeak(text) {
@@ -170,14 +164,19 @@ aiRouter.post("/log", (req, res) => {
 });
 
 // --- Per-IP daily cap to prevent abuse (resets at midnight UTC) ---
-const UNLIMITED_EMAILS = ["[redacted email]", "[redacted email]"];
+const UNLIMITED_EMAILS = new Set(
+  (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean),
+);
 const aiDailyHits = new Map();
 
 // --- Per-user daily question limit (server-authoritative, tamper-resistant) ---
 // Prevents bypassing the daily limit by clearing browser cache/cookies/localStorage.
 const dailyUsage = new Map();
 function dailyLimitFor(verified) {
-  if (verified && verified.email && UNLIMITED_EMAILS.indexOf(String(verified.email).toLowerCase()) !== -1) return Infinity;
+  if (verified && verified.email && UNLIMITED_EMAILS.has(String(verified.email).toLowerCase())) return Infinity;
   if (verified && verified.email) return 8;
   return 4;
 }
@@ -202,13 +201,8 @@ function checkAndIncrementDaily(req, verified) {
   return { allowed: true, limit: limit, remaining: limit - entry.count };
 }
 async function aiDailyLimit(req, res, next) {
-  // Unlimited for the owner account (verified via Google ID token).
-  const token = req.body && req.body.idToken;
-  if (token) {
-    const v = await verifyIdToken(token);
-    if (v && v.email && UNLIMITED_EMAILS.indexOf(String(v.email).toLowerCase()) !== -1) {
-      return next();
-    }
+  if (req.user?.email && UNLIMITED_EMAILS.has(String(req.user.email).toLowerCase())) {
+    return next();
   }
   const key = req.ip || "unknown";
   const day = new Date().toISOString().slice(0, 10);
@@ -261,8 +255,7 @@ aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
 
   // Determine if the caller is a verified signed-in user (unlocks coding help).
   let codeAllowed = false;
-  const token = req.body && req.body.idToken;
-  const verified = await verifyIdToken(token);
+  const verified = req.user || null;
   if (verified) codeAllowed = true;
 
   // Log AI usage for admin tracking.
@@ -387,10 +380,8 @@ aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
     res.json({ ok: true, configured: true, response: safeText, reply: safeText, reasoning: safeReasoning, model, provider: BRAND });
   } catch (err) {
     console.error("[ai] chat failed:", err?.message || err);
-    res.status(502).json({
-      ok: false,
-      error: `${BRAND} couldn't answer right now. Please try again in a moment.`,
-    });
+    const reply = `${BRAND} is temporarily busy due to high demand. Please try again in a few moments.`;
+    res.json({ ok: true, configured: true, response: reply, reply, model, provider: BRAND });
   }
 });
 
@@ -417,9 +408,7 @@ aiRouter.post("/generate-document", async (req, res) => {
     res.json({ ok: true, text: safeText, response: safeText, reasoning: containsLeak(reasoning) ? null : (reasoning || null), provider: BRAND });
   } catch (err) {
     console.error("[ai] document generation failed:", err?.message || err);
-    res.status(502).json({
-      ok: false,
-      error: `${BRAND} couldn't generate the document right now. Please try again in a moment.`,
-    });
+    const reply = `${BRAND} is temporarily busy due to high demand. Please try again in a few moments.`;
+    res.json({ ok: true, text: reply, response: reply, reasoning: null, provider: BRAND });
   }
 });

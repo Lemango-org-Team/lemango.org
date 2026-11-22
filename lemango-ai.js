@@ -11,12 +11,6 @@
 
     var BRAND = "Lemango AI";
 
-    var FOUNDERS =
-        "I was founded and primarily developed by [redacted], known online as [redacted], " +
-        "who created the Lemangoes project, provided funding, and configured my core " +
-        "infrastructure—including domain acquisition and Cloudflare security certification. " +
-        "[redacted], known online as [redacted], also contributed as a co-creator to the project.";
-
     var CANT_SAY = "I can't say anything about that.";
     var REFUSAL = "I can't share that information.";
     var BAD_WARNING = "⚠️ Warning: This request has been flagged as harmful or abusive. You have been reported to OmegaDIke Cybersecurity.\n\n![OmegaDIke Cybersecurity](/assets/OmegaDike.jpeg)";
@@ -33,10 +27,10 @@
     }
 
     var LEAK_INDICATORS = [
-        "[redacted]", "[redacted]", "[redacted]12", "server/routes/ai.js", "providers.js",
+        "server/routes/ai.js", "providers.js",
         "MODEL_CATALOG", "aiDailyHits", "dailyUsage", "checkAndIncrementDaily", "verifyIdToken",
-        "aiConfigured", "lemango-ai.js", "LemangoAI", "FOUNDERS", "AI_DISABLE_LIVE",
-        "AI_SYSTEM_PROMPT", "Lemango site", "[redacted local path]", "[redacted local path]",
+        "aiConfigured", "lemango-ai.js", "LemangoAI", "AI_DISABLE_LIVE",
+        "AI_SYSTEM_PROMPT", "Lemango site",
         "appendFileSync", "generateReply", "GROQ_API_KEY", "OPENROUTER_API_KEY", "GEMINI_API_KEY"
     ];
     function containsLeak(text) {
@@ -85,19 +79,7 @@
         "help. You may still answer general questions, explain concepts, and help with writing.";
 
     function isSignedIn() {
-        try {
-            var raw = localStorage.getItem("lemango_user");
-            if (raw) { var u = JSON.parse(raw); if (u && u.email) return true; }
-        } catch (e) { /* ignore */ }
-        return false;
-    }
-
-    function getIdToken() {
-        try {
-            var raw = localStorage.getItem("lemango_user");
-            if (raw) { var u = JSON.parse(raw); if (u && u.idToken) return u.idToken; }
-        } catch (e) { /* ignore */ }
-        return null;
+        return !!(window.LemangoAuth && window.LemangoAuth.isSignedIn());
     }
 
     function systemPrompt() {
@@ -133,37 +115,39 @@
 
     /* ---- Beta daily question limit (per browser, per day) ---- */
     // Signed-in users get a higher daily limit as a perk.
-    var UNLIMITED_EMAILS = ["[redacted email]", "[redacted email]"];
-    var AGENTS_EMAILS = ["[redacted email]", "[redacted email]"];
-
-    function hasAgents() {
-        try {
-            var raw = localStorage.getItem("lemango_user");
-            if (raw) {
-                var u = JSON.parse(raw);
-                if (u && u.email && AGENTS_EMAILS.indexOf(String(u.email).toLowerCase()) !== -1) return true;
-            }
-        } catch (e) { /* ignore */ }
-        return false;
+    var privilegeUser = null;
+    var privilegeCheck = null;
+    function isUnlimited() {
+        var user = window.LemangoAuth && window.LemangoAuth.user;
+        var userKey = user && (user.googleId || user.email);
+        if (!userKey) {
+            privilegeUser = null;
+            privilegeCheck = null;
+            return Promise.resolve(false);
+        }
+        if (userKey !== privilegeUser) {
+            privilegeUser = userKey;
+            privilegeCheck = fetch("/api/admin/check", {
+                credentials: "include"
+            }).then(function (res) {
+                if (!res.ok) return false;
+                return res.json();
+            }).then(function (data) {
+                return !!(data && data.isAdmin);
+            }).catch(function (err) {
+                console.error("[ai] privilege check failed:", err);
+                return false;
+            });
+        }
+        return privilegeCheck;
     }
 
-    function isUnlimited() {
-        try {
-            var raw = localStorage.getItem("lemango_user");
-            if (raw) {
-                var u = JSON.parse(raw);
-                if (u && u.email && UNLIMITED_EMAILS.indexOf(String(u.email).toLowerCase()) !== -1) return true;
-            }
-        } catch (e) { /* ignore */ }
-        return false;
+    function hasAgents() {
+        return isUnlimited();
     }
 
     function dailyLimit() {
-        if (isUnlimited()) return 999999;
-        try {
-            var raw = localStorage.getItem("lemango_user");
-            if (raw) { var u = JSON.parse(raw); if (u && u.email) return 8; }
-        } catch (e) { /* ignore */ }
+        if (window.LemangoAuth && window.LemangoAuth.isSignedIn()) return 8;
         return 4;
     }
     var DAILY_LIMIT = dailyLimit();
@@ -375,18 +359,18 @@
         }
         var counts = opts.count !== false;
         // Check limit BEFORE incrementing — only record after a successful response.
-        if (counts && !isUnlimited()) {
+        if (counts && !(await isUnlimited())) {
             if (limitInfo().remaining <= 0) throw limitReached();
         }
         var counted = false;
         try {
             var data = await viaBackendRaw(
                 "/api/ai/chat",
-                { message: opts.message, model: opts.model, history: opts.history, idToken: getIdToken(), signedIn: isSignedIn(), systemHint: opts.systemHint || modelHint(opts.model), context: opts.context || null }
+                { message: opts.message, model: opts.model, history: opts.history, systemHint: opts.systemHint || modelHint(opts.model), context: opts.context || null }
             );
             var text = (data && (data.response || data.reply)) || "";
             if (!text || !String(text).trim()) throw new Error("backend-empty");
-            if (counts && !isUnlimited()) { recordUse(); counted = true; }
+            if (counts && !(await isUnlimited())) { recordUse(); counted = true; }
             var backendText = String(text).trim();
             var backendReasoning = (data && data.reasoning) ? String(data.reasoning).trim() : null;
             if (containsLeak(backendText) || containsLeak(backendReasoning)) {
@@ -403,10 +387,14 @@
         var hint = opts.systemHint || modelHint(opts.model);
         var sys = systemPrompt() + (hint ? ("\n" + hint) : "");
         if (opts.context) sys += "\n\n" + String(opts.context).slice(0, 8000);
-        var publicText = await viaPublic(buildMessages(opts.history, opts.message, sys), opts.model);
-        if (counts && !isUnlimited() && !counted) { recordUse(); }
-        if (containsLeak(publicText)) { publicText = REFUSAL; }
-        return { text: publicText, reasoning: null };
+        try {
+            var publicText = await viaPublic(buildMessages(opts.history, opts.message, sys), opts.model);
+            if (counts && !(await isUnlimited()) && !counted) { recordUse(); }
+            if (containsLeak(publicText)) { publicText = REFUSAL; }
+            return { text: publicText, reasoning: null };
+        } catch (e2) {
+            return { text: BRAND + " is temporarily busy due to high demand. Please try again in a few moments.", reasoning: null };
+        }
     }
 
     async function document(opts) {

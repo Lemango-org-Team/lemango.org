@@ -380,19 +380,25 @@
     <script src="admin-button.js" defer></script>
     <script>
       (function () {
-        var OWNERS = ["[redacted email]", "[redacted email]"];
-        try {
-          var raw = localStorage.getItem("lemango_user");
-          var u = raw ? JSON.parse(raw) : null;
+        function checkPaidAccess() {
+          var u = window.LemangoAuth && window.LemangoAuth.user;
           var btn = document.getElementById("paidProductBtn");
-          if (btn && u && u.email && OWNERS.indexOf(String(u.email).toLowerCase()) !== -1) {
-            btn.textContent = "Open Lamda LaunchPad →";
-            var pb = window.LEMANGO_API_BASE || "";
-            btn.href = pb + (u.idToken ? "/paid?idToken=" + encodeURIComponent(u.idToken) : "/paid");
-            btn.target = "_blank";
-            btn.rel = "noopener noreferrer";
-          }
-        } catch (e) {}
+          if (!btn || !u || !u.email) return;
+          var pb = window.LEMANGO_API_BASE || "";
+          fetch(pb + "/paid/access", { method: "POST", credentials: "include" })
+            .then(function (res) {
+              if (!res.ok) return;
+              btn.textContent = "Open Lamda LaunchPad →";
+              btn.href = pb + "/paid";
+              btn.target = "_blank";
+              btn.rel = "noopener noreferrer";
+            })
+            .catch(function (err) {
+              console.error("[paid] access check failed:", err);
+            });
+        }
+        document.addEventListener("lm:auth", checkPaidAccess);
+        checkPaidAccess();
       })();
     </script>
 </body>

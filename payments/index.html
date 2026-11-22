@@ -97,13 +97,21 @@
       <a id="paidLink" href="/paid" target="_blank" rel="noopener noreferrer" class="inline" style="font-weight:700;">Open Lamda LaunchPad →</a>
       <script>
         (function () {
-          try {
-           var a = document.getElementById("paidLink");
-           var raw = localStorage.getItem("lemango_user");
-           var u = raw ? JSON.parse(raw) : null;
-           var pb = window.LEMANGO_API_BASE || "";
-           if (a) a.href = pb + "/paid" + (u && u.idToken ? "?idToken=" + encodeURIComponent(u.idToken) : "");
-          } catch (e) {}
+          function checkPaidAccess() {
+            var a = document.getElementById("paidLink");
+            var u = window.LemangoAuth && window.LemangoAuth.user;
+            if (!a || !u || !u.email) return;
+            var pb = window.LEMANGO_API_BASE || "";
+            fetch(pb + "/paid/access", { method: "POST", credentials: "include" })
+              .then(function (res) {
+                if (res.ok) a.href = pb + "/paid";
+              })
+              .catch(function (err) {
+                console.error("[paid] access check failed:", err);
+              });
+          }
+          document.addEventListener("lm:auth", checkPaidAccess);
+          checkPaidAccess();
         })();
       </script>
     </div>

@@ -311,27 +311,38 @@ function initGoogleSignIn(){
   });
 }
 
-const ALLOWED_PAID_EMAILS = ["[redacted email]","[redacted email]"];
-function handleGoogleSignIn(response){
-  if(response.credential){
-    try{
-      let payload=JSON.parse(atob(response.credential.split('.')[1]));
-      const email = (payload.email || "").toLowerCase();
-      if (ALLOWED_PAID_EMAILS.indexOf(email) === -1) {
-        alert("Access denied. This is a paid product. Please purchase access first.");
-        return;
-      }
-      state.profile={
-        name:payload.name||payload.email,
-        email:payload.email,
-        picture:payload.picture
-      };
-      save();
-      profileRender();
-    }catch(e){
-      console.error("Error decoding JWT:",e);
-      alert("Sign-in failed");
+async function handleGoogleSignIn(response){
+  if(!response.credential)return;
+  try{
+    const session = await fetch("/api/auth/session", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      credentials:"include",
+      body:JSON.stringify({credential:response.credential}),
+    });
+    const sessionData = await session.json().catch(()=>({}));
+    if(!session.ok || !sessionData.user){
+      throw new Error(sessionData.error || "Google sign-in could not be completed.");
     }
+    const access = await fetch("/paid/access", {
+      method:"POST",
+      credentials:"include",
+    });
+    if(!access.ok){
+      alert("Access denied. This is a paid product. Please purchase access first.");
+      return;
+    }
+    let payload=sessionData.user;
+    state.profile={
+      name:payload.name||payload.email,
+      email:payload.email,
+      picture:payload.picture||payload.avatar
+    };
+    save();
+    profileRender();
+  }catch(e){
+    console.error("Sign-in failed:",e);
+    alert("Sign-in failed");
   }
 }
 
@@ -466,7 +477,7 @@ $("clearPlaylist").onclick=()=>{
 };
 
 $("resetButton").onclick=()=>{
-  if(confirm("Reset all [redacted] Start Page settings and local data?")){
+  if(confirm("Reset all Lemango Start Page settings and local data?")){
     localStorage.clear();
     indexedDB.deleteDatabase("[redacted]_media");
     location.reload();

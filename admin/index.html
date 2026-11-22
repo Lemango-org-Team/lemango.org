@@ -98,15 +98,20 @@
 
   <script>
     async function tryAdmin() {
-      await window.LemangoAuth.load().catch(()=>{});
+      try {
+        await window.LemangoAuth.refresh();
+      } catch (error) {
+        console.error("[admin] session check failed:", error);
+        return false;
+      }
       const u = window.LemangoAuth.user;
-      if (!u || !u.idToken) {
+      if (!u || !u.email) {
         const slot = document.getElementById("adminSignInSlot");
         if (slot && window.LemangoAuth) window.LemangoAuth.mount(slot);
         return false;
       }
       try {
-        const res = await fetch("/api/admin/check?idToken=" + encodeURIComponent(u.idToken), { credentials: "include" });
+        const res = await fetch("/api/admin/check", { credentials: "include" });
         const data = await res.json();
         if (data.ok && data.isAdmin) {
           document.getElementById("gate").style.display = "none";
@@ -121,8 +126,8 @@
       } catch (e) { /* ignore */ }
       return false;
     }
-
     setTimeout(() => { tryAdmin(); }, 500);
+    document.addEventListener("lm:auth", () => { tryAdmin(); });
     setTimeout(() => {
       const slot = document.getElementById("adminSignInSlot");
       if (slot && window.LemangoAuth) window.LemangoAuth.mount(slot);
@@ -133,7 +138,7 @@
       const user = window.LemangoAuth.user;
       if (!user) return;
       try {
-        const res = await fetch("/api/admin/queue?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+        const res = await fetch("/api/admin/queue", { credentials: "include" });
         const data = await res.json();
         const list = document.getElementById("queueList");
         if (!data.ok || !data.queue || !data.queue.length) {
@@ -168,7 +173,7 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ idToken: user.idToken, token, force })
+          body: JSON.stringify({ token, force })
         });
         const data = await res.json();
         if (data.ok) { alert("Approved!"); loadQueue(); }
@@ -183,7 +188,7 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ idToken: user.idToken, token })
+          body: JSON.stringify({ token })
         });
         const data = await res.json();
         if (data.ok) { alert("Rejected."); loadQueue(); }
@@ -195,7 +200,7 @@
       const email = document.getElementById("inviteEmail").value.trim();
       const user = window.LemangoAuth.user;
       if (!email) { alert("Enter an email"); return; }
-      if (!user || !user.idToken) {
+      if (!user || !user.email) {
         document.getElementById("inviteResult").textContent = "Please sign out and sign in again to refresh your session.";
         return;
       }
@@ -204,7 +209,7 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ idToken: user.idToken, email })
+          body: JSON.stringify({ email })
         });
         const data = await res.json();
         if (res.status === 401 || res.status === 403) {
@@ -226,7 +231,7 @@
       const user = window.LemangoAuth.user;
       if (!user) return;
       try {
-        const res = await fetch("/api/admin/invites?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+        const res = await fetch("/api/admin/invites", { credentials: "include" });
         const data = await res.json();
         if (data.ok) {
           document.getElementById("invitesList").innerHTML = data.invites.map((inv) =>
@@ -240,7 +245,7 @@
       const user = window.LemangoAuth.user;
       if (!user) return;
       try {
-        const res = await fetch("/api/admin/abuse-report?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+        const res = await fetch("/api/admin/abuse-report", { credentials: "include" });
         const data = await res.json();
         const el = document.getElementById("abuseReport");
         if (data.ok) {
@@ -271,7 +276,7 @@
       const user = window.LemangoAuth.user;
       if (!user) return;
       try {
-        const res = await fetch("/api/admin/ai-logs?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+        const res = await fetch("/api/admin/ai-logs", { credentials: "include" });
         const data = await res.json();
         const el = document.getElementById("aiLogs");
         if (data.ok) {
@@ -286,7 +291,7 @@
       const user = window.LemangoAuth.user;
       if (!user) return;
       try {
-        const res = await fetch("/api/admin/users-log?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+        const res = await fetch("/api/admin/users-log", { credentials: "include" });
         const data = await res.json();
         const el = document.getElementById("usersLogs");
         if (data.ok) {

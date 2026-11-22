@@ -1,4 +1,4 @@
-# [redacted] Start Page — Upgrade Notes
+# Lamda LaunchPad — Upgrade Notes
 
 ## Major Changes
 

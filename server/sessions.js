@@ -9,7 +9,12 @@ import crypto from "node:crypto";
 import { JsonStore } from "./store.js";
 
 const SESSION_COOKIE = "lm_sid";
-const SESSION_SECRET = process.env.SESSION_SECRET || "lemango-dev-secret-change-in-prod";
+const configuredSecret = process.env.SESSION_SECRET;
+if (process.env.NODE_ENV === "production" &&
+    (!configuredSecret || Buffer.byteLength(configuredSecret) < 32)) {
+  throw new Error("SESSION_SECRET must be configured with at least 32 bytes in production.");
+}
+const SESSION_SECRET = configuredSecret || crypto.randomBytes(32).toString("base64url");
 const CROSS_ORIGIN = Boolean(process.env.ALLOWED_ORIGINS);
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14; // 14 days
 

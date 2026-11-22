@@ -60,8 +60,7 @@ const MOCK_USER = {
   name: "Debug User",
   given_name: "Debug",
   picture: "",
-  avatar: "",
-  idToken: "debug-mode-no-token-needed"
+  avatar: ""
 };
 
 function getMime(filePath) {
@@ -126,25 +125,18 @@ function injectDebugScript(html) {
 // ===== LEMANGO DEBUG MODE =====
 window.LEMANGO_DEBUG = true;
 window.LEMANGO_AUTH_BYPASS = true;
-
-// Auto-inject mock user so everything thinks we're signed in
-try {
-  if (!localStorage.getItem("lemango_user")) {
-    localStorage.setItem("lemango_user", JSON.stringify({
-      googleId: "debug-user",
-      email: "debug@lemango.local",
-      name: "Debug User",
-      given_name: "Debug",
-      picture: "",
-      avatar: "",
-      idToken: "debug-mode-no-token-needed"
-    }));
-  }
-} catch (e) {}
+window.__LM_DEBUG_USER = {
+  googleId: "debug-user",
+  email: "debug@lemango.local",
+  name: "Debug User",
+  given_name: "Debug",
+  picture: "",
+  avatar: ""
+};
 
 // Override LemangoAuth to always report signed in
 if (window.LemangoAuth) {
-  window.LemangoAuth.user = window.LemangoAuth.user || JSON.parse(localStorage.getItem("lemango_user") || "null");
+  window.LemangoAuth.user = window.LemangoAuth.user || window.__LM_DEBUG_USER;
   window.LemangoAuth.isSignedIn = function() { return true; };
 }
 
@@ -177,14 +169,11 @@ console.log("%c Lemango Debug Mode ", "background: linear-gradient(135deg, #ff9d
 
 // Patch lemango-auth.js for debug mode
 function patchAuthScript(js) {
-  // Force user to be set from localStorage mock
+  // Force user to be set from the in-memory debug mock
   const debugPatch = `
 // ===== DEBUG MODE PATCH =====
 if (window.LEMANGO_AUTH_BYPASS) {
-  try {
-    var mockUser = JSON.parse(localStorage.getItem("lemango_user") || "null");
-    if (mockUser) LemangoAuth.user = mockUser;
-  } catch (e) {}
+  if (window.__LM_DEBUG_USER) LemangoAuth.user = window.__LM_DEBUG_USER;
   LemangoAuth.isSignedIn = function() { return true; };
 }
 `;
@@ -254,9 +243,10 @@ async function proxyApi(req, res, pathname, body) {
 // Mock API responses for when the real backend is down
 function mockApiEndpoint(pathname, body) {
   // Auth: always return signed in
-  if (pathname === "/api/auth/me") {
+  if (pathname === "/api/auth/me" || pathname === "/api/auth/session") {
     return { ok: true, user: MOCK_USER };
   }
+  if (pathname === "/api/auth/logout") return { ok: true };
   
   // AI models
   if (pathname === "/api/ai/models") {
@@ -455,7 +445,7 @@ server.on("upgrade", handleWebSocket);
 
 // Start
 watchFiles();
-server.listen(PORT, () => {
+server.listen(PORT, "127.0.0.1", () => {
   console.log("");
   console.log("  ==========================================");
   console.log("   Lemango Debug Server");

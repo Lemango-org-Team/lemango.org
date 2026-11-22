@@ -9,6 +9,29 @@ export const courtRouter = Router();
 const STATUSES = ["open", "pending", "active", "closed"];
 const PRIORITIES = ["low", "normal", "high"];
 
+courtRouter.use((_req, res, next) => {
+  res.set("Cache-Control", "private, no-store");
+  next();
+});
+
+async function requireCourtUser(req, res, next) {
+  try {
+    if (!req.user?.sub) {
+      return res.status(401).json({ ok: false, error: "Sign in to access court records." });
+    }
+    req.courtUserId = req.user.sub;
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
+
+courtRouter.use(requireCourtUser);
+
+function findOwnedCase(list, id, userId) {
+  return list.find((item) => item.id === id && item.ownerId === userId) || null;
+}
+
 function cleanCaseInput(body = {}) {
   const out = {};
   const text = (v, max = 2000) => String(v ?? "").trim().slice(0, max);
@@ -38,9 +61,9 @@ function cleanCaseInput(body = {}) {
   return out;
 }
 
-courtRouter.get("/summary", async (_req, res, next) => {
+courtRouter.get("/summary", async (req, res, next) => {
   try {
-    const list = await cases.read();
+    const list = (await cases.read()).filter((item) => item.ownerId === req.courtUserId);
     res.json({
       total: list.length,
       byStatus: STATUSES.reduce((acc, s) => ({ ...acc, [s]: list.filter((c) => c.status === s).length }), {}),
@@ -57,7 +80,7 @@ courtRouter.get("/summary", async (_req, res, next) => {
 
 courtRouter.get("/cases", async (req, res, next) => {
   try {
-    let list = await cases.read();
+    let list = (await cases.read()).filter((item) => item.ownerId === req.courtUserId);
     const { status, q } = req.query;
     if (status) list = list.filter((c) => c.status === status);
     if (q) {
@@ -85,6 +108,7 @@ courtRouter.post("/cases", async (req, res, next) => {
     const now = new Date().toISOString();
     const record = {
       id: makeId("case"),
+      ownerId: req.courtUserId,
       title: input.title,
       type: input.type || "",
       plaintiff: input.plaintiff || "",
@@ -119,7 +143,7 @@ courtRouter.post("/cases", async (req, res, next) => {
 courtRouter.get("/cases/:id", async (req, res, next) => {
   try {
     const list = await cases.read();
-    const found = list.find((c) => c.id === req.params.id);
+    const found = findOwnedCase(list, req.params.id, req.courtUserId);
     if (!found) return res.status(404).json({ ok: false, error: "Case not found." });
     res.json({ case: found });
   } catch (err) {
@@ -132,7 +156,7 @@ courtRouter.patch("/cases/:id", async (req, res, next) => {
     const input = cleanCaseInput(req.body);
     let updated = null;
     await cases.update((list) => {
-      const idx = list.findIndex((c) => c.id === req.params.id);
+      const idx = list.findIndex((c) => c.id === req.params.id && c.ownerId === req.courtUserId);
       if (idx === -1) return null;
       list[idx] = { ...list[idx], ...input, updatedAt: new Date().toISOString() };
       updated = list[idx];
@@ -149,7 +173,7 @@ courtRouter.delete("/cases/:id", async (req, res, next) => {
   try {
     let removed = false;
     await cases.update((list) => {
-      const idx = list.findIndex((c) => c.id === req.params.id);
+      const idx = list.findIndex((c) => c.id === req.params.id && c.ownerId === req.courtUserId);
       if (idx !== -1) {
         list.splice(idx, 1);
         removed = true;
@@ -179,7 +203,7 @@ courtRouter.post("/cases/:id/notices", async (req, res, next) => {
 
     let updated = null;
     await cases.update((list) => {
-      const c = list.find((x) => x.id === req.params.id);
+      const c = findOwnedCase(list, req.params.id, req.courtUserId);
       if (!c) return null;
       c.notices.push(notice);
       c.updatedAt = new Date().toISOString();
@@ -197,7 +221,7 @@ courtRouter.patch("/cases/:id/notices/:noticeId", async (req, res, next) => {
   try {
     let updated = null;
     await cases.update((list) => {
-      const c = list.find((x) => x.id === req.params.id);
+      const c = findOwnedCase(list, req.params.id, req.courtUserId);
       if (!c) return null;
       const n = c.notices.find((x) => x.id === req.params.noticeId);
       if (!n) return null;
@@ -229,7 +253,7 @@ courtRouter.post("/cases/:id/documents", async (req, res, next) => {
 
     let updated = null;
     await cases.update((list) => {
-      const c = list.find((x) => x.id === req.params.id);
+      const c = findOwnedCase(list, req.params.id, req.courtUserId);
       if (!c) return null;
       c.documents.push(doc);
       c.updatedAt = new Date().toISOString();
@@ -247,7 +271,7 @@ courtRouter.delete("/cases/:id/documents/:docId", async (req, res, next) => {
   try {
     let updated = null;
     await cases.update((list) => {
-      const c = list.find((x) => x.id === req.params.id);
+      const c = findOwnedCase(list, req.params.id, req.courtUserId);
       if (!c) return null;
       const before = c.documents.length;
       c.documents = c.documents.filter((d) => d.id !== req.params.docId);
@@ -265,7 +289,7 @@ courtRouter.delete("/cases/:id/documents/:docId", async (req, res, next) => {
 
 courtRouter.get("/sessions", async (req, res, next) => {
   try {
-    let list = await sessions.read();
+    let list = (await sessions.read()).filter((item) => item.ownerId === req.courtUserId);
     if (req.query.caseId) list = list.filter((s) => s.caseId === req.query.caseId);
     res.json({ sessions: [...list].sort((a, b) => (b.startTime || "").localeCompare(a.startTime || "")) });
   } catch (err) {
@@ -284,6 +308,9 @@ courtRouter.post("/sessions", async (req, res, next) => {
       participants: [],
     };
     if (!session.caseId) return res.status(400).json({ ok: false, error: "A case id is required." });
+    const ownedCase = findOwnedCase(await cases.read(), session.caseId, req.courtUserId);
+    if (!ownedCase) return res.status(404).json({ ok: false, error: "Case not found." });
+    session.ownerId = req.courtUserId;
     await sessions.update((list) => {
       list.push(session);
       return session;

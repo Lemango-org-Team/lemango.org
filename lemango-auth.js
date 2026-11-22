@@ -1,8 +1,8 @@
 "use strict";
 /**
  * lemongo-auth.js — client-side "Sign in with Google" (Google Identity Services).
- * Works on static hosting (no backend required). Stores the signed-in user in
- * localStorage so other pages (and the AI daily limit) can read it.
+ * Exchanges Google credentials for a server-side HttpOnly session. Only
+ * non-secret profile data is kept in memory.
  *
  * Uses Google's official renderButton so each click re-opens the account chooser
  * (unlike prompt(), which has dismissal cooldowns).
@@ -11,7 +11,6 @@
  */
 (function () {
   const CLIENT_ID = "417747434436-j8ohlhkpo982m8uvum322d9mirg7n7gb.apps.googleusercontent.com";
-  const USER_KEY = "lemango_user";
   // Below this width the official Google button (fixed 220px) no longer fits
   // inside the site headers and pushes the whole page into horizontal scroll.
   // Narrow screens get a compact "Sign in" link to /auth instead.
@@ -20,6 +19,35 @@
     user: null,
     _scriptPromise: null,
     _compactQuery: null,
+    apiUrl(path) {
+      return (window.LEMANGO_API_BASE || "").replace(/\/+$/, "") + path;
+    },
+    async refresh() {
+      const response = await fetch(this.apiUrl("/api/auth/me"), { credentials: "include" });
+      if (response.status === 401) {
+        this.user = null;
+        return null;
+      }
+      if (!response.ok) throw new Error("Could not check the sign-in session.");
+      const data = await response.json();
+      this.user = data.user || null;
+      return this.user;
+    },
+    async acceptCredential(credential) {
+      const response = await fetch(this.apiUrl("/api/auth/session"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ credential }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.user) {
+        throw new Error(data.error || "Google sign-in could not be completed.");
+      }
+      this.user = data.user;
+      document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: this.user } }));
+      return this.user;
+    },
     load() {
       if (window.google && window.google.accounts) return Promise.resolve();
       if (this._scriptPromise) return this._scriptPromise;
@@ -33,18 +61,14 @@
       });
       return this._scriptPromise;
     },
-    decodeCredential(token) {
-      try {
-        const part = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-        const json = decodeURIComponent(atob(part).split("").map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
-        return JSON.parse(json);
-      } catch (e) { return null; }
-    },
     async init() {
+      try { localStorage.removeItem("lemango_user"); } catch {}
       try {
-        const raw = localStorage.getItem(USER_KEY);
-        if (raw) this.user = JSON.parse(raw);
-      } catch { this.user = null; }
+        await this.refresh();
+      } catch (error) {
+        this.user = null;
+        console.error("[auth] session check failed:", error);
+      }
       // On /auth/ the inline sign-in script owns the Google button entirely.
       // Skip mounting widgets there to prevent a double initialize() race.
       if (window.__lmAuthPageOwnsButton) return;
@@ -141,17 +165,14 @@
         await this.load();
         window.google.accounts.id.initialize({
           client_id: CLIENT_ID,
-          callback: (resp) => {
-            const u = this.decodeCredential(resp.credential);
-            if (!u) return;
-            this.user = {
-              googleId: u.sub, email: u.email, name: u.name,
-              given_name: u.given_name || "", picture: u.picture || "", avatar: u.picture || "",
-              idToken: resp.credential
-            };
-            try { localStorage.setItem(USER_KEY, JSON.stringify(this.user)); } catch {}
-            this.mount(container);
-            document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: this.user } }));
+          callback: async (resp) => {
+            try {
+              await this.acceptCredential(resp.credential);
+              this.mount(container);
+            } catch (error) {
+              console.error("[auth] sign-in failed:", error);
+              window.alert("Google sign-in failed. Please try again.");
+            }
           },
           cancel_on_tap_outside: false
         });
@@ -179,17 +200,14 @@
         await this.load();
         window.google.accounts.id.initialize({
           client_id: CLIENT_ID,
-          callback: (resp) => {
-            const u = this.decodeCredential(resp.credential);
-            if (!u) return;
-            this.user = {
-              googleId: u.sub, email: u.email, name: u.name,
-              given_name: u.given_name || "", picture: u.picture || "", avatar: u.picture || "",
-              idToken: resp.credential
-            };
-            try { localStorage.setItem(USER_KEY, JSON.stringify(this.user)); } catch {}
-            this.mount(container);
-            document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: this.user } }));
+          callback: async (resp) => {
+            try {
+              await this.acceptCredential(resp.credential);
+              this.mount(container);
+            } catch (error) {
+              console.error("[auth] sign-in failed:", error);
+              window.alert("Google sign-in failed. Please try again.");
+            }
           },
           cancel_on_tap_outside: false
         });
@@ -201,12 +219,23 @@
         });
       } catch (e) { console.warn("Google sign-in failed:", e); }
     },
-    signOut() {
+    async signOut() {
+      try {
+        const response = await fetch(this.apiUrl("/api/auth/logout"), {
+          method: "POST",
+          credentials: "include",
+        });
+        if (!response.ok) throw new Error("Could not end the sign-in session.");
+      } catch (error) {
+        console.error("[auth] sign-out failed:", error);
+        window.alert("Sign out could not be completed. Please try again.");
+        return false;
+      }
       this.user = null;
-      try { localStorage.removeItem(USER_KEY); } catch {}
       document.querySelectorAll("[data-auth-widget]").forEach((el) => this.mount(el));
       document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: null } }));
       try { if (window.google && window.google.accounts) window.google.accounts.id.disableAutoSelect(); } catch (e) {}
+      return true;
     },
     isSignedIn() { return !!this.user; }
   };

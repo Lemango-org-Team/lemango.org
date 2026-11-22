@@ -31,7 +31,7 @@ const App = (() => {
   }
 
   function login() {
-    document.getElementById("login-screen").style.display = "none";
+    location.assign("/auth/?next=" + encodeURIComponent("/court/"));
   }
 
   const pages = [
@@ -79,11 +79,19 @@ const App = (() => {
   let casesCache = [];
 
   async function apiRequest(path, options) {
+    const requestOptions = options || {};
     const res = await fetch('/api/court' + path, {
-      headers: { 'Content-Type': 'application/json' },
-      ...options,
+      ...requestOptions,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(requestOptions.headers || {}),
+      },
     });
     const data = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      location.assign("/auth/?next=" + encodeURIComponent("/court/"));
+    }
     if (!res.ok) throw new Error(data.error || 'Request failed.');
     return data;
   }
@@ -1138,10 +1146,22 @@ const App = (() => {
   }
 
   function init() {
-    document.getElementById("login-screen").style.display = "none";
-    navigate("home");
+    const loginScreen = document.getElementById("login-screen");
+    const showAuthenticatedView = (user) => {
+      if (!user?.email) {
+        casesCache = [];
+        els.main()?.replaceChildren();
+        loginScreen.style.display = "flex";
+        return;
+      }
+      loginScreen.style.display = "none";
+      navigate("home");
+    };
+    showAuthenticatedView(window.LemangoAuth?.user);
+    document.addEventListener("lm:auth", (event) => {
+      showAuthenticatedView(event.detail?.user);
+    });
     initGlobalSearch();
-    document.getElementById("password")?.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
   }
 
   document.addEventListener("DOMContentLoaded", init);

@@ -1,4 +1,4 @@
-# [redacted] Start Page — Quick Start Guide
+# Lamda LaunchPad — Quick Start Guide
 
 ## 🚀 5-Minute Setup
 
@@ -13,7 +13,7 @@ python -m http.server 8000
 
 **Get your Google Client ID:**
 1. Go to https://console.cloud.google.com
-2. Create new project called "[redacted]"
+2. Create new project called "Lamda LaunchPad"
 3. Click "Enable APIs and Services"
 4. Search for "Google+ API" and enable it
 5. Click "Credentials" (left sidebar)
@@ -22,7 +22,7 @@ python -m http.server 8000
 8. Under "Authorized JavaScript origins" add: `http://localhost:8000`
 9. Click "Create" and copy the Client ID
 
-**Add it to [redacted]:**
+**Add it to Lamda LaunchPad:**
 1. Open http://localhost:8000
 2. Click ⚙ (Settings) in top right
 3. Paste your Client ID in "Google OAuth Client ID" field
@@ -213,7 +213,7 @@ After deploying, update Google OAuth:
 
 ## ✨ You're All Set!
 
-Your [redacted] Start Page now has:
+Your Lamda LaunchPad now has:
 - ✓ Real Google Sign-In
 - ✓ Persistent backgrounds & music
 - ✓ Auto-save everything

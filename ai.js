@@ -383,21 +383,23 @@ document.addEventListener("click",e=>{if(!modelDropdown.contains(e.target)&&!mod
 (function init(){
     rebuildChat();autoResizeInput();updateSendState();updateRegenVisibility();
     modelLabel.textContent=currentModel;fetchModels();
-    // Agents mode toggle (only for allowlisted accounts)
+    // Agents mode toggle (only for backend-verified admin accounts)
     const agentsBtn = document.getElementById("agentsToggle");
-    if (agentsBtn && window.LemangoAI && typeof window.LemangoAI.hasAgents === "function" && window.LemangoAI.hasAgents()) {
-        agentsBtn.style.display = "inline-flex";
-        agentsBtn.classList.remove("hidden");
-        if (agentsMode) {
-            agentsBtn.classList.add("active");
-            const lbl = document.getElementById("agentsLabel");
-            if (lbl) lbl.textContent = "Agents: ON";
-        }
-    agentsBtn.addEventListener("click", () => {
-        // Open the VS Code-style workspace (Forge Code) for coding.
-        window.open("/workspace", "_blank");
-        showToast("Opening code workspace...");
-    });
+    if (agentsBtn && window.LemangoAI && typeof window.LemangoAI.hasAgents === "function") {
+        Promise.resolve(window.LemangoAI.hasAgents()).then(isAdmin => {
+            if (!isAdmin) return;
+            agentsBtn.style.display = "inline-flex";
+            agentsBtn.classList.remove("hidden");
+            if (agentsMode) {
+                agentsBtn.classList.add("active");
+                const lbl = document.getElementById("agentsLabel");
+                if (lbl) lbl.textContent = "Agents: ON";
+            }
+            agentsBtn.addEventListener("click", () => {
+                window.open("/workspace", "_blank");
+                showToast("Opening code workspace...");
+            });
+        }).catch(err => console.error("[ai] admin feature check failed:", err));
     }
 
     // Re-mount auth widgets whenever sign-in state changes (e.g., user returns from /auth/).

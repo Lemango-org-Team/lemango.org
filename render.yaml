@@ -12,5 +12,13 @@ services:
         value: 3000
       - key: DATA_DIR
         value: data
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: PAID_REPO_RAW
+        sync: false
       # Add the rest of your env vars in the Render dashboard
       # (SMTP_*, AI keys, ADSENSE_CLIENT, etc.)

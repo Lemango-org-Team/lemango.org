@@ -13,6 +13,7 @@ import crypto from "node:crypto";
 import { Router } from "express";
 import { JsonStore, makeId } from "../store.js";
 import { createSession, destroySessionFromReq } from "../sessions.js";
+import { verifyIdToken } from "./ai.js";
 
 export const authRouter = Router();
 
@@ -140,6 +141,41 @@ authRouter.get("/google", (req, res) => {
   res.redirect(googleAuthUrl(state));
 });
 
+// Exchange a short-lived Google credential for a server-side session.
+authRouter.post("/session", async (req, res, next) => {
+  try {
+    const profile = await verifyIdToken(req.body?.credential);
+    if (!profile?.sub || !profile.email) {
+      return res.status(401).json({ ok: false, error: "Google sign-in could not be verified." });
+    }
+
+    await destroySessionFromReq(req, res);
+    const user = await upsertUser(profile, req.ip);
+    await createSession(res, {
+      userId: user.id,
+      sub: user.googleId,
+      email: user.email,
+      name: user.name,
+      firstName: user.firstName,
+      avatar: user.avatar,
+    });
+
+    res.set("Cache-Control", "private, no-store");
+    res.json({
+      ok: true,
+      user: {
+        googleId: user.googleId,
+        email: user.email,
+        name: user.name,
+        firstName: user.firstName,
+        avatar: user.avatar,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/auth/google/callback
 authRouter.get("/google/callback", async (req, res) => {
   const { code, state, error } = req.query;
@@ -168,6 +204,7 @@ authRouter.get("/google/callback", async (req, res) => {
 
     await createSession(res, {
       userId:    user.id,
+      sub:       user.googleId,
       email:     user.email,
       name:      user.name,
       firstName: user.firstName,
@@ -186,6 +223,7 @@ authRouter.get("/google/callback", async (req, res) => {
 // GET /api/auth/me — returns current user or 401
 authRouter.get("/me", (req, res) => {
   if (!req.user) return res.status(401).json({ ok: false, error: "Not authenticated" });
+  res.set("Cache-Control", "private, no-store");
   res.json({ ok: true, user: req.user });
 });
 

@@ -137,9 +137,9 @@
         alt.textContent = "Use a different account";
         alt.style.cssText = "display:block;margin:12px auto 0;background:none;border:none;color:#005c2d;font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline;";
         alt.addEventListener("click", function () {
-          try { localStorage.removeItem("lemango_user"); } catch (e) {}
-          if (window.LemangoAuth) { window.LemangoAuth.user = null; }
-          renderSignInButton();
+          window.LemangoAuth.signOut().then(function (signedOut) {
+            if (signedOut) renderSignInButton();
+          });
         });
         slot.appendChild(alt);
       }
@@ -151,33 +151,16 @@
         loader.then(function () {
           window.google.accounts.id.initialize({
             client_id: "417747434436-j8ohlhkpo982m8uvum322d9mirg7n7gb.apps.googleusercontent.com",
-            callback: function (resp) {
-              var decodeCredential = window.LemangoAuth
-                ? window.LemangoAuth.decodeCredential.bind(window.LemangoAuth)
-                : function (token) {
-                    try {
-                      var part = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-                      var json = decodeURIComponent(atob(part).split("").map(function (c) { return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2); }).join(""));
-                      return JSON.parse(json);
-                    } catch (e) { return null; }
-                  };
-              var u = decodeCredential(resp.credential);
-              if (!u) return;
-              var user = {
-                googleId: u.sub, email: u.email, name: u.name,
-                given_name: u.given_name || "", picture: u.picture || "", avatar: u.picture || "",
-                idToken: resp.credential
-              };
-              try { localStorage.setItem("lemango_user", JSON.stringify(user)); } catch (e) {}
-              // Keep window.LemangoAuth in sync so other widgets on this page update.
-              if (window.LemangoAuth) {
-                window.LemangoAuth.user = user;
-                document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: user } }));
-              }
-              showAlreadySignedIn(user);
-              // Redirect back to the page that sent the user here.
-              if (window.__lmNext) {
-                setTimeout(function () { location.assign(window.__lmNext); }, 300);
+            callback: async function (resp) {
+              try {
+                var user = await window.LemangoAuth.acceptCredential(resp.credential);
+                showAlreadySignedIn(user);
+                if (window.__lmNext) {
+                  setTimeout(function () { location.assign(window.__lmNext); }, 300);
+                }
+              } catch (error) {
+                console.error("[auth] sign-in failed:", error);
+                slot.innerHTML = '<p style="color:#8c1605;font-size:13px;">Sign-in failed. Please try again.</p>';
               }
             },
             cancel_on_tap_outside: false
@@ -207,14 +190,17 @@
       }
 
       // Check if already signed in.
-      var stored = null;
-      try { stored = JSON.parse(localStorage.getItem("lemango_user") || "null"); } catch (e) {}
-
-      if (stored && stored.email) {
-        showAlreadySignedIn(stored);
-      } else {
-        renderSignInButton();
+      if (!window.LemangoAuth) {
+        slot.innerHTML = '<p style="color:#8c1605;font-size:13px;">Sign-in is unavailable. Please refresh the page.</p>';
+        return;
       }
+      window.LemangoAuth.refresh().then(function (user) {
+        if (user && user.email) showAlreadySignedIn(user);
+        else renderSignInButton();
+      }).catch(function (error) {
+        console.error("[auth] session check failed:", error);
+        renderSignInButton();
+      });
     });
   </script>
   <script src="/admin-button.js" defer></script>

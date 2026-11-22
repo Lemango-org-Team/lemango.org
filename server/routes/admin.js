@@ -5,13 +5,16 @@
 import crypto from "node:crypto";
 import { Router } from "express";
 import { JsonStore } from "../store.js";
-import { verifyIdToken } from "./ai.js";
 
 export const adminRouter = Router();
 
 const ADMINS_FILE = "admins";
 const INVITES_FILE = "invites";
 const QUEUE_FILE = "admin-queue";
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
+  .split(",")
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean);
 
 const adminsStore = new JsonStore(ADMINS_FILE, []);
 const invitesStore = new JsonStore(INVITES_FILE, {});
@@ -19,10 +22,7 @@ const queueStore = new JsonStore(QUEUE_FILE, []);
 
 async function seedAdmins() {
   const list = await adminsStore.read();
-  const seeds = [
-    { email: "[redacted email]", rank: "superadmin" },
-    { email: "[redacted email]", rank: "superadmin" },
-  ];
+  const seeds = ADMIN_EMAILS.map((email) => ({ email, rank: "superadmin" }));
   let changed = false;
   for (const s of seeds) {
     if (!list.find((a) => a.email.toLowerCase() === s.email.toLowerCase())) {
@@ -41,11 +41,9 @@ async function isAdminEmail(email) {
 }
 
 async function currentUser(req) {
-  const token = req.body?.idToken || req.query?.idToken || req.headers["x-id-token"];
-  const verified = await verifyIdToken(token);
-  if (!verified) return null;
-  const admin = await isAdminEmail(verified.email);
-  return { email: verified.email, name: verified.name, admin };
+  if (!req.user?.email) return null;
+  const admin = await isAdminEmail(req.user.email);
+  return { email: req.user.email, name: req.user.name, admin };
 }
 
 async function safetyScore(email) {

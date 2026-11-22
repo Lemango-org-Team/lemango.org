@@ -51,9 +51,9 @@
       try {
         const res = await fetch("/api/admin/verify-invite", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ token, idToken: user.idToken })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
         });
         const data = await res.json();
         if (!res.ok) {
@@ -85,9 +85,9 @@
             try {
               const r = await fetch("/api/admin/accept-tos", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                body: JSON.stringify({ token, idToken: user.idToken })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token })
               });
               const d = await r.json();
               if (d.ok) {
@@ -103,7 +103,9 @@
         // Poll status
         const poll = setInterval(async () => {
           try {
-            const r = await fetch("/api/admin/status?token=" + encodeURIComponent(token) + "&idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+            const r = await fetch("/api/admin/status?token=" + encodeURIComponent(token), {
+              credentials: "include"
+            });
             const d = await r.json();
             if (d.ok && d.entry && d.entry.status === "approved") {
               clearInterval(poll);

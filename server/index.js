@@ -24,6 +24,10 @@ app.set("trust proxy", true);
 // CORS for split hosting (frontend on GitHub Pages, backend elsewhere).
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
   .split(",").map((s) => s.trim()).filter(Boolean);
+const csrfOrigins = new Set([
+  new URL(process.env.BASE_URL || "https://lemango.org").origin,
+  ...allowedOrigins.filter((origin) => origin !== "*"),
+]);
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   // Default-deny: if no allowlist is configured, only same-origin (no Origin header) requests are allowed.
@@ -32,10 +36,21 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
     res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
   }
   if (req.method === "OPTIONS") return res.status(204).end();
+  next();
+});
+
+app.use((req, res, next) => {
+  if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
+  const origin = req.get("origin");
+  if (!origin) return next();
+  const requestOrigin = `${req.protocol}://${req.get("host")}`;
+  if (origin !== requestOrigin && !csrfOrigins.has(origin)) {
+    return res.status(403).json({ ok: false, error: "Untrusted request origin." });
+  }
   next();
 });
 
@@ -70,7 +85,6 @@ app.get("/api/health", (_req, res) => {
     services: {
       ai: aiConfigured(),
       email: isSmtpConfigured() ? "smtp" : "draft",
-      newsletterInbox: NEWSLETTER_INBOX,
       auth: Boolean(process.env.GOOGLE_CLIENT_ID),
     },
     time: new Date().toISOString(),
@@ -80,7 +94,6 @@ app.get("/api/health", (_req, res) => {
 app.get("/api/config", (_req, res) => {
   res.json({
     adsenseClient: process.env.ADSENSE_CLIENT || null,
-    newsletterInbox: NEWSLETTER_INBOX,
     aiConfigured: aiConfigured(),
     authEnabled: Boolean(process.env.GOOGLE_CLIENT_ID),
   });
@@ -102,8 +115,8 @@ app.get("/:page.html", (req, res) => {
 });
 
 // --- Static frontend ---
-const BLOCKED_DIR = /^\/(?:server|tests|data|node_modules|\.git|temp)(?:\/|$)/i;
-const BLOCKED_FILES = /^\/(?:package(?:-lock)?\.json|readme\.md|cname|dockerfile|license|\.env(?:\.example)?|\.gitignore|\.nojekyll)$/i;
+const BLOCKED_DIR = /^\/(?:server|tests|data|node_modules|\.git|temp|Debug)(?:\/|$)/i;
+const BLOCKED_FILES = /^\/(?:package(?:-lock)?\.json|readme\.md|cname|dockerfile|license|\.env(?:\.example)?|\.gitignore|\.nojekyll|_config\.yml)$/i;
 app.use((req, res, next) => {
   if (BLOCKED_DIR.test(req.path) || BLOCKED_FILES.test(req.path)) {
     return res.status(404).type("text/plain").send("Not found.");

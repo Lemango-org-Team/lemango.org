@@ -1,8 +1,8 @@
 "use strict";
 /**
  * auth-widget.js — topbar account widget.
- * Uses client-side Google auth (lemango-auth.js) when available, falling back
- * to the server /api/auth/me endpoint. Stays in sync via the "lm:auth" event.
+ * Uses the server session exposed by lemango-auth.js and stays in sync via the
+ * "lm:auth" event.
  */
 (function () {
   const LemongoAuth = {
@@ -16,14 +16,12 @@
           this._remountAll();
         });
       } else {
-        try {
-          const res = await fetch("/api/auth/me", { credentials: "include" });
-          if (res.ok) {
-            const data = await res.json();
-            this.user = data.user || null;
-          }
-        } catch {
-          this.user = null;
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          this.user = data.user || null;
+        } else if (res.status !== 401) {
+          throw new Error("Could not check the sign-in session.");
         }
       }
       this._remountAll();
@@ -104,10 +102,14 @@
       if (window.LemangoAuth && typeof window.LemangoAuth.signOut === "function") {
         window.LemangoAuth.signOut();
       } else {
-        this.user = null;
-        try { localStorage.removeItem("lemango_user"); } catch {}
-        this._remountAll();
-        document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: null } }));
+        fetch("/api/auth/logout", { method: "POST", credentials: "include" })
+          .then((response) => {
+            if (!response.ok) throw new Error("Could not end the sign-in session.");
+            this.user = null;
+            this._remountAll();
+            document.dispatchEvent(new CustomEvent("lm:auth", { detail: { user: null } }));
+          })
+          .catch((error) => console.error("[auth] sign-out failed:", error));
         try { if (window.google && window.google.accounts) window.google.accounts.id.disableAutoSelect(); } catch (e) {}
       }
     }

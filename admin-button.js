@@ -5,10 +5,11 @@
  */
 (function () {
   async function check() {
-    if (!window.LemangoAuth || !window.LemangoAuth.user) return;
-    const user = window.LemangoAuth.user;
+    if (!window.LemangoAuth || !window.LemangoAuth.user?.email) return;
     try {
-      const res = await fetch("/api/admin/check?idToken=" + encodeURIComponent(user.idToken), { credentials: "include" });
+      const res = await fetch("/api/admin/check", {
+        credentials: "include"
+      });
       const data = await res.json();
       if (data.ok && data.isAdmin) {
         const btn = document.createElement("a");
@@ -17,7 +18,9 @@
         btn.style.cssText = "position:fixed;bottom:8px;left:8px;z-index:9999;padding:6px 12px;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none;font-family:inherit;";
         document.body.appendChild(btn);
       }
-    } catch (e) { /* ignore */ }
+    } catch (error) {
+      console.error("[admin] access check failed:", error);
+    }
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {

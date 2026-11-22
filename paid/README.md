@@ -1,4 +1,4 @@
-# [redacted] Start Page — Upgraded with OAuth & Persistence
+# Lamda LaunchPad — Upgraded with OAuth & Persistence
 
 ## What's New ✨
 
@@ -50,7 +50,7 @@ Then visit: `http://localhost:8000`
 #### Step 1: Create Google Cloud Project
 1. Go to https://console.cloud.google.com
 2. Click "Select a Project" → "New Project"
-3. Name it "[redacted]" and click Create
+3. Name it "Lamda LaunchPad" and click Create
 4. Wait for project to initialize
 
 #### Step 2: Enable Google+ API
@@ -63,7 +63,7 @@ Then visit: `http://localhost:8000`
 2. Click "Create Credentials" → "OAuth client ID"
 3. If prompted, click "Configure OAuth Consent Screen" first
 4. Choose "External" for user type
-5. Fill in app name (e.g., "[redacted]")
+5. Fill in app name (e.g., "Lamda LaunchPad")
 6. Add your email, save and continue through all steps
 7. Return to Credentials, click "Create Credentials" → "OAuth client ID"
 8. Select "Web application"
@@ -72,9 +72,9 @@ Then visit: `http://localhost:8000`
    - Your actual domain when deployed (e.g., `https://example.com`)
 10. Click Create
 
-#### Step 4: Add to [redacted]
+#### Step 4: Add to Lamda LaunchPad
 1. Copy the **Client ID** (the long string, not the secret)
-2. Go to Settings in [redacted] → Google Account
+2. Go to Settings in Lamda LaunchPad → Google Account
 3. Paste the Client ID into the text field
 4. Click "Setup Google Sign-In"
 5. A Google Sign-In button will appear

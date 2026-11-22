@@ -1,0 +1,16 @@
+exclude:
+  - .env
+  - .env.*
+  - .gitignore
+  - .nojekyll
+  - README.md
+  - Debug/
+  - data/
+  - node_modules/
+  - paid/
+  - package.json
+  - package-lock.json
+  - render.yaml
+  - server/
+  - temp/
+  - tests/

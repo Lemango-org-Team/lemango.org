@@ -7,45 +7,21 @@ import { Router } from "express";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import crypto from "node:crypto";
-import { verifyIdToken } from "./ai.js";
 
 export const paidRouter = Router();
 
-const ALLOWED_PAID_EMAILS = ["[redacted email]", "[redacted email]"];
-const REPO_RAW = "https://raw.githubusercontent.com/[redacted]/Paided/main";
+const ALLOWED_PAID_EMAILS = new Set(
+  (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean),
+);
+const REPO_RAW = String(process.env.PAID_REPO_RAW || "").replace(/\/+$/, "");
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const cache = new Map(); // path -> { body: Buffer, type: string, ts: number }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOCAL_DIR = path.resolve(__dirname, "..", "..", "paid");
-
-// Sign the paid cookie so its value can't be forged by simply setting the email.
-const PAID_SECRET = process.env.PAID_COOKIE_SECRET || crypto.randomBytes(32).toString("hex");
-
-function signEmail(email) {
-  return crypto.createHmac("sha256", PAID_SECRET).update(email).digest("hex");
-}
-
-function makeCookieValue(email) {
-  return email + "." + signEmail(email);
-}
-
-function readCookieEmail(value) {
-  const raw = String(value || "");
-  const i = raw.lastIndexOf(".");
-  if (i < 0) return null;
-  const email = raw.slice(0, i).toLowerCase();
-  const sig = raw.slice(i + 1);
-  const expected = signEmail(email);
-  if (sig.length !== expected.length) return null;
-  try {
-    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return null;
-  } catch {
-    return null;
-  }
-  return email;
-}
 
 const TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -85,6 +61,7 @@ async function fetchFile(relPath) {
   } catch {
     // fall through to the remote repo
   }
+  if (!REPO_RAW) throw new Error("PAID_REPO_RAW is not configured.");
   const url = REPO_RAW + "/" + relPath.split("/").map(encodeURIComponent).join("/");
   const headers = {};
   const token = process.env.GITHUB_TOKEN || process.env.PAID_REPO_TOKEN;
@@ -97,29 +74,20 @@ async function fetchFile(relPath) {
   return entry;
 }
 
-async function isAllowed(req, res) {
-  // Cookie-based paid session (set after a successful idToken check), so that
-  // sub-resource requests (css/js/images) are authenticated automatically.
-  const cookieEmail = readCookieEmail(req.cookies?.lm_paid);
-  if (cookieEmail && ALLOWED_PAID_EMAILS.includes(cookieEmail)) return true;
-  const idt = req.query?.idToken || req.body?.idToken || req.headers["x-id-token"];
-  const verified = idt ? await verifyIdToken(idt) : null;
-  if (verified && ALLOWED_PAID_EMAILS.includes(String(verified.email).toLowerCase())) {
-    if (res) {
-      res.cookie("lm_paid", makeCookieValue(String(verified.email).toLowerCase()), {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 24 * 60 * 60 * 1000,
-      });
-    }
-    return true;
-  }
-  return false;
+function isAllowed(req) {
+  const email = String(req.user?.email || "").toLowerCase();
+  return Boolean(email && ALLOWED_PAID_EMAILS.has(email));
 }
 
+paidRouter.post("/access", async (req, res) => {
+  if (!isAllowed(req)) {
+    return res.status(403).json({ ok: false, error: "Access denied." });
+  }
+  res.json({ ok: true });
+});
+
 paidRouter.get("/", async (req, res) => {
-  if (!(await isAllowed(req, res))) return res.status(403).send("Access denied. Paid product — sign in with an authorized account.");
+  if (!isAllowed(req)) return res.status(403).send("Access denied. Paid product — sign in with an authorized account.");
   try {
     const entry = await fetchFile("index.html");
     let html = entry.body.toString("utf8");
@@ -149,7 +117,7 @@ paidRouter.get("/", async (req, res) => {
 });
 
 paidRouter.get("/*", async (req, res) => {
-  if (!(await isAllowed(req, res))) return res.status(403).send("Access denied.");
+  if (!isAllowed(req)) return res.status(403).send("Access denied.");
   const rel = req.params[0] || "";
   if (!rel || rel.endsWith("/")) {
     return res.redirect("/paid/");

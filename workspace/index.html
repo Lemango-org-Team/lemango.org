@@ -1968,20 +1968,6 @@ async function* streamChat(messages, options) {
   const url = (base || "") + "/api/ai/chat";
   const last = (messages && messages.length) ? messages[messages.length - 1] : null;
   const hist = (messages || []).slice(0, -1).filter(function (m) { return m && (m.role === "user" || m.role === "assistant"); }).map(function (m) { return { role: m.role, content: m.content }; });
-  // The API only unlocks coding help for a caller with a verified Google ID
-  // token; without one it prepends NO_CODE_RULE and replies "sign in with
-  // Google". FORGE never sent it, so even signed-in users were refused.
-  let idToken = "";
-  try {
-    idToken = (window.LemangoAuth && window.LemangoAuth.user && window.LemangoAuth.user.idToken) || "";
-  } catch (e) { /* ignore */ }
-  if (!idToken) {
-    try {
-      const saved = JSON.parse(localStorage.getItem("lemango_user") || "null");
-      if (saved && saved.idToken) idToken = saved.idToken;
-    } catch (e) { /* ignore */ }
-  }
-
   // Helper: current model value
   function getForgeModel() {
     var s = document.getElementById('lemangoModelSelect');
@@ -2012,8 +1998,6 @@ async function* streamChat(messages, options) {
         credentials: "include",
         body: JSON.stringify({
           message: last ? last.content : "",
-          idToken: idToken,
-          signedIn: !!(idToken),
           model: getForgeModel(),
           history: hist,
           context: buildSystemPrompt(),
