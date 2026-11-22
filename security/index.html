@@ -79,7 +79,7 @@
     <p>This page summarizes how we approach security for Lemango's website and services. Security is an ongoing process; no website or online service can guarantee that every risk will be prevented.</p>
 
     <div class="card">
-      <strong>Current update:</strong> We corrected a publishing configuration that had allowed some internal server and debug source files to be served from website paths. In our latest checks, both regular and cache-busted requests to those paths returned 404. We have not established whether anyone accessed the files while they were reachable, and our review of provider audit records is not complete. See the <a class="inline" href="/status/">Status page</a> for the current summary.
+      <strong>Current update:</strong> We corrected a publishing configuration that had allowed some internal server and debug source files to be served from website paths. In our latest checks, both regular and cache-busted requests to those paths returned 404. We have received a claim that a crawler collected publicly available site resources, but have not independently verified the scope or requests. We have not established whether anyone accessed the files while they were reachable, and our review of provider audit records is not complete. See the <a class="inline" href="/status/">Status page</a> for the current summary.
     </div>
 
     <h2>Information and account protections</h2>
@@ -92,11 +92,11 @@
     </ul>
 
     <h2>Data handling</h2>
-    <p>Not all information stays on your device. AI prompts are sent to our backend and external AI providers; service logs may contain conversation text and request metadata. Case Manager records are stored on the backend. Some other product preferences and workspace files are stored in your browser. Review our <a class="inline" href="/privacy/">Privacy Policy</a> before submitting information, especially sensitive or confidential information.</p>
+    <p>Not all information stays on your device. AI prompts are sent to our backend and external AI providers; service logs may contain conversation text and request metadata. Case Manager records are stored on the backend. Some other product preferences and workspace files are stored in your browser. Forge's optional bring-your-own-key settings store user-provided provider keys in browser storage and send them directly to the selected provider. Do not use that feature with a Lemango-owned key or on a shared device. Review our <a class="inline" href="/privacy/">Privacy Policy</a> before submitting information, especially sensitive or confidential information.</p>
 
     <h2>Incident update</h2>
     <p>On November 22, 2026, we identified that some internal source-file paths were accessible through the public website because of a publishing configuration. We corrected the configuration, and the website build containing that correction is deployed. Our latest checks returned 404 for both ordinary and cache-busted requests to the affected paths.</p>
-    <p>We have not confirmed whether anyone accessed those files. We have not confirmed access to account data, passwords, or credentials; provider audit records have not yet been fully reviewed, so this is not a definitive conclusion. We will update the <a class="inline" href="/status/">Status page</a> if the investigation establishes additional facts.</p>
+    <p>We have not confirmed whether anyone accessed those files. We have not confirmed access to account data, passwords, or credentials; provider audit records have not yet been fully reviewed, so this is not a definitive conclusion. A crawler can download resources that are publicly served; that alone does not establish access to private backend data. We will update the <a class="inline" href="/status/">Status page</a> if the investigation establishes additional facts.</p>
 
     <h2>Sign-in service</h2>
     <p>The live backend health check and sign-in session route are responding. We have confirmed that an invalid test credential is rejected; we have not completed an end-to-end Google sign-in test with a valid user account as part of this update.</p>

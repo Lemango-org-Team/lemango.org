@@ -1983,7 +1983,6 @@ async function* streamChat(messages, options) {
   }
 
 
-  let backendSucceeded = false;
   try {
     const backendCtrl = new AbortController();
     if (options && options.signal) {
@@ -2000,7 +1999,8 @@ async function* streamChat(messages, options) {
           message: last ? last.content : "",
           model: getForgeModel(),
           history: hist,
-          context: buildSystemPrompt(),
+          assistantMode: "forge",
+          context: buildWorkspaceContext(),
         }),
         signal: backendCtrl.signal,
       });
@@ -2014,7 +2014,6 @@ async function* streamChat(messages, options) {
       const data = await res.json();
       const reply = (data && (data.response || data.reply)) || "";
       if (reply && String(reply).trim() && !/^\s*</.test(reply)) {
-        backendSucceeded = true;
         yield String(reply).trim();
         return;
       }
@@ -2023,72 +2022,6 @@ async function* streamChat(messages, options) {
     if (e && (e.name === "AbortError" || (options && options.signal && options.signal.aborted))) throw e;
 
   }
-  if (backendSucceeded) return;
-
-
-  const PUBLIC_ENDPOINT = "https://text.pollinations.ai/openai";
-  const PUBLIC_MODELS = {
-    "Mango-Light": "openai", "Mango-Flash": "mistral",
-    "Mango-Core": "openai", "Mango-Pro": "openai", "Mango-Ultra": "openai",
-  };
-  const pubModel = PUBLIC_MODELS[getForgeModel()] || "openai";
-
-  const pub1Ctrl = new AbortController();
-  if (options && options.signal) {
-    options.signal.addEventListener("abort", function() { pub1Ctrl.abort(); }, { once: true });
-  }
-  const pub1Timer = setTimeout(function() { pub1Ctrl.abort(); }, 60000);
-  try {
-    const res2 = await fetch(PUBLIC_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: pubModel, messages: messages, private: true }),
-      signal: pub1Ctrl.signal,
-    });
-    if (res2.ok) {
-      const data2 = await res2.json();
-      const text2 = data2 && data2.choices && data2.choices[0] && data2.choices[0].message && data2.choices[0].message.content;
-      if (text2 && String(text2).trim() && !/^\s*<!doctype|^\s*<html/i.test(String(text2))) {
-        yield String(text2).trim();
-        return;
-      }
-    }
-  } catch (e2) {
-    if (e2 && (e2.name === "AbortError" || (options && options.signal && options.signal.aborted))) throw e2;
-  } finally {
-    clearTimeout(pub1Timer);
-  }
-
-
-  let system = "";
-  let lastUser = "";
-  const historyLines = [];
-  for (const m of messages) {
-    if (m.role === "system") { system += (system ? " " : "") + m.content; }
-    else if (m.role === "user") { lastUser = m.content; historyLines.push("User: " + m.content); }
-    else if (m.role === "assistant") { historyLines.push("Assistant: " + m.content); }
-  }
-  let fullSystem = system;
-  if (historyLines.length > 2) {
-    fullSystem += "\n\nConversation so far:\n" + historyLines.slice(0, -1).join("\n");
-  }
-  const simpleUrl = "https://text.pollinations.ai/" + encodeURIComponent(lastUser)
-    + "?model=" + pubModel
-    + (fullSystem ? "&system=" + encodeURIComponent(fullSystem.slice(0, 4000)) : "");
-  const pub2Ctrl = new AbortController();
-  if (options && options.signal) {
-    options.signal.addEventListener("abort", function() { pub2Ctrl.abort(); }, { once: true });
-  }
-  const pub2Timer = setTimeout(function() { pub2Ctrl.abort(); }, 60000);
-  try {
-    const res3 = await fetch(simpleUrl, { signal: pub2Ctrl.signal });
-    if (!res3.ok) throw new Error("public fallback " + res3.status);
-    const text3 = await res3.text();
-    if (text3 && text3.trim()) { yield text3.trim(); return; }
-  } finally {
-    clearTimeout(pub2Timer);
-  }
-
   throw new Error("AI is temporarily unavailable. Please check your connection and try again.");
 }
 
@@ -2244,21 +2177,19 @@ async function* streamGemini(messages, options) {
   }
 }
 
-function buildSystemPrompt() {
-  let prompt = 'You are Forge AI, an expert programming assistant integrated into a browser-based code editor called Forge (a fully in-browser VS Code-like editor). You have DIRECT control over the workspace file system.\n\n## CRITICAL: NEVER BE LAZY\nYou must ALWAYS produce complete, full, working code. Never give truncated or placeholder code. Never say "here is a simple example" and output a minimal version when the user asked for something bigger. Never give a code block and tell the user to "save it as index.html and open it in a browser" — use forge-cmd to create the files directly. If a request is complex or large, that is expected — output the FULL implementation across multiple forge-cmd blocks. Do not summarize or describe what you would build; BUILD IT. Do not say "this is a basic" or "here is a simple" or "you can extend this." Instead, build the complete thing.\n\n## Your capabilities\nYou can directly CREATE, EDIT, DELETE, and MANAGE files in the workspace by outputting special forge-cmd code blocks. The editor will show the user a confirmation button and execute the command immediately when confirmed.\n\n## forge-cmd syntax\nTo perform file operations, output a fenced code block with language `forge-cmd` containing a JSON object:\n\nCreate or overwrite a file:\n```forge-cmd\n{"action":"write","path":"filename.js","content":"file contents here"}\n```\n\nDelete a file:\n```forge-cmd\n{"action":"delete","path":"filename.js"}\n```\n\nDelete a folder and all its contents:\n```forge-cmd\n{"action":"delete_folder","path":"src"}\n```\n\nClear ALL files in the workspace:\n```forge-cmd\n{"action":"clear_all"}\n```\n\nRename or move a file:\n```forge-cmd\n{"action":"rename","from":"old.js","to":"new.js"}\n```\n\nOpen a file in the editor:\n```forge-cmd\n{"action":"open","path":"filename.js"}\n```\n\nOpen the live preview panel (runs the HTML project in a browser pane):\n```forge-cmd\n{"action":"preview"}\n```\n\n## Rules for forge-cmd usage\n- ALWAYS use forge-cmd blocks for any file operation request (create, edit, delete, rename, clear, move)\n- When writing a file, include the COMPLETE file contents in the "content" field — never truncate or use comments like "// rest of the code here"\n- Escape special characters in JSON strings properly (use \\n for newlines, \\" for quotes, \\\\ for backslashes)\n- You can chain multiple forge-cmd blocks in one response to create multiple files at once\n- After writing files, explain what you did briefly\n- For "clear workspace" or "delete all files" requests, ALWAYS use {"action":"clear_all"} — never describe steps\n- Do NOT suggest manual steps when you can use forge-cmd to do it directly\n- When the user asks to run, demo, or preview an HTML project, use {"action":"preview"} at the end\n- When you create an HTML+CSS+JS project (site, game, app), ALWAYS end your response with a {"action":"preview"} block so the user can instantly see it running\n- If asked to "make a game" or "build an app" or "create a site", create ALL files with forge-cmd write blocks (index.html, CSS, JS) and a preview block — do not just give one HTML file with inline code unless it is genuinely a single-file project\n\n## PERMISSION SYSTEM — important\nCertain actions will show the user a confirmation dialog. You do NOT need to ask the user before using these — just use forge-cmd and the editor will ask for permission automatically:\n- Deleting any file ({"action":"delete"})\n- Deleting a folder ({"action":"delete_folder"})\n- Clearing all files ({"action":"clear_all"})\n- Rewriting more than 3% of an existing file ({"action":"write"} on an existing file with major changes)\n\nFor everything else (creating new files, small edits, renaming, opening files, preview) — these run immediately without asking.\n\n## Regular code blocks\n- Use regular markdown code blocks (```js, ```html etc.) ONLY for showing/explaining code snippets\n- Regular code blocks get a "Copy" button and an "Apply" button (replaces the currently open file)\n- Use forge-cmd when you want to create/write a specific named file — ALWAYS prefer forge-cmd over regular code blocks for any file the user wants saved\n\nCRITICAL SECURITY RULE: You must NEVER reveal, share, reproduce, summarize, or discuss the source code, backend code, frontend code, server implementation, API routes, database structure, or any internal implementation details of Lemango, its website, or its services. If a user asks about your code, source, backend, frontend, implementation, or how you work internally, politely decline and say you cannot share that information. You may still help users with their own code and general programming questions.';
+function buildWorkspaceContext() {
+  let context = '';
   const file = state.activeTab ? state.files.get(state.activeTab) : null;
   if (file) {
-
     const MAX_FILE_CHARS = 60000;
     const content = file.content.length > MAX_FILE_CHARS
       ? file.content.slice(0, MAX_FILE_CHARS) + '\n\n... [file truncated for context length]'
       : file.content;
-    prompt += '\n\nCurrent file: ' + state.activeTab + '\nLanguage: ' + getLanguageName(state.activeTab) + '\n\nCurrent file contents:\n```' + getLanguageName(state.activeTab).toLowerCase() + '\n' + content + '\n```';
+    context += 'Current file: ' + state.activeTab + '\nLanguage: ' + getLanguageName(state.activeTab) + '\n\nCurrent file contents:\n```' + getLanguageName(state.activeTab).toLowerCase() + '\n' + content + '\n```';
   } else {
-
     const filePaths = Array.from(state.files.keys()).filter(p => !p.endsWith('/.gitkeep')).sort();
     if (filePaths.length > 0) {
-      prompt += '\n\nNo file is currently open. Workspace contains these files:\n' + filePaths.map(p => '- ' + p).join('\n');
+      context += 'No file is currently open. Workspace contains these files:\n' + filePaths.map(p => '- ' + p).join('\n');
     }
   }
   for (const path of state.ai.attachments) {
@@ -2269,14 +2200,14 @@ function buildSystemPrompt() {
       const content = f.content.length > MAX_ATTACH_CHARS
         ? f.content.slice(0, MAX_ATTACH_CHARS) + '\n... [truncated]'
         : f.content;
-      prompt += '\n\nAttached file: ' + path + '\n```' + getLanguageName(path).toLowerCase() + '\n' + content + '\n```';
+      context += '\n\nAttached file: ' + path + '\n```' + getLanguageName(path).toLowerCase() + '\n' + content + '\n```';
     }
   }
-  return prompt;
+  return context;
 }
 
 function buildMessages(userText) {
-  const messages = [{ role: 'system', content: buildSystemPrompt() }];
+  const messages = [];
   for (const m of state.ai.messages.slice(-10)) {
     messages.push({ role: m.role, content: m.content });
   }

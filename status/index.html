@@ -83,7 +83,7 @@
     <div class="card incident">
       <strong>Website publishing update — November 22, 2026</strong>
       <p>We found and corrected a publishing configuration that had allowed some internal server and debug source files to be served from website paths. In our latest checks, both regular and cache-busted requests to those paths returned 404.</p>
-      <p>We have not established whether anyone accessed the files while they were reachable. We have not confirmed access to account data, passwords, or credentials, and provider audit records have not yet been fully reviewed. We cannot make a definitive statement about past access until that review is complete.</p>
+      <p>We have received a claim that a crawler collected publicly available site resources, but have not independently verified the scope or requests. We have not established whether anyone accessed the files while they were reachable. We have not confirmed access to account data, passwords, or credentials, and provider audit records have not yet been fully reviewed. A crawler retrieving public resources does not by itself establish access to private backend data.</p>
       <p>The backend health check is responding, and the sign-in session endpoint now rejects invalid test credentials as expected. A valid Google sign-in has not been tested end to end as part of this update. We will revise this page if the review finds more information.</p>
       <p>For fuller details, see our <a href="/security/">Security page</a>.</p>
     </div>

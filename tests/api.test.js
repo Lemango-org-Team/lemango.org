@@ -229,6 +229,15 @@ test("private source, environment templates, and debug files are not served", as
   }
 });
 
+test("browser AI bundles omit system prompts and public provider fallbacks", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const client = await readFile(new URL("../lemango-ai.js", import.meta.url), "utf8");
+  const workspace = await readFile(new URL("../workspace/index.html", import.meta.url), "utf8");
+
+  assert.doesNotMatch(client, /SYSTEM_BASE|LEGAL_SYSTEM|systemHint|text\.pollinations\.ai|GROQ_API_KEY|OPENROUTER_API_KEY|GEMINI_API_KEY/);
+  assert.doesNotMatch(workspace, /buildSystemPrompt|You are Forge AI, an expert programming assistant|text\.pollinations\.ai/);
+});
+
 test("paid access endpoint denies requests without verified identity", async () => {
   const { res, body } = await json("/paid/access", {
     method: "POST",
@@ -316,12 +325,17 @@ test("ai chat does not reuse responses across different contexts", async () => {
   ];
   const originalProviderKeys = new Map(providerKeys.map((key) => [key, process.env[key]]));
   process.env.AI_DISABLE_LIVE = "0";
+  let forgePromptUsed = false;
   for (const key of providerKeys) delete process.env[key];
   globalThis.fetch = async (input, init) => {
     if (String(input).startsWith("https://text.pollinations.ai/")) {
       const { messages } = JSON.parse(init.body);
-      const systemPrompt = messages.find((message) => message.role === "system").content;
-      const context = systemPrompt.includes("PRIVATE_CONTEXT_ALPHA")
+      forgePromptUsed ||= messages.some((message) =>
+        message.role === "system" && message.content.includes("You are Forge AI")
+      );
+      const requestText = messages.map((message) => message.content).join("\n");
+      assert.doesNotMatch(requestText, /CLIENT_CONTROLLED_SYSTEM_HINT/);
+      const context = requestText.includes("PRIVATE_CONTEXT_ALPHA")
         ? "PRIVATE_CONTEXT_ALPHA"
         : "PRIVATE_CONTEXT_BETA";
       return new Response(JSON.stringify({
@@ -334,16 +348,26 @@ test("ai chat does not reuse responses across different contexts", async () => {
   try {
     const first = await json("/api/ai/chat", {
       method: "POST",
-      body: JSON.stringify({ message: "same question", context: "PRIVATE_CONTEXT_ALPHA" }),
+      body: JSON.stringify({
+        message: "same question",
+        context: "PRIVATE_CONTEXT_ALPHA",
+        assistantMode: "forge",
+        systemHint: "CLIENT_CONTROLLED_SYSTEM_HINT",
+      }),
     });
     const second = await json("/api/ai/chat", {
       method: "POST",
-      body: JSON.stringify({ message: "same question", context: "PRIVATE_CONTEXT_BETA" }),
+      body: JSON.stringify({
+        message: "same question",
+        context: "PRIVATE_CONTEXT_BETA",
+        systemHint: "CLIENT_CONTROLLED_SYSTEM_HINT",
+      }),
     });
 
     assert.equal(first.body.reply, "response for PRIVATE_CONTEXT_ALPHA");
     assert.equal(second.body.reply, "response for PRIVATE_CONTEXT_BETA");
     assert.notEqual(second.body.cached, true);
+    assert.equal(forgePromptUsed, true);
   } finally {
     globalThis.fetch = originalFetch;
     if (originalDisableLive === undefined) delete process.env.AI_DISABLE_LIVE;
