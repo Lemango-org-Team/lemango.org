@@ -1,13 +1,13 @@
-/**
- * server/routes/auth.js
- * Google OAuth 2.0 sign-in / sign-up flow.
- *
- * Flow:
- *   1. GET /api/auth/google          → redirect to Google consent screen
- *   2. GET /api/auth/google/callback → exchange code, fetch profile, create session
- *   3. GET /api/auth/me              → return current user (or 401)
- *   4. POST /api/auth/logout         → destroy session
- */
+
+
+
+
+
+
+
+
+
+
 
 import crypto from "node:crypto";
 import { Router } from "express";
@@ -24,7 +24,7 @@ const REDIRECT_URI  = `${BASE_URL}/api/auth/google/callback`;
 
 const users = new JsonStore("users", []);
 
-/* ── Helpers ────────────────────────────────────────────────── */
+
 
 function googleAuthUrl(state) {
   const params = new URLSearchParams({
@@ -93,7 +93,7 @@ async function upsertUser(profile, ip) {
     }
     return user;
   });
-  // Log sign-up / login
+
   try {
     const { appendFileSync, mkdirSync } = await import("node:fs");
     const pathMod = await import("node:path");
@@ -101,33 +101,33 @@ async function upsertUser(profile, ip) {
     mkdirSync(dir, { recursive: true });
     const entry = { t: new Date().toISOString(), type: isNew ? "signup" : "login", email: profile.email, name: profile.name, ip: ip || null };
     appendFileSync(pathMod.join(dir, "users-log.jsonl"), JSON.stringify(entry) + "\n");
-  } catch (e) { /* ignore */ }
+  } catch (e) {  }
   return user;
 }
 
-/* ── Routes ─────────────────────────────────────────────────── */
 
-// GET /api/auth/google
-// Kicks off the OAuth flow. Stores a CSRF state token in the session cookie
-// via a short-lived signed state param.
+
+
+
+
 authRouter.get("/google", (req, res) => {
   if (!CLIENT_ID) {
     return res.status(503).json({ ok: false, error: "Google auth is not configured on this server." });
   }
 
   const state = crypto.randomBytes(16).toString("hex");
-  // Store state in a short-lived cookie so we can verify it on callback
+
   const crossOrigin = Boolean(process.env.ALLOWED_ORIGINS);
   res.cookie("lm_oauth_state", state, {
     httpOnly: true,
     secure: crossOrigin || process.env.NODE_ENV === "production",
     sameSite: crossOrigin ? "none" : "lax",
-    maxAge: 10 * 60 * 1000, // 10 minutes
+    maxAge: 10 * 60 * 1000,
     path: "/",
   });
 
-  // Optional: where to redirect after login (passed as ?next=/ai etc.).
-  // Only allow relative paths to prevent open redirects.
+
+
   const rawNext = String(req.query.next || "/");
   const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
   res.cookie("lm_oauth_next", next, {
@@ -141,7 +141,7 @@ authRouter.get("/google", (req, res) => {
   res.redirect(googleAuthUrl(state));
 });
 
-// Exchange a short-lived Google credential for a server-side session.
+
 authRouter.post("/session", async (req, res, next) => {
   try {
     const profile = await verifyIdToken(req.body?.credential);
@@ -176,7 +176,7 @@ authRouter.post("/session", async (req, res, next) => {
   }
 });
 
-// GET /api/auth/google/callback
+
 authRouter.get("/google/callback", async (req, res) => {
   const { code, state, error } = req.query;
 
@@ -185,7 +185,7 @@ authRouter.get("/google/callback", async (req, res) => {
     return res.redirect("/auth.html?error=access_denied");
   }
 
-  // Verify CSRF state
+
   const storedState = req.cookies?.lm_oauth_state;
   res.clearCookie("lm_oauth_state", { path: "/" });
 
@@ -220,14 +220,14 @@ authRouter.get("/google/callback", async (req, res) => {
   }
 });
 
-// GET /api/auth/me — returns current user or 401
+
 authRouter.get("/me", (req, res) => {
   if (!req.user) return res.status(401).json({ ok: false, error: "Not authenticated" });
   res.set("Cache-Control", "private, no-store");
   res.json({ ok: true, user: req.user });
 });
 
-// POST /api/auth/logout
+
 authRouter.post("/logout", async (req, res) => {
   await destroySessionFromReq(req, res);
   res.json({ ok: true });

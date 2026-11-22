@@ -1,9 +1,9 @@
-/**
- * server/sessions.js
- * Server-side session store backed by JsonStore.
- * Sessions are identified by a signed token stored in an httpOnly cookie.
- * No external dependencies — just crypto from Node stdlib.
- */
+
+
+
+
+
+
 
 import crypto from "node:crypto";
 import { JsonStore } from "./store.js";
@@ -16,11 +16,11 @@ if (process.env.NODE_ENV === "production" &&
 }
 const SESSION_SECRET = configuredSecret || crypto.randomBytes(32).toString("base64url");
 const CROSS_ORIGIN = Boolean(process.env.ALLOWED_ORIGINS);
-const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14; // 14 days
+const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14;
 
 const store = new JsonStore("sessions", {});
 
-/* ── Signing ────────────────────────────────────────────────── */
+
 function sign(value) {
   const mac = crypto
     .createHmac("sha256", SESSION_SECRET)
@@ -46,9 +46,9 @@ function unsign(signed) {
   return value;
 }
 
-/* ── Public API ─────────────────────────────────────────────── */
 
-/** Create a new session and set the cookie. Returns the session id. */
+
+
 export async function createSession(res, data) {
   const id = crypto.randomBytes(24).toString("base64url");
   const session = { id, data, createdAt: Date.now(), expiresAt: Date.now() + SESSION_TTL_MS };
@@ -69,7 +69,7 @@ export async function createSession(res, data) {
   return id;
 }
 
-/** Read the current session from the request. Returns session data or null. */
+
 export async function getSession(req) {
   const raw = req.cookies?.[SESSION_COOKIE];
   if (!raw) return null;
@@ -88,7 +88,7 @@ export async function getSession(req) {
   return session.data;
 }
 
-/** Destroy the session cookie and remove it from the store. */
+
 export async function destroySession(res, id) {
   if (id) {
     await store.update((sessions) => {
@@ -101,7 +101,7 @@ export async function destroySession(res, id) {
   }
 }
 
-/** Destroy session by reading the cookie from the request. */
+
 export async function destroySessionFromReq(req, res) {
   const raw = req.cookies?.[SESSION_COOKIE];
   if (!raw) return;
@@ -110,7 +110,7 @@ export async function destroySessionFromReq(req, res) {
   else if (res) res.clearCookie(SESSION_COOKIE, { path: "/" });
 }
 
-/** Express middleware: attaches req.user if a valid session exists. */
+
 export async function sessionMiddleware(req, res, next) {
   req.user = await getSession(req);
   next();

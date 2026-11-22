@@ -33,7 +33,7 @@
       const token = params.get("token");
       if (!token) { location.replace("/404"); return; }
 
-      // Wait for auth module
+
       await new Promise((resolve) => {
         if (window.LemangoAuth) resolve();
         else document.addEventListener("lm:auth", resolve, { once: true });
@@ -42,12 +42,12 @@
 
       const user = window.LemangoAuth && window.LemangoAuth.user;
       if (!user) {
-        // Prompt login
+
         location.replace("/auth/?next=" + encodeURIComponent("/invite?token=" + token));
         return;
       }
 
-      // Verify invite (background)
+
       try {
         const res = await fetch("/api/admin/verify-invite", {
           method: "POST",
@@ -62,7 +62,7 @@
           overlay.innerHTML = `<div style="font-size:18px;font-weight:700;color:#f87171;">Access denied</div><div style="font-size:13px;color:#94a3b8;margin-top:8px;">${data.error || "Invalid invite"}</div>`;
           return;
         }
-        // Queued — show waiting UI
+
         overlay.innerHTML = `
           <div style="font-size:18px;font-weight:700;color:#34d399;">You're in the queue</div>
           <div style="font-size:13px;color:#94a3b8;margin-top:8px;max-width:400px;text-align:center;">
@@ -100,7 +100,7 @@
             }
           });
         }
-        // Poll status
+
         const poll = setInterval(async () => {
           try {
             const r = await fetch("/api/admin/status?token=" + encodeURIComponent(token), {
@@ -115,7 +115,7 @@
               clearInterval(poll);
               location.replace("/404");
             }
-          } catch (e) { /* ignore */ }
+          } catch (e) {  }
         }, 5000);
       } catch (e) {
         overlay.innerHTML = `<div style="font-size:18px;font-weight:700;color:#f87171;">Error</div><div style="font-size:13px;color:#94a3b8;margin-top:8px;">${e.message}</div>`;

@@ -125,7 +125,7 @@ aiRouter.get("/status", (_req, res) => {
   res.json({ ok: true, configured: aiConfigured(), provider: BRAND, models: catalogForClient() });
 });
 
-// Matches the chat frontend's model picker.
+
 aiRouter.get("/models", (_req, res) => {
   res.json({ ok: true, provider: BRAND, models: catalogForClient() });
 });
@@ -143,7 +143,7 @@ aiRouter.post("/clear", (_req, res) => {
   res.json({ ok: true });
 });
 
-// Best-effort chat logging for model training. Never blocks the response.
+
 aiRouter.post("/log", (req, res) => {
   try {
     const entry = {
@@ -158,12 +158,12 @@ aiRouter.post("/log", (req, res) => {
     mkdirSync(dir, { recursive: true });
     appendFileSync(path.join(dir, "chatlog.jsonl"), JSON.stringify(entry) + "\n");
   } catch (e) {
-    // ignore logging failures
+
   }
   res.json({ ok: true });
 });
 
-// --- Per-IP daily cap to prevent abuse (resets at midnight UTC) ---
+
 const UNLIMITED_EMAILS = new Set(
   (process.env.ADMIN_EMAILS || "")
     .split(",")
@@ -172,8 +172,8 @@ const UNLIMITED_EMAILS = new Set(
 );
 const aiDailyHits = new Map();
 
-// --- Per-user daily question limit (server-authoritative, tamper-resistant) ---
-// Prevents bypassing the daily limit by clearing browser cache/cookies/localStorage.
+
+
 const dailyUsage = new Map();
 function dailyLimitFor(verified) {
   if (verified && verified.email && UNLIMITED_EMAILS.has(String(verified.email).toLowerCase())) return Infinity;
@@ -219,7 +219,7 @@ async function aiDailyLimit(req, res, next) {
   next();
 }
 
-// Verify a Google ID token (best-effort). Returns the decoded payload or null.
+
 const idTokenCache = new Map();
 async function verifyIdToken(token) {
   if (!token || typeof token !== "string") return null;
@@ -253,12 +253,12 @@ aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
 
     const model = typeof req.body?.model === "string" ? req.body.model : "Mango-Light";
 
-  // Determine if the caller is a verified signed-in user (unlocks coding help).
+
   let codeAllowed = false;
   const verified = req.user || null;
   if (verified) codeAllowed = true;
 
-  // Log AI usage for admin tracking.
+
   try {
     const { appendFileSync, mkdirSync } = await import("node:fs");
     const pathMod = await import("node:path");
@@ -273,9 +273,9 @@ aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
       codeAllowed: codeAllowed,
     };
     appendFileSync(pathMod.join(dir, "ai-usage.jsonl"), JSON.stringify(entry) + "\n");
-  } catch (e) { /* ignore */ }
+  } catch (e) {  }
 
-  // Security: detect attempts to extract Lemango's own source/internal details.
+
   function extractUserText(body) {
     if (body && typeof body.message === "string" && body.message.trim()) return body.message;
     if (Array.isArray(body && body.messages)) {
@@ -313,7 +313,7 @@ aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
         message: extractUserText(req.body).slice(0, 500),
       };
       appendFileSync(path.join(dir, "security-log.jsonl"), JSON.stringify(entry) + "\n");
-    } catch (e) { /* ignore */ }
+    } catch (e) {  }
     const reply = "I can't share that information.";
     return res.json({ ok: true, configured: aiConfigured(), response: reply, reply, model, provider: BRAND });
   }
@@ -332,7 +332,7 @@ aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
         message: extractUserText(req.body).slice(0, 500),
       };
       appendFileSync(path.join(dir, "security-log.jsonl"), JSON.stringify(entry) + "\n");
-    } catch (e) { /* ignore */ }
+    } catch (e) {  }
     const reply = BAD_WARNING;
     return res.json({ ok: true, configured: aiConfigured(), response: reply, reply, model, provider: BRAND });
   }
@@ -385,7 +385,7 @@ aiRouter.post("/chat", aiDailyLimit, async (req, res) => {
   }
 });
 
-// Used by the Court & Notice Management document builder.
+
 aiRouter.post("/generate-document", async (req, res) => {
   try {
     const prompt = String(req.body?.prompt ?? "").trim().slice(0, 4000);

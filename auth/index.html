@@ -4,11 +4,11 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2231892231966691"
      crossorigin="anonymous"></script>
   <meta name="google-adsense-account" content="ca-pub-2231892231966691">
-  <meta name="lemango-api-base" content="https://lemango-org.onrender.com"><!-- set to your backend URL, e.g. https://lemango-api.onrender.com -->
+  <meta name="lemango-api-base" content="https://lemango-org.onrender.com">
   <script src="/api-base.js"></script>
   <link rel="stylesheet" href="/a11y.css">
   <link rel="manifest" href="/manifest.json">
-  <!-- Google tag (gtag.js) -->
+
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-THFCXR1KLW"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -31,7 +31,7 @@
 <body>
   <a class="lm-skip" href="#main">Skip to main content</a>
 
-  <!-- Matches site-header exactly -->
+
   <header class="site-header">
     <div class="nav-wrap">
       <a class="brand" href="/" aria-label="Lemango home">
@@ -51,10 +51,10 @@
 
 
 
-    <!-- Card -->
+
     <div class="auth-card">
 
-      <!-- Lemango flag accent bar (matches product cards) -->
+
       <div class="auth-card-bar"></div>
 
       <div class="auth-card-body">
@@ -64,7 +64,7 @@
 
         <div class="auth-error" id="auth-error" aria-live="polite" hidden></div>
 
-        <!-- Working Google sign-in -->
+
         <div id="googleSlot" style="margin: 16px 0;"></div>
         <p class="auth-terms">
           By signing in you agree to Lemango's
@@ -95,9 +95,9 @@
       el.hidden = false;
     }
 
-    // Where to send the user after a successful sign-in. The mobile headers
-    // link here with ?next=/ai (etc.) because the official Google button is
-    // too wide to fit on a phone.
+
+
+
     const rawNext = params.get("next") || "";
     window.__lmNext = (rawNext.startsWith("/") && !rawNext.startsWith("//")) ? rawNext : "";
   </script>
@@ -105,8 +105,8 @@
   <script src="/cookie-consent.js" defer></script>
   <script src="/dark-mode.js" defer></script>
   <script>
-    // Mark this page so lemango-auth.js skips its own Google button rendering here.
-    // The inline script below is the sole owner of the sign-in flow on /auth/.
+
+
     window.__lmAuthPageOwnsButton = true;
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -114,7 +114,7 @@
       var slot = document.getElementById("googleSlot");
       if (!slot) return;
 
-      // Helper: render the sign-in card showing who is signed in + "Continue" / "Use different account".
+
       function showAlreadySignedIn(stored) {
         slot.innerHTML = "";
 
@@ -144,7 +144,7 @@
         slot.appendChild(alt);
       }
 
-      // Helper: load GIS and render the official Google button.
+
       function renderSignInButton() {
         slot.innerHTML = "";
         var loader = window.LemangoAuth ? window.LemangoAuth.load() : loadGIS();
@@ -176,7 +176,7 @@
         });
       }
 
-      // Minimal GIS loader used when lemango-auth.js hasn't loaded yet.
+
       function loadGIS() {
         if (window.google && window.google.accounts) return Promise.resolve();
         return new Promise(function (resolve, reject) {
@@ -189,7 +189,7 @@
         });
       }
 
-      // Check if already signed in.
+
       if (!window.LemangoAuth) {
         slot.innerHTML = '<p style="color:#8c1605;font-size:13px;">Sign-in is unavailable. Please refresh the page.</p>';
         return;

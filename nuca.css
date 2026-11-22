@@ -1,13 +1,13 @@
 :root { color-scheme: light; }
 html { scroll-behavior: smooth; }
 
-/* The off-canvas mobile menu is a fixed panel parked at translate-x-full, which
-   Chrome counts as document overflow and turns into a sideways scroll on
-   phones. Clip it at the root.
-   NOTE: use `clip` (not `hidden`) on <body>. `overflow-x: hidden` on <body>
-   silently turns <body> into a scroll container, which detaches
-   `position: sticky` from the viewport and makes the header scroll away.
-   `overflow: clip` clips the same pixels without creating a scroll box. */
+
+
+
+
+
+
+
 html { overflow-x: hidden; }
 body { overflow-x: clip; }
 
@@ -87,7 +87,7 @@ tbody tr { transition: background 0.12s; }
   #main-content { padding: 0 !important; }
 }
 
-/* Dark theme specific styles */
+
 .bg-gray-50 { background-color: #111827 !important; }
 .bg-white { background-color: #1e293b !important; }
 .text-gray-900 { color: #e5e7eb !important; }

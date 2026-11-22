@@ -12,7 +12,7 @@ self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   const isDoc = e.request.mode === "navigate" || /\.html?$/i.test(new URL(e.request.url).pathname) || new URL(e.request.url).pathname === "/";
   if (isDoc) {
-    // Network-first for pages so new content (and new sections) always appears.
+
     e.respondWith(
       fetch(e.request, { cache: "no-store" }).then((r) => {
         const copy = r.clone();
@@ -22,7 +22,7 @@ self.addEventListener("fetch", (e) => {
     );
     return;
   }
-  // Cache-first for static assets, with background refresh.
+
   e.respondWith(
     caches.match(e.request).then((cached) => {
       const network = fetch(e.request).then((r) => {

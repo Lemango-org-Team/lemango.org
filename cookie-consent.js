@@ -1,9 +1,9 @@
 "use strict";
-/**
- * cookie-consent.js — shared cookie/consent banner for all Lemango pages.
- * Auto-injects a small banner at the bottom of the page. Stores the choice
- * in localStorage so it only shows once. No external dependencies.
- */
+
+
+
+
+
 (function () {
   const KEY = "lemango_cookie_consent";
   try { if (localStorage.getItem(KEY)) return; } catch { return; }
@@ -42,7 +42,7 @@
   banner.querySelector(".decline").addEventListener("click", () => dismiss("decline"));
 })();
 
-// Register service worker for PWA (best-effort)
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js").catch(() => {});

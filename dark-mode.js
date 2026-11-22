@@ -1,17 +1,17 @@
 "use strict";
-/**
- * dark-mode.js — shared dark-mode toggle for Lemango pages.
- * Auto-injects a toggle button into the header nav and applies a `.dark`
- * class to <html>, persisting the choice in localStorage.
- */
+
+
+
+
+
 (function () {
   const KEY = "lemango_theme_v2";
   const LEGACY_KEY = "lemango_theme";
   const html = document.documentElement;
   let theme = "light";
   try {
-    // The old key was force-set to "dark" by the AI page, which made the whole
-    // site start in dark mode. Drop it and only honour an explicit v2 choice.
+
+
     localStorage.removeItem(LEGACY_KEY);
     const stored = localStorage.getItem(KEY);
     if (stored === "dark" || stored === "light") theme = stored;
@@ -25,7 +25,7 @@
   }
   apply(theme);
 
-  // Inject dark-mode styles for the shared legal/info page palette.
+
   const style = document.createElement("style");
   style.textContent = `
     html.dark body { background: #0f172a; color: #e2e8f0; }

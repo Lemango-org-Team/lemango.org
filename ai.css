@@ -1,10 +1,10 @@
-/* ========================================================
-   Lemango AI — ChatGPT / Gemini Style
-   ======================================================== */
+
+
+
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* ---------- Light theme (default) ---------- */
+
 :root {
     --bg: #ffffff;
     --bg-secondary: #f7f7f8;
@@ -35,7 +35,7 @@
     --input-bg: #ffffff;
 }
 
-/* ---------- Dark theme ---------- */
+
 body.dark {
     --bg: #212121;
     --bg-secondary: #171717;
@@ -75,7 +75,7 @@ body {
     transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* ==================== 3-COLUMN SHELL ==================== */
+
 
 .shell {
     display: flex;
@@ -83,7 +83,7 @@ body {
     height: 100dvh;
 }
 
-/* ==================== SIDEBAR ==================== */
+
 
 .sidebar {
     width: var(--sidebar-w);
@@ -186,7 +186,7 @@ body {
 .sidebar-search input:focus { border-color: var(--text-secondary); }
 .sidebar-search input::placeholder { color: var(--text-dim); }
 
-/* Date group headers */
+
 .session-date-group {
     padding: 12px 14px 4px;
     font-size: 11px;
@@ -253,7 +253,7 @@ body {
     line-height: 1.5;
 }
 
-/* ==================== APP (CENTER COLUMN) ==================== */
+
 
 .app {
     flex: 1;
@@ -264,7 +264,7 @@ body {
     border-left: 1px solid var(--border);
 }
 
-/* ==================== HEADER ==================== */
+
 
 .header {
     position: relative;
@@ -324,7 +324,7 @@ body.dark .icon-sun { display: block; }
 .header-logo-ring { display: none; }
 .status { display: none; }
 
-/* ==================== RIGHT PANEL ==================== */
+
 
 .right-panel {
     width: var(--right-panel-w);
@@ -394,7 +394,7 @@ body.dark .capability-icon {
     line-height: 1.4;
 }
 
-/* ==================== CHAT CONTAINER ==================== */
+
 
 .chat-container {
     flex: 1;
@@ -410,7 +410,7 @@ body.dark .capability-icon {
 .chat-container::-webkit-scrollbar-track { background: transparent; }
 .chat-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
-/* ==================== WELCOME ==================== */
+
 
 .welcome-message {
     display: flex;
@@ -485,7 +485,7 @@ body.dark .capability-icon {
 
 .starter-chip:active { transform: scale(0.98); }
 
-/* ==================== MESSAGES ==================== */
+
 
 .message {
     width: 100%;
@@ -560,7 +560,7 @@ body.dark .capability-icon {
     border-bottom-right-radius: 6px;
 }
 
-/* Markdown content */
+
 .markdown-body p { margin: 0 0 10px; }
 .markdown-body p:last-child { margin-bottom: 0; }
 .markdown-body ul, .markdown-body ol { margin: 6px 0 10px; padding-left: 22px; }
@@ -610,7 +610,7 @@ body.dark .capability-icon {
     font-size: 13.5px;
 }
 
-/* Code blocks */
+
 .code-block {
     background: #1e1e1e;
     border: 1px solid var(--border);
@@ -660,7 +660,7 @@ body.dark .code-block { background: #171717; }
     line-height: 1.55;
 }
 
-/* Feedback */
+
 .feedback-buttons {
     display: flex;
     gap: 2px;
@@ -691,7 +691,7 @@ body.dark .code-block { background: #171717; }
 .rated.positive { color: var(--green); }
 .rated.negative { color: var(--red); }
 
-/* Typing */
+
 .typing-indicator {
     display: flex;
     gap: 5px;
@@ -722,7 +722,7 @@ body.dark .code-block { background: #171717; }
     font-style: italic;
 }
 
-/* Timestamps */
+
 .message-timestamp {
     font-size: 11px;
     color: var(--text-dim);
@@ -739,7 +739,7 @@ body.dark .code-block { background: #171717; }
 .message.user .chat-log-note { text-align: right; }
 .message.user .feedback-buttons { justify-content: flex-end; }
 
-/* Scroll pill */
+
 .scroll-pill {
     position: absolute;
     right: 16px;
@@ -765,7 +765,7 @@ body.dark .code-block { background: #171717; }
 .scroll-pill.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
 .scroll-pill:hover { color: var(--text); border-color: var(--border-light); }
 
-/* Action bar */
+
 .action-bar {
     display: flex;
     justify-content: center;
@@ -790,7 +790,7 @@ body.dark .code-block { background: #171717; }
 .pill-btn:hover { background: var(--surface-hover); border-color: var(--border-light); }
 .pill-btn.hidden { visibility: hidden; }
 
-/* ==================== INPUT AREA ==================== */
+
 
 .input-area {
     position: relative;
@@ -832,7 +832,7 @@ body.dark .code-block { background: #171717; }
 
 .input-area textarea::placeholder { color: var(--text-dim); }
 
-/* Model trigger — inside input row */
+
 .model-trigger {
     display: flex;
     align-items: center;
@@ -865,7 +865,7 @@ body.dark .code-block { background: #171717; }
     background: var(--accent);
 }
 
-/* Send button */
+
 .send-btn {
     width: 36px;
     height: 36px;
@@ -891,7 +891,7 @@ body.dark .code-block { background: #171717; }
     cursor: not-allowed;
 }
 
-/* Model dropdown */
+
 .model-dropdown {
     position: absolute;
     bottom: calc(100% + 8px);
@@ -949,7 +949,7 @@ body.dark .code-block { background: #171717; }
 .model-option-check { color: var(--green); opacity: 0; }
 .model-option.active .model-option-check { opacity: 1; }
 
-/* Toast */
+
 .toast {
     position: fixed;
     bottom: 80px;
@@ -971,7 +971,7 @@ body.dark .code-block { background: #171717; }
 
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ==================== ANIMATIONS ==================== */
+
 
 @keyframes welcomeIn {
     from { opacity: 0; transform: translateY(16px); }
@@ -993,7 +993,7 @@ body.dark .code-block { background: #171717; }
     50%      { opacity: 0.5; }
 }
 
-/* ==================== RESPONSIVE ==================== */
+
 
 @media (max-width: 600px) {
     .shell { flex-direction: column; }
@@ -1041,9 +1041,9 @@ body.dark .code-block { background: #171717; }
     .model-dropdown { left: 12px; right: 12px; }
 }
 
-/* ---- Mobile header (phones): the desktop header packs a 220px Google button
-   plus four 44px buttons into one flex row, which is ~458px wide and forces
-   the whole document to scroll sideways on a 320-390px screen. ---- */
+
+
+
 @media (max-width: 600px) {
     html { overflow-x: hidden; }
 
@@ -1070,7 +1070,7 @@ body.dark .code-block { background: #171717; }
         overflow: hidden;
     }
 
-    /* Icon-only action buttons */
+
     .header-actions .clear-btn {
         min-width: 34px;
         width: 34px;
@@ -1081,10 +1081,10 @@ body.dark .code-block { background: #171717; }
     }
     .header-actions .clear-btn > span { display: none; }
 
-    /* Drop the JSON export on phones - the widest, least-used control */
+
     #lm-export-log-btn { display: none; }
 
-    /* Compact sign-in control replaces the 220px Google button */
+
     .header-actions [data-auth-widget] { min-width: 0; }
     .header-actions .lm-auth-signin-wrap { max-width: 100%; }
 }

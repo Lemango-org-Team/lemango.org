@@ -257,7 +257,7 @@
   .ai-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
   .ai-status.ready .dot { background: var(--mint); box-shadow: 0 0 6px var(--mint-glow); }
   .ai-status.ready { color: var(--mint); }
-  /* ---------- AUTH (Sign in with Google) ---------- */
+
   .topbar-auth { display: flex; align-items: center; flex-shrink: 0; }
   .topbar-auth:empty { display: none; }
   .topbar-auth .lm-auth-chip {
@@ -265,8 +265,8 @@
   }
   .topbar-auth .lm-auth-signout { color: #fca5a5; }
   .topbar-auth .lm-auth-name { max-width: 90px; }
-  /* Below 900px the AI panel is hidden, so nothing in FORGE can demand a
-     sign-in. Dropping the control keeps the already-tight phone toolbar clean. */
+
+
   @media (max-width: 900px) { .topbar-auth { display: none; } }
   .icon-btn {
     width: 32px; height: 32px; display: grid; place-items: center;
@@ -601,7 +601,7 @@
   .context-item kbd { margin-left: auto; font-size: 10.5px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
   .context-divider { height: 1px; background: var(--border); margin: 4px 0; }
 
-  /* ---------- TERMINAL / OUTPUT CONSOLE ---------- */
+
   .terminal-panel { grid-area: terminal; display: flex; flex-direction: column; background: var(--bg-1); border-top: 1px solid var(--border); overflow: hidden; min-height: 0; }
   .terminal-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--bg-2); flex-shrink: 0; }
   .terminal-tabs { display: flex; }
@@ -625,14 +625,14 @@
   .shell-line input { flex: 1; background: transparent; border: none; outline: none; color: var(--fg); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
   .shell-line input::placeholder { color: var(--muted); }
 
-  /* ---------- LIVE PREVIEW ---------- */
+
   #app.preview-open .editor-area { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); grid-template-rows: 36px minmax(0,1fr); }
   #app.preview-open .tabs { grid-row: 1; grid-column: 1 / -1; }
   #app.preview-open .editor-container { grid-row: 2; grid-column: 1; }
   .preview-frame { grid-row: 2; grid-column: 2; border: none; width: 100%; height: 100%; background: #fff; min-width: 0; }
   .preview-frame[hidden] { display: none; }
 
-  /* ---------- SOURCE CONTROL / HISTORY ---------- */
+
   .history-list { flex: 1; overflow-y: auto; padding: 4px 4px 12px; }
   .history-item { padding: 8px 10px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); margin-bottom: 6px; background: var(--bg-2); transition: border-color 0.12s, background 0.12s; }
   .history-item:hover { border-color: var(--accent); background: var(--bg-3); }
@@ -655,7 +655,7 @@
   .diff-line.hunk { background: var(--bg-2); color: var(--muted); }
   .diff-empty { padding: 20px; text-align: center; color: var(--muted); font-size: 12px; }
 
-  /* ---------- SNIPPETS ---------- */
+
   .snippet-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; cursor: pointer; color: var(--fg-2); transition: background 0.1s; }
   .snippet-item:hover, .snippet-item.active { background: var(--bg-2); color: var(--fg); }
   .snippet-icon { width: 16px; height: 16px; display: grid; place-items: center; color: var(--muted); flex-shrink: 0; }
@@ -682,9 +682,9 @@
   @media (max-width: 900px) {
     #app { grid-template-columns: minmax(0, 1fr) !important; grid-template-rows: 48px minmax(0, 1fr) 200px 26px !important; grid-template-areas: "topbar" "editor" "terminal" "statusbar" !important; }
     .sidebar, .ai-panel { display: none; }
-    /* Grid items default to min-width:auto, so the topbar's min-content width
-       (~801px) used to blow the 1fr track out past the viewport and clip every
-       button on the right. */
+
+
+
     .topbar { min-width: 0; gap: 8px; padding: 0 10px; }
     .cmd-trigger { flex: 0 1 auto; min-width: 0; max-width: 260px; }
     .cmd-trigger span, .cmd-trigger kbd { display: none; }
@@ -720,9 +720,9 @@
       <span class="dot"></span>
       <span id="aiStatusText">No AI configured</span>
     </div>
-    <!-- Sign in with Google. FORGE's AI refuses coding help until the visitor is
-         signed in, so the control has to live somewhere visible. Forced compact
-         (64px) because this toolbar is already full of icon buttons. -->
+
+
+
     <div class="topbar-auth" data-auth-widget data-auth-compact></div>
     <button class="icon-btn" id="toggleSidebar" title="Toggle sidebar (Ctrl+B)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
@@ -1078,9 +1078,9 @@
 <script>
 'use strict';
 
-// ============================================================
-// SAMPLE PROJECT
-// ============================================================
+
+
+
 const SAMPLE_FILES = {
   'README.md': '# Forge Code Workspace\n\nWelcome to **Forge** — an AI-native code editor that runs entirely in your browser.\n\n## Features\n\n- **Virtual file system** with folders, persisted in IndexedDB\n- **Multi-tab editor** powered by CodeMirror (15+ languages)\n- **Command palette** (Ctrl+K) for fast navigation\n- **Search across all files**\n- **AI assistant** with support for OpenAI, Anthropic, Gemini, OpenRouter, Groq, and Big Pickle\n\n## Getting started\n\n1. Open `src/app.js` to start coding\n2. Press **Ctrl+K** to open the command palette\n3. Click the settings icon to add your AI API key\n4. Use the AI panel on the right to ask questions\n\n## Shortcuts\n\n- `Ctrl+K` — Command palette\n- `Ctrl+S` — Save\n- `Ctrl+B` — Toggle sidebar\n- `Ctrl+J` — Toggle AI panel\n',
   'index.html': '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8" />\n  <title>My App</title>\n  <link rel="stylesheet" href="src/styles.css" />\n</head>\n<body>\n  <div class="container">\n    <h1>Hello, Forge!</h1>\n    <p>Edit this file and see your changes.</p>\n    <button id="action">Click me</button>\n  </div>\n  <script src="src/app.js"></scr' + 'ipt>\n</body>\n</html>\n',
@@ -1092,9 +1092,9 @@ const SAMPLE_FILES = {
   'src/types.ts': '// TypeScript type definitions\n\ninterface Item {\n  id: string;\n  name: string;\n  price: number;\n  tags?: string[];\n}\n\ntype ItemFilter = (item: Item) => boolean;\n\ninterface AppState {\n  items: Item[];\n  filter: string;\n  isLoading: boolean;\n  error: string | null;\n}\n\nconst initialState: AppState = {\n  items: [],\n  filter: \'\',\n  isLoading: false,\n  error: null,\n};\n'
 };
 
-// ============================================================
-// STATE
-// ============================================================
+
+
+
 const state = {
   files: new Map(),
   openTabs: [],
@@ -1186,9 +1186,9 @@ const PROVIDER_MODELS = {
   ],
 };
 
-// ============================================================
-// DB
-// ============================================================
+
+
+
 let db = null;
 
 function openDB() {
@@ -1294,9 +1294,9 @@ async function saveMeta() {
   await dbPut('meta', { key: 'snippets', value: state.snippets });
 }
 
-// ============================================================
-// SETTINGS
-// ============================================================
+
+
+
 function getApiKey(provider) {
   return state.settings[provider + 'Key'] || '';
 }
@@ -1307,9 +1307,9 @@ function getModel(provider) {
 
 function applySettingsToUI() {
   ['openai','anthropic','gemini','openrouter','groq','bigpickle'].forEach(p => {
-    // Elements can be absent (the provider select was removed from the markup),
-    // and an unguarded lookup here used to abort the whole function — leaving
-    // the status stuck on "No AI configured" and the theme list empty.
+
+
+
     const keyEl = document.getElementById(p + 'Key');
     const modelEl = document.getElementById(p + 'Model');
     const badgeEl = document.getElementById('badge-' + p);
@@ -1390,9 +1390,9 @@ function setProvider(provider) {
   saveMeta();
 }
 
-// ============================================================
-// THEMES
-// ============================================================
+
+
+
 function applyTheme() {
   const theme = state.settings.theme || 'forge';
   document.documentElement.setAttribute('data-theme', THEMES[theme] ? theme : 'forge');
@@ -1413,9 +1413,9 @@ function populateThemeSelect() {
   select.value = state.settings.theme || 'forge';
 }
 
-// ============================================================
-// FILE TREE
-// ============================================================
+
+
+
 function getFileIconClass(name) {
   const ext = name.split('.').pop().toLowerCase();
   const map = {
@@ -1721,9 +1721,9 @@ function showNewFileInput(isFolder) {
   });
 }
 
-// ============================================================
-// TABS & EDITOR
-// ============================================================
+
+
+
 function getModeForPath(path) {
   const ext = path.split('.').pop().toLowerCase();
   const map = {
@@ -1918,9 +1918,9 @@ async function saveCurrent() {
   }
 }
 
-// ============================================================
-// SEARCH
-// ============================================================
+
+
+
 function performSearch(query) {
   const results = [];
   const q = query.toLowerCase();
@@ -1959,22 +1959,22 @@ function renderSearchResults(query) {
   }
 }
 
-// ============================================================
-// AI STREAMING
-// ============================================================
+
+
+
 async function* streamChat(messages, options) {
-  // Use Lemango AI backend (no user API keys required).
+
   const base = (window.LEMANGO_API_BASE || "").replace(/\/+$/, "");
   const url = (base || "") + "/api/ai/chat";
   const last = (messages && messages.length) ? messages[messages.length - 1] : null;
   const hist = (messages || []).slice(0, -1).filter(function (m) { return m && (m.role === "user" || m.role === "assistant"); }).map(function (m) { return { role: m.role, content: m.content }; });
-  // Helper: current model value
+
   function getForgeModel() {
     var s = document.getElementById('lemangoModelSelect');
     var v = s ? s.value : 'Mango-Core';
     if (v !== 'auto') return v;
     var t = (last ? last.content : "").toLowerCase();
-    // Big/complex tasks → Pro or Ultra
+
     if (/game|app|site|website|full|complete|build|create|make me|three\.?js|react|vue|svelte|canvas|webgl|entire|project/i.test(t)) return 'Mango-Pro';
     if (/code|function|debug|error|script|program|refactor|optimize|fix|bug/i.test(t)) return 'Mango-Core';
     if (t.length < 60) return 'Mango-Light';
@@ -1982,7 +1982,7 @@ async function* streamChat(messages, options) {
     return 'Mango-Pro';
   }
 
-  // ---- Try Lemango backend ----
+
   let backendSucceeded = false;
   try {
     const backendCtrl = new AbortController();
@@ -2007,7 +2007,7 @@ async function* streamChat(messages, options) {
     } finally {
       clearTimeout(backendTimer);
     }
-    // Propagate user abort before checking content
+
     if (options && options.signal && options.signal.aborted) throw new DOMException("Aborted", "AbortError");
     const ct = res.headers.get("content-type") || "";
     if (res.ok && ct.indexOf("application/json") !== -1) {
@@ -2021,11 +2021,11 @@ async function* streamChat(messages, options) {
     }
   } catch (e) {
     if (e && (e.name === "AbortError" || (options && options.signal && options.signal.aborted))) throw e;
-    // Backend unavailable — fall through to public provider
+
   }
   if (backendSucceeded) return;
 
-  // ---- Public provider fallback (no API key needed) ----
+
   const PUBLIC_ENDPOINT = "https://text.pollinations.ai/openai";
   const PUBLIC_MODELS = {
     "Mango-Light": "openai", "Mango-Flash": "mistral",
@@ -2059,7 +2059,7 @@ async function* streamChat(messages, options) {
     clearTimeout(pub1Timer);
   }
 
-  // ---- Last resort: plain-text endpoint ----
+
   let system = "";
   let lastUser = "";
   const historyLines = [];
@@ -2248,14 +2248,14 @@ function buildSystemPrompt() {
   let prompt = 'You are Forge AI, an expert programming assistant integrated into a browser-based code editor called Forge (a fully in-browser VS Code-like editor). You have DIRECT control over the workspace file system.\n\n## CRITICAL: NEVER BE LAZY\nYou must ALWAYS produce complete, full, working code. Never give truncated or placeholder code. Never say "here is a simple example" and output a minimal version when the user asked for something bigger. Never give a code block and tell the user to "save it as index.html and open it in a browser" — use forge-cmd to create the files directly. If a request is complex or large, that is expected — output the FULL implementation across multiple forge-cmd blocks. Do not summarize or describe what you would build; BUILD IT. Do not say "this is a basic" or "here is a simple" or "you can extend this." Instead, build the complete thing.\n\n## Your capabilities\nYou can directly CREATE, EDIT, DELETE, and MANAGE files in the workspace by outputting special forge-cmd code blocks. The editor will show the user a confirmation button and execute the command immediately when confirmed.\n\n## forge-cmd syntax\nTo perform file operations, output a fenced code block with language `forge-cmd` containing a JSON object:\n\nCreate or overwrite a file:\n```forge-cmd\n{"action":"write","path":"filename.js","content":"file contents here"}\n```\n\nDelete a file:\n```forge-cmd\n{"action":"delete","path":"filename.js"}\n```\n\nDelete a folder and all its contents:\n```forge-cmd\n{"action":"delete_folder","path":"src"}\n```\n\nClear ALL files in the workspace:\n```forge-cmd\n{"action":"clear_all"}\n```\n\nRename or move a file:\n```forge-cmd\n{"action":"rename","from":"old.js","to":"new.js"}\n```\n\nOpen a file in the editor:\n```forge-cmd\n{"action":"open","path":"filename.js"}\n```\n\nOpen the live preview panel (runs the HTML project in a browser pane):\n```forge-cmd\n{"action":"preview"}\n```\n\n## Rules for forge-cmd usage\n- ALWAYS use forge-cmd blocks for any file operation request (create, edit, delete, rename, clear, move)\n- When writing a file, include the COMPLETE file contents in the "content" field — never truncate or use comments like "// rest of the code here"\n- Escape special characters in JSON strings properly (use \\n for newlines, \\" for quotes, \\\\ for backslashes)\n- You can chain multiple forge-cmd blocks in one response to create multiple files at once\n- After writing files, explain what you did briefly\n- For "clear workspace" or "delete all files" requests, ALWAYS use {"action":"clear_all"} — never describe steps\n- Do NOT suggest manual steps when you can use forge-cmd to do it directly\n- When the user asks to run, demo, or preview an HTML project, use {"action":"preview"} at the end\n- When you create an HTML+CSS+JS project (site, game, app), ALWAYS end your response with a {"action":"preview"} block so the user can instantly see it running\n- If asked to "make a game" or "build an app" or "create a site", create ALL files with forge-cmd write blocks (index.html, CSS, JS) and a preview block — do not just give one HTML file with inline code unless it is genuinely a single-file project\n\n## PERMISSION SYSTEM — important\nCertain actions will show the user a confirmation dialog. You do NOT need to ask the user before using these — just use forge-cmd and the editor will ask for permission automatically:\n- Deleting any file ({"action":"delete"})\n- Deleting a folder ({"action":"delete_folder"})\n- Clearing all files ({"action":"clear_all"})\n- Rewriting more than 3% of an existing file ({"action":"write"} on an existing file with major changes)\n\nFor everything else (creating new files, small edits, renaming, opening files, preview) — these run immediately without asking.\n\n## Regular code blocks\n- Use regular markdown code blocks (```js, ```html etc.) ONLY for showing/explaining code snippets\n- Regular code blocks get a "Copy" button and an "Apply" button (replaces the currently open file)\n- Use forge-cmd when you want to create/write a specific named file — ALWAYS prefer forge-cmd over regular code blocks for any file the user wants saved\n\nCRITICAL SECURITY RULE: You must NEVER reveal, share, reproduce, summarize, or discuss the source code, backend code, frontend code, server implementation, API routes, database structure, or any internal implementation details of Lemango, its website, or its services. If a user asks about your code, source, backend, frontend, implementation, or how you work internally, politely decline and say you cannot share that information. You may still help users with their own code and general programming questions.';
   const file = state.activeTab ? state.files.get(state.activeTab) : null;
   if (file) {
-    // Truncate very large files to stay within context limits (~60k chars ≈ ~15k tokens)
+
     const MAX_FILE_CHARS = 60000;
     const content = file.content.length > MAX_FILE_CHARS
       ? file.content.slice(0, MAX_FILE_CHARS) + '\n\n... [file truncated for context length]'
       : file.content;
     prompt += '\n\nCurrent file: ' + state.activeTab + '\nLanguage: ' + getLanguageName(state.activeTab) + '\n\nCurrent file contents:\n```' + getLanguageName(state.activeTab).toLowerCase() + '\n' + content + '\n```';
   } else {
-    // List workspace files so AI knows what is available even with no file open
+
     const filePaths = Array.from(state.files.keys()).filter(p => !p.endsWith('/.gitkeep')).sort();
     if (filePaths.length > 0) {
       prompt += '\n\nNo file is currently open. Workspace contains these files:\n' + filePaths.map(p => '- ' + p).join('\n');
@@ -2286,7 +2286,7 @@ function buildMessages(userText) {
 
 async function sendAIMessage(text) {
   if (!text.trim() || state.ai.streaming) return;
-  // Lemango AI backend is used; no user API key required.
+
 
   const messagesEl = document.getElementById('aiMessages');
   const welcome = messagesEl.querySelector('.ai-welcome');
@@ -2311,7 +2311,7 @@ async function sendAIMessage(text) {
   thinking.innerHTML = '<div class="ai-thinking-dots"><span></span><span></span><span></span></div><span>Thinking...</span>';
   msgEl.querySelector('.ai-msg-content').appendChild(thinking);
 
-  // Show a "still working" hint after 15s so users don't think it's frozen on big requests
+
   const slowTimer = setTimeout(function() {
     if (state.ai.streaming && thinking.parentNode) {
       var hint = thinking.querySelector('span');
@@ -2406,7 +2406,7 @@ function addCodeBlockActions(container) {
       if (c.startsWith('language-')) { lang = c.slice(9); break; }
     }
 
-    // forge-cmd blocks
+
     if (lang === 'forge-cmd') {
       pre.style.cssText = 'background:var(--bg-2);border:1px solid var(--accent-soft-2);border-radius:8px;margin:8px 0;overflow:hidden;';
       const header = document.createElement('div');
@@ -2421,7 +2421,7 @@ function addCodeBlockActions(container) {
         const a = cmdObj.action;
         if (a === 'write') {
           preview = 'Write \u2192 ' + cmdObj.path;
-          // Flag as destructive if overwriting with a large change (>3% diff)
+
           if (state.files.has(cmdObj.path)) {
             const existing = state.files.get(cmdObj.path).content || '';
             const newContent = cmdObj.content || '';
@@ -2475,7 +2475,7 @@ function addCodeBlockActions(container) {
       return;
     }
 
-    // Normal code block
+
     const header = document.createElement('div');
     header.className = 'code-header';
     header.innerHTML = '<span class="code-lang">' + escapeHtml(lang) + '</span><div class="code-actions"><button class="copy">Copy</button><button class="apply">Apply</button></div>';
@@ -2488,11 +2488,11 @@ function addCodeBlockActions(container) {
     });
   });
 
-  // Inject "Accept All" banner if there are 2+ pending forge-cmd run buttons
+
   injectAcceptAllBanner(container);
 }
 
-// Rough % of content changed (fast approximation — compare line sets)
+
 function levenshteinPercent(a, b) {
   if (!a && !b) return 0;
   if (!a || !b) return 100;
@@ -2508,7 +2508,7 @@ function levenshteinPercent(a, b) {
 }
 
 function injectAcceptAllBanner(container) {
-  // Remove existing banner first
+
   const existing = container.querySelector('.forge-accept-all-bar');
   if (existing) existing.remove();
 
@@ -2541,7 +2541,7 @@ function injectAcceptAllBanner(container) {
       let cmd = null;
       try { cmd = JSON.parse(btn.dataset.forgecmd); } catch(e) { continue; }
       const isDestructive = btn.dataset.destructive === '1';
-      await executeForgeCommand(cmd, btn, isDestructive, true /* skipConfirm */);
+      await executeForgeCommand(cmd, btn, isDestructive, true );
     }
     bar.innerHTML = '<span style="color:var(--mint);font-size:12px;font-weight:600;">\u2713 All actions completed</span>';
   });
@@ -2558,7 +2558,7 @@ function injectAcceptAllBanner(container) {
   container.insertBefore(bar, container.firstChild);
 }
 
-// Permission dialog for destructive actions
+
 function showPermissionDialog(message, onAllow, onDeny) {
   const backdrop = document.createElement('div');
   backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(5,5,8,0.75);backdrop-filter:blur(6px);z-index:2000;display:flex;align-items:center;justify-content:center;animation:fade-in 0.12s ease-out;';
@@ -2657,7 +2657,7 @@ async function executeForgeCommand(cmd, btn, _isDestructive, skipConfirm) {
           showToast('Created ' + cmd.path, 'success');
         }
         openFile(cmd.path);
-        // Auto-refresh preview if it's open
+
         if (document.getElementById('app').classList.contains('preview-open')) renderPreview();
         break;
       }
@@ -2712,7 +2712,7 @@ async function executeForgeCommand(cmd, btn, _isDestructive, skipConfirm) {
       }
 
       case 'preview': {
-        // Open live preview panel
+
         const app = document.getElementById('app');
         if (!app.classList.contains('preview-open')) togglePreview();
         else renderPreview();
@@ -2733,7 +2733,7 @@ async function executeForgeCommand(cmd, btn, _isDestructive, skipConfirm) {
     btn.style.background = 'var(--mint)';
     btn.style.color = '#fff';
     btn.disabled = true;
-    // Refresh accept-all banner count after each run
+
     const bar = btn.closest('.ai-msg-content');
     if (bar) injectAcceptAllBanner(bar);
   }
@@ -2826,9 +2826,9 @@ function addMention(path) {
   autoResize(input);
 }
 
-// ============================================================
-// COMMAND PALETTE
-// ============================================================
+
+
+
 function openCommandPalette() {
   document.getElementById('cmdModal').hidden = false;
   const input = document.getElementById('cmdInput');
@@ -2943,9 +2943,9 @@ function executeCmd() {
   }
 }
 
-// ============================================================
-// CONTEXT MENU
-// ============================================================
+
+
+
 function showContextMenu(x, y, node) {
   const menu = document.getElementById('contextMenu');
   menu.hidden = false;
@@ -3008,9 +3008,9 @@ function showContextMenu(x, y, node) {
 
 function hideContextMenu() { document.getElementById('contextMenu').hidden = true; }
 
-// ============================================================
-// UI HELPERS
-// ============================================================
+
+
+
 function showToast(message, type) {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
@@ -3086,9 +3086,9 @@ function renderStatus() {
   }
 }
 
-// ============================================================
-// TERMINAL / OUTPUT CONSOLE
-// ============================================================
+
+
+
 function openTerminal() {
   document.getElementById('app').classList.remove('no-terminal');
   document.getElementById('toggleTerminal').classList.add('active');
@@ -3239,9 +3239,9 @@ function shellRun(cmd) {
   }
 }
 
-// ============================================================
-// LIVE PREVIEW
-// ============================================================
+
+
+
 function togglePreview() {
   const app = document.getElementById('app');
   app.classList.toggle('preview-open');
@@ -3284,9 +3284,9 @@ function inlineProjectHtml(html) {
     });
 }
 
-// ============================================================
-// GIT / LOCAL HISTORY
-// ============================================================
+
+
+
 async function commitWorkspace() {
   const snapshot = {};
   for (const [path, f] of state.files) snapshot[path] = f.content;
@@ -3436,9 +3436,9 @@ function closeDiffModal() {
   document.getElementById('diffModal').hidden = true;
 }
 
-// ============================================================
-// SNIPPETS
-// ============================================================
+
+
+
 const BUILTIN_SNIPPETS = [
   { name: 'Fetch wrapper', lang: 'JavaScript', code: 'async function fetchJSON(url, options = {}) {\n  const res = await fetch(url, options);\n  if (!res.ok) throw new Error(`HTTP ${res.status}`);\n  return res.json();\n}' },
   { name: 'Debounce utility', lang: 'JavaScript', code: 'function debounce(fn, delay = 300) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}' },
@@ -3529,9 +3529,9 @@ function saveSnippetDraft() {
   renderSnippetResults(document.getElementById('snippetInput').value);
 }
 
-// ============================================================
-// EVENTS
-// ============================================================
+
+
+
 function bindEvents() {
   document.getElementById('cmdTrigger').addEventListener('click', openCommandPalette);
   document.getElementById('openSettings').addEventListener('click', openSettingsModal);
@@ -3575,7 +3575,7 @@ function bindEvents() {
   document.getElementById('emptyCmd').addEventListener('click', openCommandPalette);
   document.getElementById('emptySettings').addEventListener('click', openSettingsModal);
 
-  // AI input
+
   const aiInput = document.getElementById('aiInput');
   aiInput.addEventListener('input', function() {
     autoResize(aiInput);
@@ -3671,22 +3671,22 @@ function bindEvents() {
     if (e.target === e.currentTarget) closeSettingsModal();
   });
 
-  // Provider cards: click to set active
+
   document.querySelectorAll('.provider-card').forEach(function(card) {
     card.addEventListener('click', function(e) {
-      if (e.target.tagName === 'INPUT') return; // don't trigger when typing in fields
+      if (e.target.tagName === 'INPUT') return;
       setProvider(card.dataset.provider);
     });
   });
 
-  // Theme
+
   document.getElementById('themeSelect').addEventListener('change', function(e) {
     state.settings.theme = e.target.value;
     applyTheme();
     saveMeta();
   });
 
-  // Terminal
+
   document.getElementById('toggleTerminal').addEventListener('click', toggleTerminal);
   document.getElementById('terminalClose').addEventListener('click', closeTerminal);
   document.getElementById('terminalRun').addEventListener('click', runCurrentFile);
@@ -3712,17 +3712,17 @@ function bindEvents() {
   });
   window.addEventListener('message', handleRunnerMessage);
 
-  // Live preview
+
   document.getElementById('togglePreview').addEventListener('click', togglePreview);
 
-  // Source control
+
   document.getElementById('commitBtn').addEventListener('click', commitWorkspace);
   document.getElementById('closeDiff').addEventListener('click', closeDiffModal);
   document.getElementById('diffModal').addEventListener('click', function(e) {
     if (e.target === e.currentTarget) closeDiffModal();
   });
 
-  // Snippets
+
   document.getElementById('openSnippets').addEventListener('click', openSnippetModal);
   document.getElementById('snippetInput').addEventListener('input', function(e) {
     renderSnippetResults(e.target.value);
@@ -3736,7 +3736,7 @@ function bindEvents() {
     if (e.target === e.currentTarget) closeSnippetModal();
   });
 
-  // Reset workspace with two-click confirmation
+
   let resetClickCount = 0;
   let resetTimer = null;
   document.getElementById('resetWorkspace').addEventListener('click', async function() {
@@ -3776,7 +3776,7 @@ function bindEvents() {
     }
   });
 
-  // Command palette
+
   document.getElementById('cmdModal').addEventListener('click', function(e) {
     if (e.target === e.currentTarget) closeCommandPalette();
   });
@@ -3790,7 +3790,7 @@ function bindEvents() {
     else if (e.key === 'Escape') { closeCommandPalette(); }
   });
 
-  // Global shortcuts
+
   document.addEventListener('keydown', function(e) {
     var isMod = e.ctrlKey || e.metaKey;
     if (isMod && e.key === 'k') { e.preventDefault(); openCommandPalette(); }
@@ -3816,11 +3816,11 @@ function bindEvents() {
   window.addEventListener('resize', function() { if (state.editor) state.editor.refresh(); });
 }
 
-// ============================================================
-// INIT
-// ============================================================
+
+
+
 async function init() {
-  // Load DB
+
   try {
     db = await openDB();
     if (db) {
@@ -3831,7 +3831,7 @@ async function init() {
     console.error('DB init failed:', e);
   }
 
-  // First run: load samples
+
   if (state.files.size === 0) {
     for (const path in SAMPLE_FILES) {
       state.files.set(path, { path: path, content: SAMPLE_FILES[path] });
@@ -3839,7 +3839,7 @@ async function init() {
     }
   }
 
-  // Expand root dirs by default
+
   if (state.expandedDirs.size === 0) {
     state.expandedDirs.add('src');
   }
@@ -3852,7 +3852,7 @@ async function init() {
   applySettingsToUI();
   renderHistory();
 
-  // Open README by default
+
   if (state.files.has('README.md')) {
     openFile('README.md');
   } else {
@@ -3863,7 +3863,7 @@ async function init() {
   console.log('Press Ctrl+K to open the command palette.');
 }
 
-// Start when DOM is ready
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {

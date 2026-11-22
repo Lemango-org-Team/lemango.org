@@ -1,8 +1,8 @@
 "use strict";
-/**
- * admin-button.js — shows an "Admin page login" button at the bottom of the
- * page only for verified admin accounts (determined by the backend).
- */
+
+
+
+
 (function () {
   async function check() {
     if (!window.LemangoAuth || !window.LemangoAuth.user?.email) return;
@@ -24,7 +24,7 @@
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
-      // wait for auth
+
       if (window.LemangoAuth) {
         if (window.LemangoAuth.user) check();
         document.addEventListener("lm:auth", () => check(), { once: true });

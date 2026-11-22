@@ -1,19 +1,19 @@
 "use strict";
-/**
- * lemongo-auth.js — client-side "Sign in with Google" (Google Identity Services).
- * Exchanges Google credentials for a server-side HttpOnly session. Only
- * non-secret profile data is kept in memory.
- *
- * Uses Google's official renderButton so each click re-opens the account chooser
- * (unlike prompt(), which has dismissal cooldowns).
- *
- * Exposes window.LemangoAuth = { user, init, mount, signIn, signOut, isSignedIn }.
- */
+
+
+
+
+
+
+
+
+
+
 (function () {
   const CLIENT_ID = "417747434436-j8ohlhkpo982m8uvum322d9mirg7n7gb.apps.googleusercontent.com";
-  // Below this width the official Google button (fixed 220px) no longer fits
-  // inside the site headers and pushes the whole page into horizontal scroll.
-  // Narrow screens get a compact "Sign in" link to /auth instead.
+
+
+
   const COMPACT_MAX = 960;
   const LemangoAuth = {
     user: null,
@@ -69,8 +69,8 @@
         this.user = null;
         console.error("[auth] session check failed:", error);
       }
-      // On /auth/ the inline sign-in script owns the Google button entirely.
-      // Skip mounting widgets there to prevent a double initialize() race.
+
+
       if (window.__lmAuthPageOwnsButton) return;
       this._watchCompact();
       document.querySelectorAll("[data-auth-widget]").forEach((el) => this.mount(el));
@@ -140,8 +140,8 @@
       const wrap = document.createElement("div");
       wrap.className = "lm-auth-signin-wrap";
       wrap.style.display = "inline-block";
-      // `data-auth-compact` forces the small link even on wide screens. Used by
-      // tool UIs whose toolbars are already crowded and cannot fit 220px.
+
+
       if (this._isCompact() || (container && container.hasAttribute("data-auth-compact"))) {
         wrap.appendChild(this._buildCompactSignIn());
       } else {
@@ -149,8 +149,8 @@
       }
       return wrap;
     },
-    // Narrow screens: a small link to the dedicated sign-in page instead of the
-    // 220px Google button, which cannot shrink and overflows mobile headers.
+
+
     _buildCompactSignIn() {
       const a = document.createElement("a");
       a.href = "/auth/?next=" + encodeURIComponent(location.pathname + location.search);
@@ -195,7 +195,7 @@
       }
     },
     async signIn(container) {
-      // Fallback path (used if renderButton fails). Uses prompt with cancel_on_tap_outside false.
+
       try {
         await this.load();
         window.google.accounts.id.initialize({
@@ -212,7 +212,7 @@
           cancel_on_tap_outside: false
         });
         window.google.accounts.id.prompt((notification) => {
-          // If One Tap is dismissed/skipped, do nothing; the rendered button still works.
+
           if (notification && notification.isNotDisplayed && notification.isNotDisplayed()) {
             console.info("One Tap not displayed:", notification.getNotDisplayedReason && notification.getNotDisplayedReason());
           }

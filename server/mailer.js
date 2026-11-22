@@ -23,14 +23,14 @@ function createTransport() {
       },
     });
   }
-  // No SMTP configured: build a real RFC822 message but do not send it.
+
   return nodemailer.createTransport({ streamTransport: true, buffer: true, newline: "unix" });
 }
 
-/**
- * Sends an email when SMTP is configured. Otherwise the fully composed message
- * is written to data/outbox as a .eml draft so nothing is ever lost.
- */
+
+
+
+
 export async function sendMail({ to, subject, text, html, replyTo }) {
   const from = process.env.MAIL_FROM || "Lemango <no-reply@lemango.org>";
   const transport = createTransport();

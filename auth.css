@@ -1,6 +1,6 @@
-/* ============================================================
-   auth.css — matches style.css exactly
-   ============================================================ */
+
+
+
 
 :root {
   --paper:       #f8f6f1;
@@ -37,7 +37,7 @@ body {
   min-height: 100dvh;
 }
 
-/* Background image — exact same as main site */
+
 body::before {
   content: "";
   position: fixed;
@@ -48,7 +48,7 @@ body::before {
   pointer-events: none;
 }
 
-/* ── Header — copy of site-header from style.css ── */
+
 .site-header {
   position: sticky;
   top: 0;
@@ -75,7 +75,7 @@ body::before {
 .site-nav a { color: var(--ink); font-size: 13px; font-weight: 600; text-decoration: none; transition: color .18s; }
 .site-nav a:hover { color: var(--green-dark); }
 
-/* ── Main layout ── */
+
 .auth-main {
   width: min(540px, calc(100% - 40px));
   margin: 60px auto 80px;
@@ -84,7 +84,7 @@ body::before {
   gap: 16px;
 }
 
-/* ── Out of order banner — matches construction-banner from style.css ── */
+
 .auth-ood {
   display: flex;
   align-items: center;
@@ -130,7 +130,7 @@ body::before {
   white-space: nowrap;
 }
 
-/* ── Card — matches product-card from style.css ── */
+
 .auth-card {
   position: relative;
   overflow: hidden;
@@ -140,7 +140,7 @@ body::before {
   box-shadow: var(--shadow-md);
 }
 
-/* Lemango flag accent bar — matches product-card::before */
+
 .auth-card-bar {
   height: 3px;
   background: linear-gradient(90deg, var(--green) 0 50%, var(--flag-red) 50% 75%, var(--flag-orange) 75% 88%, var(--flag-yellow) 88%);
@@ -150,7 +150,7 @@ body::before {
   padding: 36px 40px 32px;
 }
 
-/* Eyebrow — matches site eyebrow */
+
 .eyebrow {
   display: flex;
   align-items: center;
@@ -188,7 +188,7 @@ h1 {
   line-height: 1.75;
 }
 
-/* Error banner */
+
 .auth-error {
   display: block;
   margin-bottom: 20px;
@@ -202,7 +202,7 @@ h1 {
   line-height: 1.5;
 }
 
-/* Google button */
+
 .google-btn {
   display: flex;
   align-items: center;
@@ -234,7 +234,7 @@ h1 {
   white-space: nowrap;
 }
 
-/* Terms */
+
 .auth-terms {
   margin: 20px 0 0;
   color: #9aa096;
@@ -248,7 +248,7 @@ h1 {
 }
 .auth-terms a:hover { text-decoration: underline; }
 
-/* Card footer */
+
 .auth-card-footer {
   padding: 16px 40px;
   border-top: 1px solid var(--line);
@@ -262,14 +262,14 @@ h1 {
 }
 .auth-card-footer a:hover { color: var(--green-dark); }
 
-/* Focus */
+
 a:focus-visible, button:focus-visible {
   outline: 3px solid var(--green);
   outline-offset: 3px;
   border-radius: 3px;
 }
 
-/* Responsive */
+
 @media (max-width: 520px) {
   .auth-main { margin-top: 36px; }
   .auth-card-body { padding: 26px 22px 22px; }

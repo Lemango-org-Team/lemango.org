@@ -1,8 +1,8 @@
-/**
- * server/routes/paid.js
- * Serves paid products behind auth + allowlist. Files are loaded from the
- * bundled local product directory first, then fall back to the Paided repo.
- */
+
+
+
+
+
 import { Router } from "express";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -18,7 +18,7 @@ const ALLOWED_PAID_EMAILS = new Set(
 );
 const REPO_RAW = String(process.env.PAID_REPO_RAW || "").replace(/\/+$/, "");
 const CACHE_TTL_MS = 5 * 60 * 1000;
-const cache = new Map(); // path -> { body: Buffer, type: string, ts: number }
+const cache = new Map();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOCAL_DIR = path.resolve(__dirname, "..", "..", "paid");
@@ -59,7 +59,7 @@ async function fetchFile(relPath) {
     cache.set(relPath, local);
     return local;
   } catch {
-    // fall through to the remote repo
+
   }
   if (!REPO_RAW) throw new Error("PAID_REPO_RAW is not configured.");
   const url = REPO_RAW + "/" + relPath.split("/").map(encodeURIComponent).join("/");

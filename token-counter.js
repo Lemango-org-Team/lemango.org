@@ -1,6 +1,6 @@
 "use strict";
 (function () {
-  // Inject styles
+
   const style = document.createElement("style");
   style.textContent = `
     .tc-widget { position: fixed; bottom: 12px; right: 12px; z-index: 50; background: #2f343a; border: 1px solid rgba(255,255,255,.05); border-radius: 14px; padding: 6px 10px; box-shadow: 0 8px 20px rgba(0,0,0,.4); font-family: "JetBrains Mono", monospace; font-size: 11px; color: #e2e8f0; display: flex; align-items: center; gap: 8px; }
@@ -11,7 +11,7 @@
   `;
   document.head.appendChild(style);
 
-  // Inject widget HTML
+
   const widget = document.createElement("div");
   widget.className = "tc-widget";
   widget.id = "tcWidget";

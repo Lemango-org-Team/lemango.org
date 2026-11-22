@@ -21,7 +21,7 @@ const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", true);
 
-// CORS for split hosting (frontend on GitHub Pages, backend elsewhere).
+
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
   .split(",").map((s) => s.trim()).filter(Boolean);
 if (allowedOrigins.includes("*")) {
@@ -33,7 +33,7 @@ const csrfOrigins = new Set([
 ]);
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  // Default-deny: if no allowlist is configured, only same-origin (no Origin header) requests are allowed.
+
   const ok = !origin || allowedOrigins.includes(origin);
   if (ok && origin) {
     res.setHeader("Access-Control-Allow-Origin", origin);
@@ -61,7 +61,7 @@ app.use(express.json({ limit: "256kb" }));
 app.use(cookieParser());
 app.use(sessionMiddleware);
 
-// --- Tiny in-memory rate limiter (per IP) for write endpoints ---
+
 const hits = new Map();
 function rateLimit({ windowMs = 60_000, max = 20 } = {}) {
   return (req, res, next) => {
@@ -81,7 +81,7 @@ function rateLimit({ windowMs = 60_000, max = 20 } = {}) {
   };
 }
 
-// --- API ---
+
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
@@ -109,7 +109,7 @@ app.use("/api/newsletter", rateLimit({ windowMs: 60_000, max: 10 }), newsletterR
 app.use("/api/ai", rateLimit({ windowMs: 60_000, max: 60 }), aiRouter);
 app.use("/api/court", rateLimit({ windowMs: 60_000, max: 60 }), courtRouter);
 
-// --- Clean URL redirects: strip .html extension ---
+
 app.get("/:page.html", (req, res) => {
   const query = Object.keys(req.query).length
     ? "?" + new URLSearchParams(req.query).toString()
@@ -117,7 +117,7 @@ app.get("/:page.html", (req, res) => {
   res.redirect(301, `/${req.params.page}${query}`);
 });
 
-// --- Static frontend ---
+
 const BLOCKED_DIR = /^\/(?:server|tests|data|node_modules|\.git|temp|Debug)(?:\/|$)/i;
 const BLOCKED_FILES = /^\/(?:package(?:-lock)?\.json|readme\.md|cname|dockerfile|license|\.env(?:\.example)?|\.gitignore|\.nojekyll|_config\.yml)$/i;
 app.use((req, res, next) => {
@@ -135,7 +135,7 @@ app.get("*", (_req, res) => {
   res.sendFile(path.join(ROOT_DIR, "index.html"));
 });
 
-// eslint-disable-next-line no-unused-vars
+
 app.use((err, _req, res, _next) => {
   console.error("[error]", err);
   res.status(500).json({ ok: false, error: "Something went wrong on our end." });

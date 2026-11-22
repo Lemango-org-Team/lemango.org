@@ -1,11 +1,11 @@
-/*
- * Lemango AI — shared browser client.
- *
- * Tries the Lemango backend first (multi-provider + optional API keys), and
- * falls back to a free, keyless public provider so the assistant keeps working
- * on static hosting (e.g. GitHub Pages) where no Node backend is running.
- * Every response is branded "Lemango AI"; the underlying provider is hidden.
- */
+
+
+
+
+
+
+
+
 (function () {
     "use strict";
 
@@ -113,8 +113,8 @@
         "only, and that real legal matters should be handled by a real court and a licensed " +
         "lawyer for legal advice.";
 
-    /* ---- Beta daily question limit (per browser, per day) ---- */
-    // Signed-in users get a higher daily limit as a perk.
+
+
     var privilegeUser = null;
     var privilegeCheck = null;
     function isUnlimited() {
@@ -176,7 +176,7 @@
     }
 
     function writeUsage(usage) {
-        try { localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) { /* ignore */ }
+        try { localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) {  }
     }
 
     function limitInfo() {
@@ -218,7 +218,7 @@
 
     var PUBLIC_ENDPOINT = "https://text.pollinations.ai/openai";
     var PUBLIC_MODEL = "openai";
-    // Map branded models to free public provider models so switching works on static hosting.
+
     var PUBLIC_MODELS = {
         "Mango-Light": "openai",
         "Mango-Flash": "mistral",
@@ -298,20 +298,20 @@
                 var text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
                 if (text && String(text).trim() && !/^\s*<!doctype|^\s*<html/i.test(String(text))) { clearTimeout(timer); return String(text).trim(); }
             }
-        } catch (e) { /* try the simpler endpoint below */ } finally {
+        } catch (e) {  } finally {
             clearTimeout(timer);
         }
         return viaPublicSimple(messages, model);
     }
 
-    // Plain-text keyless endpoint, used if the chat-completions call fails.
+
     async function viaPublicSimple(messages, model) {
         var pubModel = (model && PUBLIC_MODELS[model]) || PUBLIC_MODEL;
         var controller = new AbortController();
         var timer = setTimeout(function () { controller.abort(); }, 25000);
         var system = "";
         var lastUser = "";
-        // Build a condensed prompt that includes conversation history so context isn't lost.
+
         var historyLines = [];
         for (var i = 0; i < messages.length; i++) {
             var m = messages[i];
@@ -324,7 +324,7 @@
                 historyLines.push("Assistant: " + m.content);
             }
         }
-        // Include prior turns in the system context so the assistant has conversation history.
+
         var fullSystem = system;
         if (historyLines.length > 2) {
             var priorTurns = historyLines.slice(0, -1).join("\n");
@@ -358,7 +358,7 @@
             return { text: NOT_VIBE_CODED, reasoning: null };
         }
         var counts = opts.count !== false;
-        // Check limit BEFORE incrementing — only record after a successful response.
+
         if (counts && !(await isUnlimited())) {
             if (limitInfo().remaining <= 0) throw limitReached();
         }
@@ -382,7 +382,7 @@
             if (err && (err.code === "daily-limit" || /daily limit/i.test(String(err.message || "")))) {
                 throw limitReached();
             }
-            /* fall back to the keyless public provider */
+
         }
         var hint = opts.systemHint || modelHint(opts.model);
         var sys = systemPrompt() + (hint ? ("\n" + hint) : "");
@@ -423,7 +423,7 @@
             var dReasoning = (data && data.reasoning) ? String(data.reasoning).trim() : null;
             if (containsLeak(dText) || containsLeak(dReasoning)) { dText = REFUSAL; dReasoning = null; }
             return { text: dText, reasoning: dReasoning };
-        } catch (e) { /* fall through */ }
+        } catch (e) {  }
         var docText = await viaPublic([
             { role: "system", content: SYSTEM + "\n" + LEGAL_SYSTEM },
             { role: "user", content: "Create a legal document based on this request: " + prompt }
@@ -442,7 +442,7 @@
                 var d = await res.json();
                 if (d && Array.isArray(d.models) && d.models.length) { clearTimeout(timer); return d.models; }
             }
-        } catch (e) { /* ignore */ } finally {
+        } catch (e) {  } finally {
             clearTimeout(timer);
         }
         return MODELS;

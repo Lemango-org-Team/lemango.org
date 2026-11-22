@@ -4,11 +4,11 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2231892231966691"
      crossorigin="anonymous"></script>
   <meta name="google-adsense-account" content="ca-pub-2231892231966691">
-  <meta name="lemango-api-base" content="https://lemango-org.onrender.com"><!-- set to your backend URL, e.g. https://lemango-api.onrender.com -->
+  <meta name="lemango-api-base" content="https://lemango-org.onrender.com">
   <script src="/api-base.js"></script>
   <link rel="stylesheet" href="/a11y.css">
   <link rel="manifest" href="/manifest.json">
-  <!-- Google tag (gtag.js) -->
+
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-THFCXR1KLW"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -40,7 +40,7 @@
   {"@context":"https://schema.org","@type":"SoftwareApplication","name":"FastPay Agreement & Receipt Studio","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"https://lemango.org/fastpay","description":"Create a signed service agreement and receipt and export a clean PDF, entirely in your browser.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
   </script>
 
-  <!-- External libraries -->
+
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -133,7 +133,7 @@
     }
     .app-head p { margin: 0; color: var(--muted); font-size: 13px; }
 
-    /* stepper */
+
     .stepper {
       display: flex;
       gap: 6px;
@@ -228,7 +228,7 @@
     .late-fee { margin-top: 12px; display: none; }
     .late-fee.show { display: block; }
 
-    /* signature */
+
     .sig-wrap {
       border: 2px dashed #cbd5e1;
       border-radius: 12px;
@@ -292,7 +292,7 @@
     }
     .form-actions .spacer { flex: 1; }
 
-    /* preview */
+
     .preview {
       border: 1px solid var(--line);
       border-radius: 12px;
@@ -337,7 +337,7 @@
 
     .field-error { color: var(--danger); font-size: 11.5px; font-weight: 600; min-height: 14px; }
 
-    /* ---- Sign in with Google ---- */
+
     .signin-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px 14px; border: 1px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; }
     .signin-row-note { color: var(--muted); font-size: 12px; line-height: 1.5; }
     .signin-row-note.ok { color: var(--ok); font-weight: 600; }
@@ -347,7 +347,7 @@
     .account-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: #dbeafe; }
     .account-chip img { width: 26px; height: 26px; border-radius: 50%; }
 
-    /* ---- Demo payment area ---- */
+
     .pay-box { margin-top: 16px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 12px; background: #f8fafc; }
     .pay-box-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .pay-box-head strong { font-size: 14px; color: #0b2b28; }
@@ -410,7 +410,7 @@
     </div>
 
     <form id="fastpay-form" novalidate>
-      <!-- STEP 1: PARTIES -->
+
       <section class="step active" data-step="1">
         <h2>Who's involved?</h2>
         <p class="hint">Enter the parties to this agreement. Emails are optional but recommended.</p>
@@ -443,7 +443,7 @@
         <p class="field-error" id="err-1"></p>
       </section>
 
-      <!-- STEP 2: AGREEMENT DETAILS -->
+
       <section class="step" data-step="2">
         <h2>What's the deal?</h2>
         <p class="hint">Describe the work and the payment terms.</p>
@@ -478,7 +478,7 @@
         <p class="field-error" id="err-2"></p>
       </section>
 
-      <!-- STEP 3: SIGNATURE -->
+
       <section class="step" data-step="3">
         <h2>Sign the agreement</h2>
         <p class="hint">Sign with your mouse, finger, or stylus. This signature is embedded in the PDF.</p>
@@ -505,7 +505,7 @@
         </div>
       </section>
 
-      <!-- STEP 4: PREVIEW & EXPORT -->
+
       <section class="step" data-step="4">
         <h2>Review &amp; export</h2>
         <p class="hint">Check the details, then download your signed PDF.</p>
@@ -558,84 +558,84 @@
   <script>
     "use strict";
 
-    /* =====================================================================
-     * FastPay Agreement & Receipt Studio
-     * ---------------------------------------------------------------------
-     * Architecture (kept modular so upgrades never touch the core flow):
-     *   - getFormData()         : read + normalize all inputs into one object
-     *   - checkPaymentStatus()  : payment gate hook (defaults to paid)
-     *   - renderPDF()           : build the one-page PDF from a data object
-     *   - handleExport()        : orchestrates data -> gate -> PDF
-     *   - PaymentGatewayModule  : isolated placeholder for Stripe/etc.
-     * ===================================================================== */
+
+
+
+
+
+
+
+
+
+
 
     var TOTAL_STEPS = 4;
     var currentStep = 1;
     var signaturePad = null;
 
-    /* ---------------------------------------------------------------------
-     * PaymentGatewayModule
-     * ---------------------------------------------------------------------
-     * ISOLATED PLACEHOLDER. This module is intentionally inert. To add real
-     * payments later, implement the methods below (call your backend, which
-     * creates a Stripe Checkout Session and verifies payment via webhook).
-     * Nothing here is referenced by renderPDF()/getFormData(), so filling it
-     * in will NOT break the current PDF or UI code.
-     *
-     * Suggested flow:
-     *   1. PaymentGatewayModule.createCheckoutSession(getFormData())
-     *        -> POST /api/create-checkout-session -> redirect to Stripe.
-     *   2. On return, PaymentGatewayModule.verifyPayment(sessionId)
-     *        -> POST /api/verify -> { paid: true/false }.
-     *   3. make checkPaymentStatus() call verifyPayment() instead of the default.
-     * ------------------------------------------------------------------- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     var PaymentGatewayModule = {
       enabled: false,
       provider: "stripe",
       config: {
-        publishableKey: "",      // e.g. "pk_live_..."
-        checkoutEndpoint: "",    // e.g. "/api/create-checkout-session"
-        verifyEndpoint: ""       // e.g. "/api/verify-payment"
+        publishableKey: "",
+        checkoutEndpoint: "",
+        verifyEndpoint: ""
       },
 
-      // Called to start a checkout flow. Attach this to a button when ready.
+
       createCheckoutSession: async function (formData) {
         if (!this.enabled || !this.config.checkoutEndpoint) {
           return { ok: false, reason: "Payments are not enabled yet." };
         }
-        // Example (kept commented so the default build makes no network calls):
-        // var res = await fetch(this.config.checkoutEndpoint, {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({ amount: formData.totalAmount, email: formData.buyerEmail })
-        // });
-        // return await res.json(); // { url: "https://checkout.stripe.com/..." }
+
+
+
+
+
+
+
         return { ok: false, reason: "createCheckoutSession() is a placeholder." };
       },
 
-      // Called to confirm a payment actually succeeded before releasing the PDF.
+
       verifyPayment: async function (sessionId, formData) {
         if (!this.enabled || !this.config.verifyEndpoint) {
           return { paid: true, verified: false, provider: this.provider };
         }
-        // Example:
-        // var res = await fetch(this.config.verifyEndpoint + "?session_id=" + sessionId);
-        // return await res.json(); // { paid: true }
+
+
+
         return { paid: true, verified: false, provider: this.provider };
       },
 
-      // -------------------------------------------------------------------
-      // DEMO MODE (what powers the "Payment" area today)
-      // -------------------------------------------------------------------
-      // A fully local, fake gateway so the flow can be demoed end to end
-      // without a real processor. No network calls, no card data is read or
-      // stored, and nothing is charged.
-      // To go live: set demoMode = false and implement createCheckoutSession
-      // + verifyPayment against your backend (Stripe / Adyen / etc.).
+
+
+
+
+
+
+
+
       demoMode: true,
       demoPaid: false,
 
-      // Simulates a successful payment locally (used by the demo area).
+
       simulatePayment: function (formData) {
         var self = this;
         return new Promise(function (resolve) {
@@ -652,35 +652,35 @@
         });
       },
 
-      // Optional: mount a payment button/status area into a container element.
+
       mount: function (container) {
         if (!container) return;
-        // When enabled, render a "Pay to unlock" button here that triggers
-        // createCheckoutSession(), then re-runs handleExport() on success.
+
+
         container.setAttribute("data-gateway", this.demoMode ? "demo" : (this.enabled ? "active" : "inactive"));
       }
     };
 
-    /* ---------------------------------------------------------------------
-     * GoogleSignInModule
-     * ---------------------------------------------------------------------
-     * Client-side "Sign in with Google" via Google Identity Services (GIS).
-     *
-     * !! SECURITY !!  Only a PUBLIC OAuth *Client ID* belongs in this file.
-     * NEVER put a client secret (starts with "GOCSPX-") here or anywhere in
-     * this repo � this page is downloaded by every visitor, so a secret would
-     * be public. Client secrets must stay on a server.
-     *
-     * To enable:
-     *   1. Google Cloud Console -> APIs & Services -> Credentials
-     *   2. Create credentials -> OAuth client ID -> Web application
-     *   3. Authorized JavaScript origins: add https://lemango.org (and
-     *      http://localhost:3000 while testing)
-     *   4. Paste the Client ID below (looks like "1234-abc.apps.googleusercontent.com")
-     * ------------------------------------------------------------------- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     var GoogleSignInModule = {
       clientId: "417747434436-j8ohlhkpo982m8uvum322d9mirg7n7gb.apps.googleusercontent.com",
-      onSignedIn: null,       // callback(user) -> autofill / UI
+      onSignedIn: null,
       _scriptPromise: null,
 
       load: function () {
@@ -698,7 +698,7 @@
         return this._scriptPromise;
       },
 
-      // Decodes the JWT id_token returned by GIS (payload only; no verify needed client-side).
+
       decodeCredential: function (token) {
         try {
           var part = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
@@ -713,7 +713,7 @@
         var self = this;
         if (!slot) return;
 
-        // Not configured yet: show a friendly button that explains what's needed.
+
         if (!this.clientId) {
           slot.innerHTML = "";
           var b = document.createElement("button");
@@ -736,7 +736,7 @@
           return;
         }
 
-        // Configured: load GIS and render the official button.
+
         this.load().then(function () {
           window.google.accounts.id.initialize({
             client_id: self.clientId,
@@ -758,10 +758,10 @@
       }
     };
 
-    /* ---------------------------------------------------------------------
-     * FastPay logo � drawn as a very faint watermark in the exported PDF.
-     * ------------------------------------------------------------------- */
-    var fastpayLogo = null; // HTMLImageElement once loaded
+
+
+
+    var fastpayLogo = null;
     function loadFastPayLogo() {
       return new Promise(function (resolve) {
         var img = new Image();
@@ -771,7 +771,7 @@
       });
     }
 
-    // Renders the signed-in account chip in the top bar.
+
     function renderAccountChip(user) {
       var area = $("#accountArea");
       if (!area) return;
@@ -800,11 +800,11 @@
       area.appendChild(out);
     }
 
-    /* ---------------------------- DOM helpers ---------------------------- */
+
     function $(sel) { return document.querySelector(sel); }
     function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; }
 
-    /* -------------------------------- State ------------------------------- */
+
     function todayISO() {
       var d = new Date();
       var off = d.getTimezoneOffset();
@@ -812,11 +812,11 @@
       return local.toISOString().slice(0, 10);
     }
 
-    /* =====================================================================
-     * getFormData()
-     * Reads every field into a single normalized object. This is the ONLY
-     * shape the rest of the app (PDF, gateway) depends on.
-     * ===================================================================== */
+
+
+
+
+
     function getFormData() {
       var amount = parseFloat(val("totalAmount"));
       return {
@@ -865,22 +865,22 @@
       return signaturePad.toDataURL("image/png");
     }
 
-    /* =====================================================================
-     * checkPaymentStatus()
-     * Payment gate hook. Defaults to { paid: true } so the app works with no
-     * backend. To require payment, delegate to PaymentGatewayModule:
-     *     return await PaymentGatewayModule.verifyPayment(sessionId, data);
-     * ===================================================================== */
+
+
+
+
+
+
     async function checkPaymentStatus(data) {
-      // if (PaymentGatewayModule.enabled) { ... }  <- future paid flow
+
       return { paid: true };
     }
 
-    /* =====================================================================
-     * renderPDF()
-     * Builds a formatted, single-page US-letter PDF from a data object.
-     * Returns the jsPDF instance (caller decides whether to save/share).
-     * ===================================================================== */
+
+
+
+
+
     function renderPDF(data, status) {
       var jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
       var doc = new jsPDFCtor({ unit: "pt", format: "letter" });
@@ -910,7 +910,7 @@
         return doc.splitTextToSize(str || "", width);
       }
 
-      // ---- Faint brand watermark (bottom-right corner) ----
+
       if (fastpayLogo && fastpayLogo.complete && fastpayLogo.naturalWidth) {
         try {
           var wmW = 150;
@@ -922,10 +922,10 @@
           if (canGState) doc.setGState(new doc.GState({ opacity: 0.06 }));
           doc.addImage(fastpayLogo, "PNG", wmX, wmY, wmW, wmH);
           if (canGState) doc.setGState(new doc.GState({ opacity: 1 }));
-        } catch (e) { /* watermark is optional � never block export */ }
+        } catch (e) {  }
       }
 
-      // ---- Header band ----
+
       doc.setFillColor.apply(doc, BRAND);
       doc.rect(0, 0, W, 96, "F");
       text("FastPay Agreement & Receipt", M, 46, { color: [255, 255, 255], bold: true, size: 19 });
@@ -942,7 +942,7 @@
         y += Math.max(16, lines.length * 14) + 6;
       }
 
-      // ---- Parties ----
+
       y = 130;
       text("Parties", M, y, { size: 12, bold: true, color: [11, 43, 40] }); y += 8;
       doc.setDrawColor.apply(doc, BRAND);
@@ -958,7 +958,7 @@
 
       y += 6;
 
-      // ---- Agreement details ----
+
       text("Agreement details", M, y, { size: 12, bold: true, color: [11, 43, 40] }); y += 8;
       doc.setDrawColor.apply(doc, BRAND);
       doc.line(M, y, M + 92, y); y += 18;
@@ -968,7 +968,7 @@
       row("Due date", formatLongDate(data.dueDate));
       row("Late fee", data.lateFeeEnabled && data.lateFeeText ? data.lateFeeText : "None");
 
-      // Service description block
+
       text("Scope of services", M, y, { size: 10, bold: true, color: MUTED }); y += 15;
       var descLines = wrap(data.serviceDescription || "�", contentW, 10);
       doc.setTextColor.apply(doc, INK);
@@ -977,7 +977,7 @@
       doc.text(descLines, M, y);
       y += descLines.length * 14 + 12;
 
-      // ---- Payment status ----
+
       var paid = status && status.paid;
       doc.setFillColor(paid ? 209 : 254, paid ? 250 : 243, paid ? 229 : 199);
       doc.roundedRect(M, y - 12, 132, 22, 4, 4, "F");
@@ -986,7 +986,7 @@
       });
       y += 34;
 
-      // ---- Signature ----
+
       text("Authorized signature", M, y, { size: 12, bold: true, color: [11, 43, 40] }); y += 8;
       doc.setDrawColor.apply(doc, BRAND);
       doc.line(M, y, M + 108, y); y += 16;
@@ -994,7 +994,7 @@
       if (data.signatureDataUrl) {
         try {
           doc.addImage(data.signatureDataUrl, "PNG", M, y, 190, 60);
-        } catch (e) { /* ignore bad image, still render name */ }
+        } catch (e) {  }
         y += 64;
       } else {
         y += 40;
@@ -1007,7 +1007,7 @@
       text("Signed: " + formatLongDate(data.signDate) + "  �  Generated: " + data.generatedAt.toLocaleString(),
            M + 240, y, { size: 8, color: MUTED });
 
-      // ---- Legal footer ----
+
       var footerY = H - 118;
       doc.setDrawColor.apply(doc, LINE);
       doc.setLineWidth(1);
@@ -1029,10 +1029,10 @@
       return doc;
     }
 
-    /* =====================================================================
-     * handleExport()
-     * Orchestrates the flow: gather data -> payment gate -> render -> save.
-     * ===================================================================== */
+
+
+
+
     async function handleExport() {
       var errEl = $("#err-4");
       errEl.textContent = "";
@@ -1067,7 +1067,7 @@
       }
     }
 
-    /* ============================ Wizard / UI ============================ */
+
 
     function showStep(n) {
       currentStep = Math.min(TOTAL_STEPS, Math.max(1, n));
@@ -1095,9 +1095,9 @@
       showStep(currentStep + 1);
     }
 
-    // validateStep(n): clears and re-checks the fields for step n.
-    // Returns true when the step is valid. Safe to call for ANY step
-    // regardless of which step is currently visible (used by handleExport).
+
+
+
     function validateStep(n) {
       var errEl = document.getElementById("err-" + n);
       if (errEl) errEl.textContent = "";
@@ -1150,7 +1150,7 @@
           $("#sigWrap").classList.add("signed");
         });
       }
-      // First time the canvas becomes visible it needs its backing store sized.
+
       if (canvas.width === 0 || canvas.offsetWidth !== canvas._cssW) {
         resizeCanvas();
       }
@@ -1174,7 +1174,7 @@
 
     function renderPreview() {
       var d = getFormData();
-      var paid = { paid: PaymentGatewayModule.demoPaid }; // display-only; real gate happens on export
+      var paid = { paid: PaymentGatewayModule.demoPaid };
       var preview = $("#preview");
 
       function row(k, v) {
@@ -1216,10 +1216,10 @@
 
     function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
-    /* ============================== Wiring =============================== */
+
 
     function init() {
-      // default dates
+
       if (!$("#dueDate").value) $("#dueDate").value = todayISO();
       if (!$("#signDate").value) $("#signDate").value = todayISO();
 
@@ -1240,7 +1240,7 @@
         var e = $("#err-3"); if (e) e.textContent = "";
       });
 
-      // clear inline error styling as the user fixes fields
+
       document.querySelectorAll("#fastpay-form input, #fastpay-form textarea").forEach(function (el) {
         el.addEventListener("input", function () {
           el.classList.remove("invalid");
@@ -1249,7 +1249,7 @@
         });
       });
 
-      // keep signature crisp on resize / orientation change
+
       var rt;
       window.addEventListener("resize", function () {
         if (currentStep !== 3) return;
@@ -1257,10 +1257,10 @@
         rt = setTimeout(resizeCanvas, 150);
       });
 
-      // Load the FastPay logo used as the faint PDF watermark (non-blocking)
+
       loadFastPayLogo();
 
-      // Google Sign-In (client-side; activates once an OAuth Client ID is set)
+
       GoogleSignInModule.onSignedIn = function (user) {
         if (!user) return;
         if (user.name && !val("sellerName")) document.getElementById("sellerName").value = user.name;
@@ -1274,7 +1274,7 @@
       };
       GoogleSignInModule.renderInto($("#googleSlot"), $("#googleStatus"));
 
-      // Demo payment area (fake gateway � no real charge)
+
       var payBtn = $("#btnPayDemo");
       if (payBtn) {
         payBtn.addEventListener("click", function () {

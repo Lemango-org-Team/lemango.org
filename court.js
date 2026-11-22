@@ -144,7 +144,7 @@ const App = (() => {
   let jitsiApi = null;
 
   function startVideoCourt(caseId, caseTitle) {
-    // Show video container and hide other elements
+
     document.getElementById('cases-list').classList.add('hidden');
     document.getElementById('create-case-form').classList.add('hidden');
     document.getElementById('video-court-container').classList.remove('hidden');
@@ -196,7 +196,7 @@ const App = (() => {
       },
       videoConferenceJoined: () => {
         console.log('Video conference joined');
-        // Create court session record
+
         createCourtSession(caseId, roomId);
       },
       videoConferenceLeft: () => {
@@ -221,7 +221,7 @@ const App = (() => {
     navigate('cases');
   }
 
-  // ── HOME ──────────────────────────────────────────────────────────────────
+
   function getHomeHtml() {
     const adminItems = getAdminAnnouncements();
     const builtInNews = [
@@ -344,7 +344,7 @@ const App = (() => {
     </div>`;
   }
 
-  // ── NOTICES ────────────────────────────────────────────────────────────────
+
   function getNoticesHtml() {
     return `
     <div class="bg-gray-900 min-h-screen animate-slide">
@@ -409,7 +409,7 @@ const App = (() => {
     </div>`;
   }
 
-  // ── FILING ─────────────────────────────────────────────────────────────────
+
   function getFilingHtml() {
     return `
     <div class="bg-gray-900 min-h-screen animate-slide">
@@ -484,7 +484,7 @@ const App = (() => {
     </div>`;
   }
 
-  // ── SEARCH ────────────────────────────────────────────────────────────────
+
   function getSearchHtml() {
     return `
     <div class="bg-gray-900 min-h-screen animate-slide">
@@ -532,7 +532,7 @@ const App = (() => {
     </div>`;
   }
 
-  // ── CASES ─────────────────────────────────────────────────────────────────
+
   function getCasesHtml() {
     const cases = getCases();
     const casesList = cases.length === 0 
@@ -691,7 +691,7 @@ const App = (() => {
   }
 
 
-  // ── DOCUMENTS ───────────────────────────────────────────────────────────────
+
   function getDocumentsHtml() {
     const templates = [
       { id: 'cease-desist', name: 'Cease & Desist', icon: '⚠️', description: 'Formal demand to stop illegal activity' },
@@ -898,7 +898,7 @@ const App = (() => {
     if (file) {
       const reader = new FileReader();
       reader.onload = function(e) {
-        // Add logo watermark to image
+
         const img = new Image();
         img.onload = function() {
           const canvas = document.createElement('canvas');
@@ -907,7 +907,7 @@ const App = (() => {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0);
           
-          // Add NUCA logo watermark
+
           ctx.font = 'bold 24px Arial';
           ctx.fillStyle = 'rgba(202, 138, 4, 0.7)';
           ctx.fillText('NUCA - Lemangoes Gov', 20, canvas.height - 20);
@@ -982,7 +982,7 @@ const App = (() => {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       
-      // Add NUCA header
+
       doc.setFontSize(24);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(17, 46, 81);
@@ -993,13 +993,13 @@ const App = (() => {
       doc.setTextColor(102, 102, 102);
       doc.text('National Universal Court (for) All - Lemangoes Government', 72, 100);
       
-      // Add document title
+
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(0, 0, 0);
       doc.text(title.toUpperCase(), 72, 120);
       
-      // Add verification watermark
+
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(202, 138, 4);
@@ -1007,7 +1007,7 @@ const App = (() => {
       
       let yPosition = 145;
       
-      // Process blocks
+
       documentBlocks.forEach(block => {
         if (block.type === 'header') {
           doc.setFontSize(14);
@@ -1035,7 +1035,7 @@ const App = (() => {
         }
       });
       
-      // Add footer
+
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(153, 153, 153);
@@ -1056,8 +1056,8 @@ const App = (() => {
     }
     
     try {
-      // Uses the shared Lemango AI client: backend first, then a free keyless
-      // public provider so generation also works on static hosting.
+
+
        const _doc = (await window.LemangoAI.document({ prompt: prompt, model: 'Mango-Core' })) || {};
        const generatedContent = (_doc && _doc.text) ? _doc.text : (_doc || '');
       if (!generatedContent.trim()) {
@@ -1067,7 +1067,7 @@ const App = (() => {
       createNewDocument();
       document.getElementById('document-title').value = 'AI Generated Document';
       
-      // Parse AI generated content into blocks
+
       const lines = generatedContent.split('\n');
       documentBlocks = [];
       
@@ -1088,7 +1088,7 @@ const App = (() => {
         documentBlocks.push({ type: 'text', content: currentText.trim() });
       }
       
-      // Add signature block
+
       documentBlocks.push({ type: 'signature', content: '' });
       
       renderDocumentBlocks();
@@ -1098,7 +1098,7 @@ const App = (() => {
     }
   }
 
-  // ── CONTACT ───────────────────────────────────────────────────────────────
+
   function getContactHtml() {
     return `
     <div class="bg-gray-900 min-h-screen animate-slide">
@@ -1130,7 +1130,7 @@ const App = (() => {
     </div>`;
   }
 
-  // ── NAVIGATE ──────────────────────────────────────────────────────────────
+
   async function navigate(view) {
     activeView = view;
     toggleMobileMenu(false);

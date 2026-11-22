@@ -7,10 +7,10 @@ async function ensureDir(dir) {
   await fs.mkdir(dir, { recursive: true });
 }
 
-/**
- * Minimal, dependency-free JSON store with serialized writes and atomic renames.
- * Good enough for early-stage volume; swap for a real database later.
- */
+
+
+
+
 export class JsonStore {
   constructor(name, initial) {
     this.file = path.join(DATA_DIR, `${name}.json`);

@@ -1,18 +1,18 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ── Year ─────────────────────────────────────────────────
+
   const yearEl = document.querySelector("#current-year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
-  // ── Scroll reveal ─────────────────────────────────────────
+
   setupReveal();
 
-  // ── Mobile nav ────────────────────────────────────────────
+
   setupMobileNav();
 });
 
-/* ── Config fetch ─────────────────────────────────────────── */
+
 async function getConfig() {
   try {
     const res = await fetch("/api/config");
@@ -23,14 +23,14 @@ async function getConfig() {
   }
 }
 
-/* ── Ads — handled by ads.js (shared across all pages) ────── */
 
-/* ── Scroll reveal ────────────────────────────────────────── */
+
+
 function setupReveal() {
   const els = document.querySelectorAll(".reveal");
   if (!els.length) return;
 
-  // Respect prefers-reduced-motion: mark everything visible immediately
+
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     els.forEach((el) => el.classList.add("is-visible"));
     return;
@@ -51,7 +51,7 @@ function setupReveal() {
   els.forEach((el) => observer.observe(el));
 }
 
-/* ── Mobile hamburger nav ─────────────────────────────────── */
+
 function setupMobileNav() {
   const btn     = document.getElementById("nav-hamburger");
   const overlay = document.getElementById("nav-overlay");
@@ -61,7 +61,7 @@ function setupMobileNav() {
     btn.setAttribute("aria-expanded", "true");
     overlay.setAttribute("aria-hidden", "false");
     overlay.style.display = "block";
-    // Force reflow so transition fires
+
     overlay.getBoundingClientRect();
     overlay.classList.add("is-open");
     document.body.style.overflow = "hidden";
@@ -72,7 +72,7 @@ function setupMobileNav() {
     overlay.setAttribute("aria-hidden", "true");
     overlay.classList.remove("is-open");
     document.body.style.overflow = "";
-    // Hide after transition
+
     overlay.addEventListener("transitionend", () => {
       if (!overlay.classList.contains("is-open")) {
         overlay.style.display = "";
@@ -85,12 +85,12 @@ function setupMobileNav() {
     isOpen ? closeNav() : openNav();
   });
 
-  // Close on any link click inside overlay
+
   overlay.querySelectorAll("a").forEach((a) => {
     a.addEventListener("click", closeNav);
   });
 
-  // Close on Escape
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && btn.getAttribute("aria-expanded") === "true") closeNav();
   });

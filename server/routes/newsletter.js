@@ -47,7 +47,7 @@ newsletterRouter.post("/", async (req, res, next) => {
     res.status(202).json({ ok: true });
     if (!subscriber) return;
 
-    // Auto-draft a notification email to the Lemango newsletter inbox.
+
     try {
       await sendMail({
         to: NEWSLETTER_INBOX,

@@ -1,19 +1,19 @@
-/**
- * Lemango Debug Server
- * 
- * A zero-config local server for testing and debugging the Lemango site.
- * 
- * Features:
- * - Serves all static files from the project root
- * - Auto-reloads the page when any file changes (injected WebSocket)
- * - Bypasses auth entirely — no sign-in needed, all users are "signed in"
- * - Unlocks all AI features — no daily limits, coding always allowed
- * - Proxies /api/* to the real backend (or mocks responses if backend is down)
- * - No rate limiting, no security restrictions — pure debug mode
- * 
- * Usage:  node Debug/server.js
- * Then open http://localhost:4000 in your browser.
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import http from "node:http";
 import { readFileSync, watchFile, readdirSync, statSync, existsSync } from "node:fs";
@@ -25,7 +25,7 @@ const ROOT = path.resolve(__dirname, "..");
 const PORT = 4000;
 const BACKEND_URL = "https://lemango-org.onrender.com";
 
-// MIME types
+
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
@@ -50,10 +50,10 @@ const MIME = {
   ".wasm": "application/wasm",
 };
 
-// WebSocket connections for auto-reload
+
 const clients = new Set();
 
-// Mock auth user (injected into pages)
+
 const MOCK_USER = {
   googleId: "debug-user",
   email: "debug@lemango.local",
@@ -68,7 +68,7 @@ function getMime(filePath) {
   return MIME[ext] || "application/octet-stream";
 }
 
-// Try to serve a file, return false if not found
+
 function serveFile(req, res, filePath) {
   if (!existsSync(filePath)) return false;
   const stat = statSync(filePath);
@@ -78,31 +78,31 @@ function serveFile(req, res, filePath) {
     const data = readFileSync(filePath);
     let contentType = getMime(filePath);
     
-    // Inject debug helpers into HTML pages
+
     if (filePath.endsWith(".html")) {
       let html = data.toString("utf-8");
       html = injectDebugScript(html);
       return res.writeHead(200, { "Content-Type": contentType }).end(html), true;
     }
     
-    // Inject mock auth into lemango-auth.js
+
     if (filePath.endsWith("lemango-auth.js")) {
       let js = data.toString("utf-8");
       js = patchAuthScript(js);
       return res.writeHead(200, { "Content-Type": contentType }).end(js), true;
     }
     
-    // Patch lemango-ai.js to unlock all features
+
     if (filePath.endsWith("lemango-ai.js")) {
       let js = data.toString("utf-8");
       js = patchAIScript(js);
       return res.writeHead(200, { "Content-Type": contentType }).end(js), true;
     }
     
-    // Patch api-base.js to use localhost for /api in debug mode
+
     if (filePath.endsWith("api-base.js")) {
       let js = data.toString("utf-8");
-      // Keep the real backend URL — we proxy through this server
+
       js = js.replace(
         /const base = \(\(meta && meta\.content\) \|\| window\.LEMANGO_API_BASE \|\| ""\)\.trim\(\)\.replace\(\/\\\+\$\/, ""\);/,
         'const base = ""; // Debug: keep /api relative, this server proxies to backend'
@@ -118,7 +118,7 @@ function serveFile(req, res, filePath) {
   }
 }
 
-// Inject auto-reload + debug script into HTML
+
 function injectDebugScript(html) {
   const debugScript = `
 <script>
@@ -160,16 +160,16 @@ if (window.LemangoAuth) {
 console.log("%c Lemango Debug Mode ", "background: linear-gradient(135deg, #ff9d3a, #ff6b1a); color: #1a0e00; font-weight: bold; padding: 4px 8px; border-radius: 4px;", "Auth bypassed | All features unlocked | Auto-reload ON");
 </script>`;
   
-  // Insert right after <head> or at the start
+
   if (html.includes("<head>")) {
     return html.replace("<head>", "<head>" + debugScript);
   }
   return debugScript + html;
 }
 
-// Patch lemango-auth.js for debug mode
+
 function patchAuthScript(js) {
-  // Force user to be set from the in-memory debug mock
+
   const debugPatch = `
 // ===== DEBUG MODE PATCH =====
 if (window.LEMANGO_AUTH_BYPASS) {
@@ -177,11 +177,11 @@ if (window.LEMANGO_AUTH_BYPASS) {
   LemangoAuth.isSignedIn = function() { return true; };
 }
 `;
-  // Insert before the final IIFE close
+
   return js.replace("})();", debugPatch + "\n})();");
 }
 
-// Patch lemango-ai.js for debug mode
+
 function patchAIScript(js) {
   const debugPatch = `
 // ===== DEBUG MODE PATCH =====
@@ -196,13 +196,13 @@ if (window.LEMANGO_DEBUG) {
   return js.replace("window.LemangoAI", debugPatch + "\nwindow.LemangoAI");
 }
 
-// Proxy /api/* to the real backend or mock it
+
 async function proxyApi(req, res, pathname, body) {
   const targetUrl = BACKEND_URL + pathname;
   
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 120000); // 2 min for big requests
+    const timer = setTimeout(() => controller.abort(), 120000);
     
     const fetchRes = await fetch(targetUrl, {
       method: req.method,
@@ -215,7 +215,7 @@ async function proxyApi(req, res, pathname, body) {
     const contentType = fetchRes.headers.get("content-type") || "application/json";
     const text = await fetchRes.text();
     
-    // If backend returned an error or is down, mock common endpoints
+
     if (!fetchRes.ok) {
       const mocked = mockApiEndpoint(pathname, body);
       if (mocked !== null) {
@@ -228,7 +228,7 @@ async function proxyApi(req, res, pathname, body) {
     res.writeHead(fetchRes.status, { "Content-Type": contentType });
     res.end(text);
   } catch (e) {
-    // Backend unreachable — try mock
+
     const mocked = mockApiEndpoint(pathname, body);
     if (mocked !== null) {
       res.writeHead(200, { "Content-Type": "application/json" });
@@ -240,15 +240,15 @@ async function proxyApi(req, res, pathname, body) {
   }
 }
 
-// Mock API responses for when the real backend is down
+
 function mockApiEndpoint(pathname, body) {
-  // Auth: always return signed in
+
   if (pathname === "/api/auth/me" || pathname === "/api/auth/session") {
     return { ok: true, user: MOCK_USER };
   }
   if (pathname === "/api/auth/logout") return { ok: true };
   
-  // AI models
+
   if (pathname === "/api/ai/models") {
     return {
       ok: true,
@@ -262,30 +262,30 @@ function mockApiEndpoint(pathname, body) {
     };
   }
   
-  // AI status
+
   if (pathname === "/api/ai/status") {
     return { ok: true, configured: true, provider: "Lemango AI (Debug)" };
   }
   
-  // AI chat — proxy to public provider if backend is down
+
   if (pathname === "/api/ai/chat") {
-    return null; // Let the frontend handle via its own fallback
+    return null;
   }
   
-  // Rate / log — always succeed
+
   if (pathname === "/api/ai/rate" || pathname === "/api/ai/log") {
     return { ok: true };
   }
   
-  // Newsletter
+
   if (pathname === "/api/newsletter/subscribe") {
     return { ok: true, message: "Subscribed (debug mode)" };
   }
   
-  return null; // No mock available
+  return null;
 }
 
-// File watching for auto-reload
+
 const watchedDirs = ["", "ai", "auth", "workspace", "assets", "admin", "court", "fastpay", "faq", "terms", "privacy", "security", "status", "changelog", "business-ideas", "invite", "paid", "payment-complete", "payments"];
 
 function watchFiles() {
@@ -297,7 +297,7 @@ function watchFiles() {
       for (const ws of clients) {
         try { ws.send("reload"); } catch (e) {}
       }
-    }, 200); // Debounce rapid saves
+    }, 200);
   }
   
   const extensions = [".html", ".js", ".css", ".json", ".svg", ".png", ".jpg", ".webp"];
@@ -311,7 +311,7 @@ function watchFiles() {
         const filePath = path.join(fullPath, entry);
         try {
           const stat = statSync(filePath);
-          if (stat.isDirectory()) continue; // Only top-level + known dirs
+          if (stat.isDirectory()) continue;
           const ext = path.extname(entry).toLowerCase();
           if (extensions.includes(ext)) {
             watchFile(filePath, { interval: 500 }, triggerReload);
@@ -321,7 +321,7 @@ function watchFiles() {
     } catch (e) {}
   }
   
-  // Watch root files
+
   const rootFiles = readdirSync(ROOT);
   for (const f of rootFiles) {
     const fp = path.join(ROOT, f);
@@ -336,7 +336,7 @@ function watchFiles() {
     } catch (e) {}
   }
   
-  // Watch subdirectories
+
   for (const dir of watchedDirs) {
     if (dir) watchDir(dir);
   }
@@ -344,10 +344,10 @@ function watchFiles() {
   console.log("  Auto-reload: watching for file changes...");
 }
 
-// WebSocket upgrade handler
+
 function handleWebSocket(req, socket) {
   if (req.url === "/__reload") {
-    // Simple WebSocket handshake
+
     const key = req.headers["sec-websocket-key"];
     if (!key) { socket.destroy(); return; }
     
@@ -367,10 +367,10 @@ function handleWebSocket(req, socket) {
     socket.on("close", () => clients.delete(socket));
     socket.on("error", () => clients.delete(socket));
     
-    // Send ping every 30s to keep alive
+
     const pingInterval = setInterval(() => {
       try {
-        // WebSocket ping frame (opcode 0x9)
+
         socket.write(Buffer.from([0x89, 0x00]));
       } catch (e) {
         clearInterval(pingInterval);
@@ -384,9 +384,9 @@ function handleWebSocket(req, socket) {
   }
 }
 
-// Main server
+
 const server = http.createServer(async (req, res) => {
-  // CORS for debug
+
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
@@ -394,7 +394,7 @@ const server = http.createServer(async (req, res) => {
   
   let pathname = req.url.split("?")[0];
   
-  // API proxy
+
   if (pathname.startsWith("/api/")) {
     let body = "";
     if (req.method !== "GET") {
@@ -403,47 +403,47 @@ const server = http.createServer(async (req, res) => {
     return proxyApi(req, res, pathname, body);
   }
   
-  // Manifest
+
   if (pathname === "/manifest.json") {
     return serveFile(req, res, path.join(ROOT, "manifest.json")) || 
            res.writeHead(404).end("Not found");
   }
   
-  // Clean URLs: /ai/ → ai/index.html, /ai → ai/index.html
+
   if (pathname !== "/" && !pathname.includes(".")) {
-    // Try /path/index.html first
+
     const indexPath = path.join(ROOT, pathname, "index.html");
     if (serveFile(req, res, indexPath)) return;
-    // Try /path.html
+
     const htmlPath = path.join(ROOT, pathname.slice(1) + ".html");
     if (serveFile(req, res, htmlPath)) return;
   }
   
-  // Root
+
   if (pathname === "/") {
     return serveFile(req, res, path.join(ROOT, "index.html")) || 
            res.writeHead(404).end("Not found");
   }
   
-  // Static file
+
   const filePath = path.join(ROOT, pathname);
   if (serveFile(req, res, filePath)) return;
   
-  // Try with .html extension
+
   if (!path.extname(pathname)) {
     const htmlFile = path.join(ROOT, pathname + ".html");
     if (serveFile(req, res, htmlFile)) return;
   }
   
-  // 404
+
   res.writeHead(404, { "Content-Type": "text/html" });
   res.end("<h1>404 — Not Found</h1><p>In debug mode. File: " + pathname + "</p><p><a href="/">← Go home</a></p>");
 });
 
-// WebSocket upgrade
+
 server.on("upgrade", handleWebSocket);
 
-// Start
+
 watchFiles();
 server.listen(PORT, "127.0.0.1", () => {
   console.log("");
@@ -461,7 +461,7 @@ server.listen(PORT, "127.0.0.1", () => {
   console.log("");
 });
 
-// Graceful shutdown
+
 process.on("SIGINT", () => {
   console.log("\n  Debug server stopped.");
   process.exit(0);

@@ -1,7 +1,7 @@
-/**
- * server/routes/admin.js
- * Gmail zero-trust admin system.
- */
+
+
+
+
 import crypto from "node:crypto";
 import { Router } from "express";
 import { JsonStore } from "../store.js";
@@ -176,7 +176,7 @@ adminRouter.post("/reject", async (req, res) => {
   res.json({ ok: true, entry });
 });
 
-// Abuse detection: same IP, multiple users, direct-to-AI patterns.
+
 adminRouter.get("/abuse-report", async (req, res) => {
   const u = await currentUser(req);
   if (!u || !u.admin) return res.status(403).json({ ok: false, error: "Admin only" });
@@ -192,7 +192,7 @@ adminRouter.get("/abuse-report", async (req, res) => {
     const users = readLines("users-log.jsonl");
     const security = readLines("security-log.jsonl");
 
-    // Group AI usage by IP
+
     const byIp = {};
     for (const e of usage) {
       const ip = e.ip || "unknown";
@@ -225,7 +225,7 @@ adminRouter.get("/abuse-report", async (req, res) => {
   }
 });
 
-// GET /api/admin/ai-logs
+
 adminRouter.get("/ai-logs", async (req, res) => {
   const u = await currentUser(req);
   if (!u || !u.admin) return res.status(403).json({ ok: false, error: "Admin only" });
@@ -240,7 +240,7 @@ adminRouter.get("/ai-logs", async (req, res) => {
   }
 });
 
-// GET /api/admin/users-log
+
 adminRouter.get("/users-log", async (req, res) => {
   const u = await currentUser(req);
   if (!u || !u.admin) return res.status(403).json({ ok: false, error: "Admin only" });

@@ -33,9 +33,9 @@ let currentModel = localStorage.getItem("lemango_model") || "Mango-Light";
 let agentsMode = localStorage.getItem("lemango_agents") === "1";
 let models = [];
 
-/* ============================================================
-   Markdown
-   ============================================================ */
+
+
+
 
 function escapeHtml(s) {
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
@@ -71,9 +71,9 @@ function mdToHtml(raw) {
     fp();cl(); return h;
 }
 
-/* ============================================================
-   Sessions
-   ============================================================ */
+
+
+
 
 function loadSessions(){try{const r=localStorage.getItem(SESSION_KEY);const p=r?JSON.parse(r):[];return Array.isArray(p)?p.filter(s=>s&&typeof s.id==="string"):[]}catch{return[]}}
 function saveSessions(){try{localStorage.setItem(SESSION_KEY,JSON.stringify(sessions))}catch{}}
@@ -84,9 +84,9 @@ function rebuildChat(){chatContainer.innerHTML="";if(history.length){history.for
 function deleteSession(id){sessions=sessions.filter(s=>s.id!==id);saveSessions();if(activeSessionId===id){const s=sessions.length?sessions[0]:createSession();activeSessionId=s.id;history=s.messages;localStorage.setItem(ACTIVE_KEY,activeSessionId);welcomeRemoved=false;rebuildChat();updateRegenVisibility()}renderSessionList()}
 function sessionTitle(s){if(!s.messages.length)return s.title;const f=s.messages.find(m=>m.r==="user");return f?f.t.slice(0,50):s.title}
 
-/* ============================================================
-   Sidebar
-   ============================================================ */
+
+
+
 
 function openSidebar(){sidebar.classList.add("open");sidebarOverlay.classList.add("open");renderSessionList()}
 function closeSidebar(){sidebar.classList.remove("open");sidebarOverlay.classList.remove("open")}
@@ -116,9 +116,9 @@ function renderSessionList(){
     sessionList.innerHTML=html;
 }
 
-/* ============================================================
-   Model Switcher
-   ============================================================ */
+
+
+
 
 function renderModelDropdown(){
     if(!models.length){
@@ -144,15 +144,15 @@ async function switchModel(name){
 
 async function fetchModels(){try{const list=await window.LemangoAI.models();if(Array.isArray(list)&&list.length){models=list;if(!models.find(m=>m.name===currentModel)){currentModel=models[0].name;modelLabel.textContent=currentModel}renderModelDropdown()}}catch{}}
 
-/* ============================================================
-   Toast
-   ============================================================ */
+
+
+
 
 function showToast(msg){toastEl.textContent=msg;toastEl.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove("show"),2200)}
 
-/* ============================================================
-   Messages
-   ============================================================ */
+
+
+
 
 function updateRightPanel(){if(rightPanel)rightPanel.classList.toggle("hidden",welcomeRemoved||history.length>0)}
 function removeWelcome(){if(!welcomeRemoved){const w=chatContainer.querySelector(".welcome-message");if(w)w.remove();welcomeRemoved=true;updateRightPanel()}}
@@ -218,11 +218,11 @@ function logChat(role, text) {
     const raw = localStorage.getItem("lemango_chat_log");
     const arr = raw ? JSON.parse(raw) : [];
     arr.push(entry);
-    // keep last 2000 entries to avoid unbounded growth
+
     if (arr.length > 2000) arr.splice(0, arr.length - 2000);
     localStorage.setItem("lemango_chat_log", JSON.stringify(arr));
-  } catch (e) { /* ignore */ }
-  // Best-effort server-side log (only if backend is running)
+  } catch (e) {  }
+
   try {
     fetch("/api/ai/log", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role: role, text: String(text), session: activeSessionId, model: currentModel }) }).catch(() => {});
   } catch (e) {}
@@ -235,9 +235,9 @@ async function copyText(text,btn){try{await navigator.clipboard.writeText(text);
 
 async function rateResponse(positive,fb){try{await fetch("/api/ai/rate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({positive})});fb.innerHTML=positive?'<span class="rated positive">Thanks!</span>':'<span class="rated negative">Noted!</span>'}catch{fb.innerHTML='<span class="rated">Failed</span>'}}
 
-/* ============================================================
-   Typing
-   ============================================================ */
+
+
+
 
 function showTyping(){
     removeWelcome();
@@ -255,9 +255,9 @@ function showTyping(){
 
 function removeTyping(){const el=document.getElementById("typing");if(el)el.remove()}
 
-/* ============================================================
-   Send / Regenerate
-   ============================================================ */
+
+
+
 
 function updateSendState(){sendBtn.disabled=sending||!messageInput.value.trim()}
 
@@ -274,14 +274,14 @@ async function sendMessage(text,displayUser=true){
             result=await window.LemangoAI.chat({message:text,model:currentModel,history:historyPayload,count:displayUser});
         } catch (e1) {
             if (e1 && e1.code === "daily-limit") throw e1;
-            // one automatic retry on transient failure
+
             await new Promise(r=>setTimeout(r,800));
             result=await window.LemangoAI.chat({message:text,model:currentModel,history:historyPayload,count:false});
         }
         removeTyping();
         const reply=(result&&result.text)?result.text:(typeof result==="string"?result:"");
         if (reply && /^\s*</.test(reply)) {
-            // Backend returned HTML instead of text — treat as failure
+
             throw new Error("backend returned HTML");
         }
         if(window.addToken && reply) window.addToken(Math.max(1, Math.ceil(reply.length/4)));
@@ -307,9 +307,9 @@ async function regenerateLast(){
     updateRegenVisibility();await sendMessage(lastUser,false);
 }
 
-/* ============================================================
-   Export / Clear / Welcome
-   ============================================================ */
+
+
+
 
 function exportChat(){try{const s=sessions.find(x=>x.id===activeSessionId);const msgs=(s&&s.messages)||history||[];const out=msgs.map(m=>(m.r==="user"?"You":botName)+": "+m.t).join("\n\n")||"(empty chat)";const blob=new Blob([out],{type:"text/plain;charset=utf-8"});const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download="lemango_ai_chat.txt";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}catch{alert("Failed to export chat.")}}
 function exportChatLog(){try{const raw=localStorage.getItem("lemango_chat_log");const arr=raw?JSON.parse(raw):[];const blob=new Blob([JSON.stringify(arr,null,2)],{type:"application/json;charset=utf-8"});const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download="lemango_chat_log.json";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u)}catch{alert("Failed to export chat log.")}}
@@ -335,18 +335,18 @@ async function clearChat(){
     updateRegenVisibility();updateScrollPill();renderSessionList();updateRightPanel();
 }
 
-/* ============================================================
-   Scroll / Input / Theme
-   ============================================================ */
+
+
+
 
 function isNearBottom(){return chatContainer.scrollHeight-chatContainer.scrollTop-chatContainer.clientHeight<120}
 function updateScrollPill(){scrollDownBtn.classList.toggle("visible",history.length>0&&!isNearBottom())}
 function scrollToBottom(sm){chatContainer.scrollTo({top:chatContainer.scrollHeight,behavior:sm?"smooth":"auto"})}
 function autoResizeInput(){messageInput.style.height="auto";messageInput.style.height=Math.min(messageInput.scrollHeight,160)+"px"}
 
-/* ============================================================
-   Events
-   ============================================================ */
+
+
+
 
 const chatForm=document.getElementById("chatContainer").closest(".app").querySelector("form")||document.querySelector("form");
 const inputWrapper=document.querySelector(".input-wrapper");
@@ -370,20 +370,20 @@ newChatBtn.addEventListener("click",()=>{const s=createSession();history=s.messa
 sidebarSearch.addEventListener("input",()=>renderSessionList());
 sessionList.addEventListener("click",e=>{const d=e.target.closest(".session-delete");if(d){e.stopPropagation();deleteSession(d.dataset.del);return}const i=e.target.closest(".session-item");if(i)switchSession(i.dataset.id)});
 
-// Theme is locked to dark for Lemango AI (light mode breaks the layout).
+
 
 modelTrigger.addEventListener("click",e=>{e.stopPropagation();toggleModelDropdown()});
 modelDropdown.addEventListener("click",e=>{const o=e.target.closest(".model-option");if(o)switchModel(o.dataset.model)});
 document.addEventListener("click",e=>{if(!modelDropdown.contains(e.target)&&!modelTrigger.contains(e.target))closeModelDropdown()});
 
-/* ============================================================
-   Init
-   ============================================================ */
+
+
+
 
 (function init(){
     rebuildChat();autoResizeInput();updateSendState();updateRegenVisibility();
     modelLabel.textContent=currentModel;fetchModels();
-    // Agents mode toggle (only for backend-verified admin accounts)
+
     const agentsBtn = document.getElementById("agentsToggle");
     if (agentsBtn && window.LemangoAI && typeof window.LemangoAI.hasAgents === "function") {
         Promise.resolve(window.LemangoAI.hasAgents()).then(isAdmin => {
@@ -402,7 +402,7 @@ document.addEventListener("click",e=>{if(!modelDropdown.contains(e.target)&&!mod
         }).catch(err => console.error("[ai] admin feature check failed:", err));
     }
 
-    // Re-mount auth widgets whenever sign-in state changes (e.g., user returns from /auth/).
+
     document.addEventListener("lm:auth", () => {
         if (window.LemangoAuth && typeof window.LemangoAuth._remountAll === "function") {
             window.LemangoAuth._remountAll();

@@ -1,9 +1,9 @@
 "use strict";
-/**
- * auth-widget.js — topbar account widget.
- * Uses the server session exposed by lemango-auth.js and stays in sync via the
- * "lm:auth" event.
- */
+
+
+
+
+
 (function () {
   const LemongoAuth = {
     user: null,
@@ -115,7 +115,7 @@
     }
   };
 
-  // Inject minimal styles
+
   const style = document.createElement("style");
   style.textContent = `
     .lm-auth-signin { display:inline-block; }

@@ -63,7 +63,7 @@ function applyCustomBackground(){
   
   if(state.backgroundMode==="custom"){
     if(state.backgroundFile){
-      // Blob is already set from IndexedDB load
+
       if(state.backgroundFile.type.startsWith("video/")){
         vid.src=URL.createObjectURL(state.backgroundFile);
         vid.style.display="block";
@@ -184,7 +184,7 @@ function loadWeather(){
     .catch(()=>{$("weatherText").textContent="Weather unavailable"});
 }
 
-// IndexedDB functions
+
 async function db(){
   return new Promise((res,rej)=>{
     let r=indexedDB.open("[redacted]_media",1);
@@ -223,7 +223,7 @@ async function deleteMedia(id){
   });
 }
 
-// Load background file from IndexedDB on startup
+
 async function loadBackgroundFile(){
   try{
     let media=await getMedia("background");
@@ -291,14 +291,14 @@ function prevSong(){
   playSong(state.currentSong);
 }
 
-// Google OAuth Handler
+
 function initGoogleSignIn(){
   if(!state.googleClientId){
     alert("Add your Google OAuth Client ID in Settings first.\n\nGet it from: https://console.cloud.google.com/\n1. Create project\n2. Enable Google+ API\n3. Create OAuth 2.0 Web Client\n4. Add authorized redirect URI");
     return;
   }
   
-  // Initialize Google Sign-In
+
   google.accounts.id.initialize({
     client_id:state.googleClientId,
     callback:handleGoogleSignIn
@@ -346,7 +346,7 @@ async function handleGoogleSignIn(response){
   }
 }
 
-// Event listeners
+
 document.querySelectorAll(".nav-item").forEach(x=>x.onclick=()=>nav(x.dataset.panel));
 
 $("collapseSidebar").onclick=()=>{
@@ -484,7 +484,7 @@ $("resetButton").onclick=()=>{
   }
 };
 
-// Initialization sequence
+
 async function initialize(){
   renderApps();
   profileRender();
@@ -493,7 +493,7 @@ async function initialize(){
   clock();
   loadWeather();
   
-  // Initialize Google Sign-In if script is loaded
+
   if(typeof google !== 'undefined'){
     initGoogleSignIn();
   }
@@ -502,7 +502,7 @@ async function initialize(){
   setInterval(loadWeather,1800000);
 }
 
-// Start when DOM is ready
+
 if(document.readyState==="loading"){
   document.addEventListener("DOMContentLoaded",initialize);
 }else{

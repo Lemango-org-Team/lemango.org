@@ -5,9 +5,9 @@ import { mkdir, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-// Use an isolated data directory before the server modules load.
+
 process.env.DATA_DIR = path.join(os.tmpdir(), `lemango-test-${Date.now()}`);
-// Keep AI tests deterministic and offline.
+
 process.env.AI_DISABLE_LIVE = "1";
 process.env.SESSION_SECRET = "test-session-secret-with-sufficient-length";
 process.env.GOOGLE_CLIENT_ID = "test-google-client-id";

@@ -1,14 +1,14 @@
 "use strict";
-/**
- * ads.js — shared AdSense loader for all Lemango pages.
- * Fetches the publisher ID from /api/config, then injects
- * AdSense script + <ins> tags into every .promo-slot on the page.
- */
+
+
+
+
+
 (async function setupAds() {
   const slots = document.querySelectorAll(".promo-slot");
   if (!slots.length) return;
 
-  // Fallback client ID used on static hosting where /api/config is unavailable.
+
   const FALLBACK_CLIENT = "ca-pub-2231892231966691";
 
   let adsenseClient = null;
@@ -19,19 +19,19 @@
       adsenseClient = cfg.adsenseClient || null;
     }
   } catch {
-    /* server offline — fall back to the hardcoded client ID */
+
   }
   if (!adsenseClient) adsenseClient = FALLBACK_CLIENT;
 
   if (adsenseClient) {
-    // Only inject the AdSense script once per page
+
     if (!document.querySelector('script[src*="adsbygoogle"]')) {
       const script = document.createElement("script");
       script.async = true;
       script.crossOrigin = "anonymous";
       script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(adsenseClient)}`;
       script.onerror = function () {
-        // Ad blocker or network block — keep the promo cards visible (no-op)
+
       };
       document.head.appendChild(script);
     }
@@ -61,11 +61,11 @@
     if (!mount) return;
     const unit = slot.dataset.adUnit;
 
-    // Always show the promo as the default content.
+
     renderPromo(mount);
 
     if (adsenseClient && unit) {
-      // Try to replace the promo with a real ad after a short delay.
+
       setTimeout(() => {
         const ins = document.createElement("ins");
         ins.className = "adsbygoogle";
@@ -80,10 +80,10 @@
         try {
           (window.adsbygoogle = window.adsbygoogle || []).push({});
         } catch {
-          /* AdSense not ready yet — restore promo */
+
           renderPromo(mount);
         }
-        // If the ad doesn't render within 6s, restore the promo.
+
         setTimeout(() => {
           if (!ins.offsetHeight || ins.offsetHeight < 10) {
             renderPromo(mount);

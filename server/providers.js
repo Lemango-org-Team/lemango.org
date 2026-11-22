@@ -1,9 +1,9 @@
-// Multi-provider AI backend for Lemango AI.
-//
-// Every response is branded as "Lemango AI" and the underlying model/company
-// is never disclosed to the caller. Providers are tried in a chain; the first
-// one that answers wins. Pollinations is keyless so everything works out of
-// the box, while optional API keys unlock faster / stronger providers.
+
+
+
+
+
+
 
 const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 120000);
 
@@ -72,7 +72,7 @@ const PROVIDERS = {
   },
 };
 
-// Branded model names shown to users. Each maps to a chain of real providers.
+
 export const MODEL_CATALOG = [
   { name: "Mango-Light", desc: "Fast, everyday answers", color: "#f59e0b", chain: ["nemotron", "gemma26", "openrouter", "pollinations"] },
   { name: "Mango-Flash", desc: "Snappy and efficient", color: "#22c55e", chain: ["lfm", "gemma26", "openrouter", "pollinations"] },
@@ -136,7 +136,7 @@ async function callProvider(name, messages, opts) {
       const err = new Error(`${name} responded ${res.status}: ${detail.slice(0, 200)}`);
       err.status = res.status;
       let retryAfter = null;
-      try { retryAfter = res.headers.get("retry-after"); } catch (e) { /* ignore */ }
+      try { retryAfter = res.headers.get("retry-after"); } catch (e) {  }
       if (retryAfter) err.retryAfter = Number(retryAfter) || null;
       const m = detail.match(/retry after (\d+)\s*s/i);
       if (!err.retryAfter && m) err.retryAfter = Number(m[1]);
@@ -146,7 +146,7 @@ async function callProvider(name, messages, opts) {
     const msg = data?.choices?.[0]?.message || {};
     let text = msg.content || "";
     let reasoning = msg.reasoning || msg.reasoning_content || null;
-    // Some models inline thinking in <think>...</think> tags.
+
     const thinkMatch = text.match(/<think>([\s\S]*?)<\/think>/i);
     if (thinkMatch) {
       reasoning = (reasoning ? reasoning + "\n" : "") + thinkMatch[1].trim();
@@ -159,7 +159,7 @@ async function callProvider(name, messages, opts) {
   }
 }
 
-// Try each available provider in the model's chain until one succeeds.
+
 export async function generateReply(messages, modelName, opts = {}) {
   if (liveDisabled()) throw new Error("Live AI is disabled by configuration.");
   const chain = chainFor(modelName);
