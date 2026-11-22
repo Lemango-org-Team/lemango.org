@@ -24,14 +24,17 @@ app.set("trust proxy", true);
 // CORS for split hosting (frontend on GitHub Pages, backend elsewhere).
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
   .split(",").map((s) => s.trim()).filter(Boolean);
+if (allowedOrigins.includes("*")) {
+  throw new Error("ALLOWED_ORIGINS must list explicit origins; '*' is not permitted.");
+}
 const csrfOrigins = new Set([
   new URL(process.env.BASE_URL || "https://lemango.org").origin,
-  ...allowedOrigins.filter((origin) => origin !== "*"),
+  ...allowedOrigins,
 ]);
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   // Default-deny: if no allowlist is configured, only same-origin (no Origin header) requests are allowed.
-  const ok = !origin || (allowedOrigins.length > 0 && (allowedOrigins.includes(origin) || allowedOrigins.includes("*")));
+  const ok = !origin || allowedOrigins.includes(origin);
   if (ok && origin) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");

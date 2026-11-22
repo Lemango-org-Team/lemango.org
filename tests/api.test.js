@@ -1,5 +1,7 @@
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { mkdir, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -9,6 +11,8 @@ process.env.DATA_DIR = path.join(os.tmpdir(), `lemango-test-${Date.now()}`);
 process.env.AI_DISABLE_LIVE = "1";
 process.env.SESSION_SECRET = "test-session-secret-with-sufficient-length";
 process.env.GOOGLE_CLIENT_ID = "test-google-client-id";
+process.env.ALLOWED_ORIGINS = "https://lemango.org";
+process.env.ADMIN_EMAILS = "configured-admin@example.test";
 
 const originalFetch = globalThis.fetch;
 const testGoogleUsers = {
@@ -21,6 +25,12 @@ const testGoogleUsers = {
   "court-test-token-b": {
     sub: "court-test-user-b",
     email: "court-user-b@example.test",
+    email_verified: true,
+    aud: process.env.GOOGLE_CLIENT_ID,
+  },
+  "admin-test-token": {
+    sub: "configured-admin",
+    email: "configured-admin@example.test",
     email_verified: true,
     aud: process.env.GOOGLE_CLIENT_ID,
   },
@@ -42,6 +52,10 @@ let base;
 let nextTestIp = 1;
 
 before(async () => {
+  await mkdir(process.env.DATA_DIR, { recursive: true });
+  await writeFile(path.join(process.env.DATA_DIR, "admins.json"), JSON.stringify([
+    { email: "court-user-a@example.test", rank: "superadmin" },
+  ]));
   const { app } = await import("../server/index.js");
   server = app.listen(0);
   await new Promise((resolve) => server.once("listening", resolve));
@@ -85,6 +99,43 @@ test("health reports service status", async () => {
   assert.equal(Object.prototype.hasOwnProperty.call(body.services, "newsletterInbox"), false);
   const config = await json("/api/config");
   assert.equal(Object.prototype.hasOwnProperty.call(config.body, "newsletterInbox"), false);
+});
+
+test("CORS only reflects explicitly allowlisted origins", async () => {
+  const allowed = await fetch(`${base}/api/health`, {
+    headers: { Origin: "https://lemango.org" },
+  });
+  assert.equal(allowed.headers.get("access-control-allow-origin"), "https://lemango.org");
+  assert.equal(allowed.headers.get("access-control-allow-credentials"), "true");
+
+  const attacker = await fetch(`${base}/api/health`, {
+    headers: { Origin: "https://attacker.example" },
+  });
+  assert.equal(attacker.headers.get("access-control-allow-origin"), null);
+
+  const preflight = await fetch(`${base}/api/health`, {
+    method: "OPTIONS",
+    headers: {
+      Origin: "https://attacker.example",
+      "Access-Control-Request-Method": "GET",
+    },
+  });
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get("access-control-allow-origin"), null);
+});
+
+test("server rejects wildcard credentialed CORS configuration", () => {
+  const result = spawnSync(process.execPath, [
+    "--input-type=module",
+    "-e",
+    "await import('./server/index.js')",
+  ], {
+    cwd: process.cwd(),
+    env: { ...process.env, ALLOWED_ORIGINS: "*" },
+    encoding: "utf8",
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /ALLOWED_ORIGINS must list explicit origins/);
 });
 
 test("newsletter rejects invalid email", async () => {
@@ -242,6 +293,14 @@ test("admin endpoints require a session cookie, not bearer or query tokens", asy
   });
   assert.equal(sessionUser.res.status, 200);
   assert.equal(sessionUser.body.isAdmin, false);
+
+  const configuredAdminCookie = await signIn("admin-test-token");
+  const configuredAdmin = await json("/api/admin/check", {
+    headers: { Cookie: configuredAdminCookie },
+  });
+  assert.equal(configuredAdmin.res.status, 200);
+  assert.equal(configuredAdmin.body.isAdmin, true);
+  assert.equal(configuredAdmin.body.rank, "superadmin");
 });
 
 test("ai chat does not reuse responses across different contexts", async () => {

@@ -8,36 +8,22 @@ import { JsonStore } from "../store.js";
 
 export const adminRouter = Router();
 
-const ADMINS_FILE = "admins";
 const INVITES_FILE = "invites";
 const QUEUE_FILE = "admin-queue";
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
+const ADMIN_EMAILS = new Set((process.env.ADMIN_EMAILS || "")
   .split(",")
   .map((email) => email.trim().toLowerCase())
-  .filter(Boolean);
+  .filter(Boolean));
 
-const adminsStore = new JsonStore(ADMINS_FILE, []);
 const invitesStore = new JsonStore(INVITES_FILE, {});
 const queueStore = new JsonStore(QUEUE_FILE, []);
 
-async function seedAdmins() {
-  const list = await adminsStore.read();
-  const seeds = ADMIN_EMAILS.map((email) => ({ email, rank: "superadmin" }));
-  let changed = false;
-  for (const s of seeds) {
-    if (!list.find((a) => a.email.toLowerCase() === s.email.toLowerCase())) {
-      list.push({ email: s.email, rank: s.rank, addedAt: new Date().toISOString() });
-      changed = true;
-    }
-  }
-  if (changed) await adminsStore.write(list);
-}
-seedAdmins().catch(() => {});
-
 async function isAdminEmail(email) {
   if (!email) return null;
-  const list = await adminsStore.read();
-  return list.find((a) => a.email.toLowerCase() === String(email).toLowerCase()) || null;
+  const normalizedEmail = String(email).trim().toLowerCase();
+  return ADMIN_EMAILS.has(normalizedEmail)
+    ? { email: normalizedEmail, rank: "superadmin" }
+    : null;
 }
 
 async function currentUser(req) {
