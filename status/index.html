@@ -52,6 +52,7 @@
     .ok { background: #16a34a; }
     .warn { background: #d97706; }
     .down { background: #dc2626; }
+    .incident { border-left: 4px solid #0f766e; background: #f0fdfa; }
     footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
     footer .wrap { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: center; }
     footer a { color: var(--green-dark); text-decoration: none; font-weight: 600; margin-right: 16px; }
@@ -68,18 +69,25 @@
   <main id="main" class="wrap">
     <p class="eyebrow">Status</p>
     <h1>Service Status</h1>
-    <p class="updated">Last updated: October 17, 2026</p>
+    <p class="updated">Last updated: November 22, 2026</p>
 
     <div class="card">
-      <div class="row"><span><span class="dot ok"></span>Website (lemango.org)</span><strong>Operational</strong></div>
-      <div class="row"><span><span class="dot ok"></span>Lemango AI (client)</span><strong>Operational</strong></div>
-      <div class="row"><span><span class="dot ok"></span>Court &amp; Notice Management</span><strong>Operational</strong></div>
-      <div class="row"><span><span class="dot ok"></span>FastPay Studio</span><strong>Operational</strong></div>
-      <div class="row"><span><span class="dot warn"></span>AI backend (optional)</span><strong>Demo mode</strong></div>
-      <div class="row"><span><span class="dot warn"></span>Payments</span><strong>Not available</strong></div>
-      <div class="row"><span><span class="dot warn"></span>Account sign-in</span><strong>Preview</strong></div>
+      <div class="row"><span><span class="dot ok"></span>Website (lemango.org)</span><strong>Available</strong></div>
+      <div class="row"><span><span class="dot ok"></span>Backend API health check</span><strong>Responding</strong></div>
+      <div class="row"><span><span class="dot warn"></span>Lemango AI</span><strong>Configured; provider availability varies</strong></div>
+      <div class="row"><span><span class="dot warn"></span>Google sign-in</span><strong>Endpoint responding; full sign-in test pending</strong></div>
+      <div class="row"><span><span class="dot warn"></span>Case Manager</span><strong>Not independently verified today</strong></div>
+      <div class="row"><span><span class="dot warn"></span>Payments</span><strong>Not available; demo only</strong></div>
     </div>
-    <p style="font-size:13px;color:var(--muted);">Status is reported manually. Email us if something looks wrong.</p>
+
+    <div class="card incident">
+      <strong>Website publishing update — November 22, 2026</strong>
+      <p>We found and corrected a publishing configuration that had allowed some internal server and debug source files to be served from website paths. In our latest checks, both regular and cache-busted requests to those paths returned 404.</p>
+      <p>We have not established whether anyone accessed the files while they were reachable. We have not confirmed access to account data, passwords, or credentials, and provider audit records have not yet been fully reviewed. We cannot make a definitive statement about past access until that review is complete.</p>
+      <p>The backend health check is responding, and the sign-in session endpoint now rejects invalid test credentials as expected. A valid Google sign-in has not been tested end to end as part of this update. We will revise this page if the review finds more information.</p>
+      <p>For fuller details, see our <a href="/security/">Security page</a>.</p>
+    </div>
+    <p style="font-size:13px;color:var(--muted);">Status is checked and reported manually; not every feature is continuously monitored. Last checked November 22, 2026. Email <a href="mailto:lemangonewsletter@gmail.com">lemangonewsletter@gmail.com</a> if something looks wrong.</p>
   </main>
   <footer>
     <div class="wrap">

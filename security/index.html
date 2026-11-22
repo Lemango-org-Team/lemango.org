@@ -74,46 +74,40 @@
   <main id="main" class="wrap">
     <p class="eyebrow">Security</p>
     <h1>Security at Lemango</h1>
-    <p class="updated">Last updated: October 17, 2026</p>
+    <p class="updated">Last updated: November 22, 2026</p>
 
-    <p>Lemango is built to keep your data under your control. Most of our tools run entirely in your browser, and we do not operate a large backend that stores your personal information.</p>
+    <p>This page summarizes how we approach security for Lemango's website and services. Security is an ongoing process; no website or online service can guarantee that every risk will be prevented.</p>
 
     <div class="card">
-      <strong>The short version:</strong> your documents, chats, and case data stay on your device. We do not sell or share your data. If you find a security issue, please report it responsibly.
+      <strong>Current update:</strong> We corrected a publishing configuration that had allowed some internal server and debug source files to be served from website paths. In our latest checks, both regular and cache-busted requests to those paths returned 404. We have not established whether anyone accessed the files while they were reachable, and our review of provider audit records is not complete. See the <a class="inline" href="/status/">Status page</a> for the current summary.
     </div>
 
-    <h2>How your data is handled</h2>
+    <h2>Information and account protections</h2>
     <ul>
-      <li><strong>Lemango AI:</strong> messages are sent to our AI provider to generate a reply. We do not store your conversation history on a server; it lives in your browser's local storage.</li>
-      <li><strong>Case Manager:</strong> cases and documents are kept in your browser. Nothing is uploaded unless you choose to export or share a file.</li>
-      <li><strong>FastPay Studio:</strong> agreements and signatures are generated on your device. PDFs are created locally and downloaded directly to you.</li>
+      <li>Google sign-in is verified by the backend; Lemango does not receive your Google password.</li>
+      <li>Authenticated sessions use signed, HttpOnly cookies with secure settings in production.</li>
+      <li>Case Manager requests require an authenticated account, and records are restricted to the account that owns them.</li>
+      <li>Browser publishing rules exclude server-side and debug paths from the public static site. Recent checks confirmed that the affected paths return 404.</li>
+      <li>Backend integrations are designed to use deployment environment settings for provider credentials rather than placing those credentials in browser code.</li>
     </ul>
 
-    <h2>Sign-in and accounts</h2>
-    <p>When account sign-in is available, we use Google's OAuth 2.0 flow. We never see or store your Google password. Session cookies are httpOnly and signed. We ask only for basic profile information (name, email, avatar).</p>
+    <h2>Data handling</h2>
+    <p>Not all information stays on your device. AI prompts are sent to our backend and external AI providers; service logs may contain conversation text and request metadata. Case Manager records are stored on the backend. Some other product preferences and workspace files are stored in your browser. Review our <a class="inline" href="/privacy/">Privacy Policy</a> before submitting information, especially sensitive or confidential information.</p>
+
+    <h2>Incident update</h2>
+    <p>On November 22, 2026, we identified that some internal source-file paths were accessible through the public website because of a publishing configuration. We corrected the configuration, and the website build containing that correction is deployed. Our latest checks returned 404 for both ordinary and cache-busted requests to the affected paths.</p>
+    <p>We have not confirmed whether anyone accessed those files. We have not confirmed access to account data, passwords, or credentials; provider audit records have not yet been fully reviewed, so this is not a definitive conclusion. We will update the <a class="inline" href="/status/">Status page</a> if the investigation establishes additional facts.</p>
+
+    <h2>Sign-in service</h2>
+    <p>The live backend health check and sign-in session route are responding. We have confirmed that an invalid test credential is rejected; we have not completed an end-to-end Google sign-in test with a valid user account as part of this update.</p>
 
     <h2>Payments</h2>
     <div class="card warn">
-      <strong>Payments are not available yet.</strong> Lemango does not currently process payments or subscriptions. Any payment-related UI you see is a demonstration only — no card is charged and no data is collected. We will clearly announce when real payments become available.
+      <strong>Payment processing is not available.</strong> Payment-related UI currently shown in FastPay is a demonstration. Lemango does not currently process payments through that feature.
     </div>
 
-    <h2>How we protect the site</h2>
-    <ul>
-      <li>HTTPS everywhere, via our hosting and CDN providers.</li>
-      <li>Security headers and content security practices applied at the edge.</li>
-      <li>No third-party tracking scripts beyond what is needed for analytics and advertising, which you can control.</li>
-      <li>Regular dependency and configuration reviews.</li>
-    </ul>
-
-    <h2>Reporting a vulnerability</h2>
-    <p>If you believe you have found a security vulnerability, please report it responsibly by emailing <a class="inline" href="mailto:lemangonewsletter@gmail.com">lemangonewsletter@gmail.com</a> with a description and steps to reproduce. Please do not publicly disclose the issue until we have had a reasonable opportunity to address it. We appreciate responsible disclosure and will acknowledge your report.</p>
-
-    <h2>What we don't do</h2>
-    <ul>
-      <li>We do not sell your personal data.</li>
-      <li>We do not run a large backend database of user content.</li>
-      <li>We do not process payments or store payment details.</li>
-    </ul>
+    <h2>Report a security issue</h2>
+    <p>Email <a class="inline" href="mailto:lemangonewsletter@gmail.com">lemangonewsletter@gmail.com</a> with a description, affected page, and steps to reproduce. Please avoid accessing other people's information, disrupting services, or conducting tests beyond what is needed to demonstrate the issue. We ask that you give us a reasonable opportunity to investigate before publishing details. Do not include passwords, tokens, or other secrets in your report.</p>
 
     <h2>Contact</h2>
     <p>Security questions? Email <a class="inline" href="mailto:lemangonewsletter@gmail.com">lemangonewsletter@gmail.com</a>.</p>
