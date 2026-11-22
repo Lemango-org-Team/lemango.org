@@ -133,7 +133,14 @@ async function callProvider(name, messages, opts) {
     });
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
-      throw new Error(`${name} responded ${res.status}: ${detail.slice(0, 200)}`);
+      const err = new Error(`${name} responded ${res.status}: ${detail.slice(0, 200)}`);
+      err.status = res.status;
+      let retryAfter = null;
+      try { retryAfter = res.headers.get("retry-after"); } catch (e) { /* ignore */ }
+      if (retryAfter) err.retryAfter = Number(retryAfter) || null;
+      const m = detail.match(/retry after (\d+)\s*s/i);
+      if (!err.retryAfter && m) err.retryAfter = Number(m[1]);
+      throw err;
     }
     const data = await res.json();
     const msg = data?.choices?.[0]?.message || {};
@@ -167,12 +174,13 @@ export async function generateReply(messages, modelName, opts = {}) {
       } catch (err) {
         lastError = err;
         const msg = String(err && err.message || "");
-        const retryable = /429|5\d\d|fetch failed|aborted|timeout/i.test(msg);
+        const retryable = /429|5\d\d|fetch failed|aborted|timeout|402/i.test(msg);
         if (!retryable || attempt === 1) {
           console.warn(`[ai] provider '${provider}' failed: ${err.message}`);
           break;
         }
-        await new Promise((r) => setTimeout(r, 600));
+        const delay = (err && err.retryAfter) ? Math.min(err.retryAfter * 1000, 15000) : 600;
+        await new Promise((r) => setTimeout(r, delay));
       }
     }
   }
